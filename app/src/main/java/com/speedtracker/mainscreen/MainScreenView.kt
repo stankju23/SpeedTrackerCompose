@@ -46,6 +46,7 @@ import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
 import com.speedtracker.R
 import com.speedtracker.mainscreen.SpeedViewModel
+import com.speedtracker.mainscreen.StatisticsPage
 import com.speedtracker.ui.theme.MainGradientBG
 import com.speedtracker.ui.theme.MainGradientEndColor
 import com.speedtracker.ui.theme.SpeedTrackerComposeTheme
@@ -352,9 +353,9 @@ fun StatisticsPart(modifier: Modifier) {
             TabRow(
                 modifier = Modifier
                     .weight(4f)
-                    .padding(top = 10.dp, bottom = 10.dp, start = 2.dp,end=2.dp)
+                    .padding(top = 10.dp, bottom = 10.dp, start = 2.dp, end = 2.dp)
                     .clip(RoundedCornerShape(50))
-                    .border(1.dp,Color.Gray.copy(alpha = 0.5f), RoundedCornerShape(50)),
+                    .border(1.dp, Color.Gray.copy(alpha = 0.5f), RoundedCornerShape(50)),
 
                 // Our selected tab is our current page
                 selectedTabIndex = pagerState.currentPage,
@@ -404,17 +405,12 @@ fun StatisticsPart(modifier: Modifier) {
             state = pagerState,
         ) { page ->
             if (page == 0) {
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight()
-                    .background(Color.White)) {}
+                var itemsList = listOf<String>("Overall distance", "Overll max speed", "Overal average speed")
+                StatisticsPage(itemList = itemsList)
             } else {
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight()
-                    .background(Color.White)) {}
+                var itemsList = listOf<String>("Trip distance", "Trip max speed", "Trip average speed","Trip average altitude")
+                StatisticsPage(itemList = itemsList)
             }
-
         }
     }
 }
