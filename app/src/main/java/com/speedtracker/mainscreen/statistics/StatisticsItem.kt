@@ -34,7 +34,7 @@ fun StatisticsItem(title:String) {
                     .size(40.dp))
             Column() {
                 Text(text = title, color = Color.DarkGray, fontSize = 16.sp)
-                Text(text = "Overall distance from first run of the app", color = Color.LightGray, fontSize = 12.sp)
+                Text(text = "Overall distance from first run of the app", color = Color.LightGray, fontSize = 10.sp)
             }
             Spacer(modifier = Modifier.weight(1f))
             Text(text = "1234 km", modifier = Modifier.padding(end = 15.dp))

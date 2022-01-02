@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.speedtracker.pages
 
 import android.graphics.Path
@@ -14,8 +16,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ScaffoldState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -33,6 +37,7 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
@@ -51,6 +56,7 @@ import com.speedtracker.ui.theme.MainGradientBG
 import com.speedtracker.ui.theme.MainGradientEndColor
 import com.speedtracker.ui.theme.SpeedTrackerComposeTheme
 import com.speedtracker.ui.theme.Typography
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.PI
 import kotlin.math.abs
@@ -58,30 +64,34 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 @Composable
-fun MainScreenView(speed:MutableLiveData<Float>) {
+fun MainScreenView(speed:MutableLiveData<Float>, scope: CoroutineScope, scaffoldState: ScaffoldState,speedViewModel:SpeedViewModel) {
     Column(modifier = Modifier
         .fillMaxSize()) {
         ActualSpeedPart(modifier = Modifier
-            .weight(1f)
+            .weight(10f)
             .fillMaxWidth()
             .background(brush = MainGradientBG),
-            speed = speed)
+            speed = speed,
+            scope = scope,
+            scaffoldState = scaffoldState,
+            speedViewModel = speedViewModel)
 
         StatisticsPart(modifier = Modifier
-            .weight(1f)
+            .weight(9f)
             .fillMaxWidth()
             .background(Color.White))
     }
 }
 
 @Composable
-fun ActualSpeedPart(modifier: Modifier,speed:MutableLiveData<Float>) {
+fun ActualSpeedPart(modifier: Modifier,speed:MutableLiveData<Float>, scope: CoroutineScope, scaffoldState: ScaffoldState,speedViewModel:SpeedViewModel) {
     Column(modifier = modifier) {
-        ActualSpeedPartTopBar()
+        ActualSpeedPartTopBar(scope,scaffoldState, speedViewModel = speedViewModel)
         Column(modifier = Modifier.weight(1f),
         verticalArrangement = Arrangement.Center) {
             SpeedText(modifier = Modifier
                 .fillMaxWidth()
+                .weight(3f)
                 .align(Alignment.CenterHorizontally), speed = speed)
             AdditionalInfo(modifier = Modifier
                 .fillMaxWidth()
@@ -91,13 +101,17 @@ fun ActualSpeedPart(modifier: Modifier,speed:MutableLiveData<Float>) {
 }
 
 @Composable
-fun ActualSpeedPartTopBar() {
+fun ActualSpeedPartTopBar(scope: CoroutineScope, scaffoldState: ScaffoldState,speedViewModel:SpeedViewModel) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(60.dp),
         verticalAlignment = Alignment.CenterVertically) {
-        IconButton(onClick = { }) {
+        IconButton(onClick = {
+            scope.launch {
+                scaffoldState.drawerState.open()
+        } })
+        {
             Icon(
                 imageVector = Icons.Filled.Menu,
                 contentDescription = "Menu Btn",
@@ -128,7 +142,7 @@ fun ActualSpeedPartTopBar() {
             }
 
         }
-        IconButton(onClick = { }) {
+        IconButton(onClick = { speedViewModel.animate0To200And200To0() }) {
             Icon(
                 imageVector = Icons.Filled.Add,
                 contentDescription = "Menu Btn",
@@ -145,30 +159,35 @@ fun SpeedText(modifier: Modifier,speed:MutableLiveData<Float>) {
     var speedTextReadyToDraw by remember { mutableStateOf(false) }
     var unitTextReadyToDraw by remember { mutableStateOf(false) }
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+        var needsToResize by remember { mutableStateOf(false) }
+
         Text(
             text = "${speed.observeAsState().value!!.toInt()}",
             color = Color.White,
-            style = speedTextStyle,
             maxLines = 1,
+            style = speedTextStyle,
             softWrap = false,
             textAlign = TextAlign.Right,
             modifier = Modifier
                 .weight(4f)
                 .alignByBaseline()
                 .padding(start = 20.dp)
-                .drawWithContent {
-                    if (speedTextReadyToDraw) drawContent()
-                },
-            onTextLayout = { textLayoutResult ->
-                if (textLayoutResult.didOverflowWidth) {
-                    speedTextStyle = speedTextStyle.copy(fontSize = speedTextStyle.fontSize * 0.9)
-                } else {
-                    if (speed.value!! < 100) {
-                        speedTextStyle = speedTextStyle.copy(fontSize = Typography.bodyLarge.fontSize)
-                    }
-                    speedTextReadyToDraw = true
-                }
-            })
+//                .drawWithContent {
+//                    if (speedTextReadyToDraw) drawContent()
+//                },
+//            onTextLayout = { textLayoutResult ->
+//                if (textLayoutResult.didOverflowWidth || textLayoutResult.didOverflowHeight) {
+//                    speedTextStyle = speedTextStyle.copy(fontSize = speedTextStyle.fontSize * 0.9)
+//                    needsToResize = true
+//                } else {
+////                    if (textLayoutResult.size.width > textLayoutResult.multiParagraph.width || textLayoutResult.size.height > textLayoutResult.multiParagraph.height) {
+////                        speedTextStyle = speedTextStyle.copy(fontSize = Typography.bodyLarge.fontSize)
+////                    }
+////                    }
+//                    speedTextReadyToDraw = true
+//                }
+//            }
+    )
 
         Text(
             text = "km/h",
@@ -405,10 +424,10 @@ fun StatisticsPart(modifier: Modifier) {
             state = pagerState,
         ) { page ->
             if (page == 0) {
-                var itemsList = listOf<String>("Overall distance", "Overll max speed", "Overal average speed")
+                var itemsList = listOf("Overall distance", "Overll max speed", "Overal average speed")
                 StatisticsPage(itemList = itemsList)
             } else {
-                var itemsList = listOf<String>("Trip distance", "Trip max speed", "Trip average speed","Trip average altitude")
+                var itemsList = listOf("Trip distance", "Trip max speed", "Trip average speed","Trip average altitude")
                 StatisticsPage(itemList = itemsList)
             }
         }
@@ -421,8 +440,9 @@ fun StatisticsPart(modifier: Modifier) {
 @Composable
 fun DefaultPreview() {
     SpeedTrackerComposeTheme {
-
-        MainScreenView(MutableLiveData(0f))
+        val scope = rememberCoroutineScope()
+        val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
+//        MainScreenView(MutableLiveData(0f),scope,scaffoldState)
     }
 }
 

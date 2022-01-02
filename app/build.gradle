@@ -59,6 +59,7 @@ dependencies {
     implementation "com.google.accompanist:accompanist-pager:0.22.0-rc"
     // If using indicators, also depend on
     implementation "com.google.accompanist:accompanist-pager-indicators:0.22.0-rc"
+    implementation("androidx.navigation:navigation-compose:2.4.0-rc01")
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
