@@ -2,9 +2,6 @@
 
 package com.speedtracker.pages
 
-import android.graphics.Path
-import android.graphics.RectF
-import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -26,23 +23,16 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.*
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.MutableLiveData
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -53,31 +43,26 @@ import com.speedtracker.R
 import com.speedtracker.mainscreen.SpeedViewModel
 import com.speedtracker.mainscreen.StatisticsPage
 import com.speedtracker.ui.theme.MainGradientBG
-import com.speedtracker.ui.theme.MainGradientEndColor
 import com.speedtracker.ui.theme.SpeedTrackerComposeTheme
 import com.speedtracker.ui.theme.Typography
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import kotlin.math.PI
-import kotlin.math.abs
-import kotlin.math.cos
-import kotlin.math.sin
 
 @Composable
-fun MainScreenView(speed:MutableLiveData<Float>, scope: CoroutineScope, scaffoldState: ScaffoldState,speedViewModel:SpeedViewModel) {
+fun MainScreenView(scope: CoroutineScope, scaffoldState: ScaffoldState,speedViewModel:SpeedViewModel) {
     Column(modifier = Modifier
         .fillMaxSize()) {
         ActualSpeedPart(modifier = Modifier
-            .weight(10f)
+            .weight(1f)
             .fillMaxWidth()
             .background(brush = MainGradientBG),
-            speed = speed,
+            speed = speedViewModel.speed,
             scope = scope,
             scaffoldState = scaffoldState,
             speedViewModel = speedViewModel)
 
         StatisticsPart(modifier = Modifier
-            .weight(9f)
+            .weight(1f)
             .fillMaxWidth()
             .background(Color.White))
     }
@@ -95,7 +80,8 @@ fun ActualSpeedPart(modifier: Modifier,speed:MutableLiveData<Float>, scope: Coro
                 .align(Alignment.CenterHorizontally), speed = speed)
             AdditionalInfo(modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f))
+                .weight(1f),
+                speedViewModel = speedViewModel)
         }
     }
 }
@@ -117,30 +103,38 @@ fun ActualSpeedPartTopBar(scope: CoroutineScope, scaffoldState: ScaffoldState,sp
                 contentDescription = "Menu Btn",
                 tint = Color.White)
         }
-        Row(modifier = Modifier
-            .weight(1f)
-            .fillMaxHeight(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically) {
-            CircularProgressIndicator(
+        if (speedViewModel.searchingForGPSLocation.observeAsState().value == true) {
+            Row(
                 modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .width(15.dp)
-                    .height(15.dp),
-                color = Color.White,
-                strokeWidth = 1.5.dp
-            )
-
-            Column(modifier = Modifier
-                .padding(start = 6.dp),) {
-                Text(
-                    textAlign = TextAlign.Center,
-                    text = "Searching for GPS location...",
+                    .weight(1f)
+                    .fillMaxHeight(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .width(15.dp)
+                        .height(15.dp),
                     color = Color.White,
-                    fontSize = 12.sp
+                    strokeWidth = 1.5.dp
                 )
-            }
 
+                Column(
+                    modifier = Modifier
+                        .padding(start = 6.dp),
+                ) {
+                    Text(
+                        textAlign = TextAlign.Center,
+                        text = "Searching for GPS location...",
+                        color = Color.White,
+                        fontSize = 12.sp
+                    )
+                }
+
+            }
+        } else {
+            Spacer(modifier = Modifier.weight(1f))
         }
         IconButton(onClick = { speedViewModel.animate0To200And200To0() }) {
             Icon(
@@ -159,19 +153,17 @@ fun SpeedText(modifier: Modifier,speed:MutableLiveData<Float>) {
     var speedTextReadyToDraw by remember { mutableStateOf(false) }
     var unitTextReadyToDraw by remember { mutableStateOf(false) }
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
-        var needsToResize by remember { mutableStateOf(false) }
 
         Text(
             text = "${speed.observeAsState().value!!.toInt()}",
             color = Color.White,
             maxLines = 1,
             style = speedTextStyle,
-            softWrap = false,
             textAlign = TextAlign.Right,
             modifier = Modifier
                 .weight(4f)
                 .alignByBaseline()
-                .padding(start = 20.dp)
+                .padding(start = 10.dp)
 //                .drawWithContent {
 //                    if (speedTextReadyToDraw) drawContent()
 //                },
@@ -188,6 +180,7 @@ fun SpeedText(modifier: Modifier,speed:MutableLiveData<Float>) {
 //                }
 //            }
     )
+
 
         Text(
             text = "km/h",
@@ -210,18 +203,18 @@ fun SpeedText(modifier: Modifier,speed:MutableLiveData<Float>) {
 }
 
 @Composable
-fun AdditionalInfo(modifier: Modifier) {
+fun AdditionalInfo(modifier: Modifier,speedViewModel: SpeedViewModel) {
     Row(modifier = modifier.padding(bottom = 20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceEvenly) {
     AdditionalInfoItem(
         modifier = Modifier.width(150.dp),
         imageRes = R.drawable.satellite_icon,
-        value = "14/17",
+        value = "${speedViewModel.connectedSattelites.observeAsState().value}/${speedViewModel.allSattelites.observeAsState().value}",
         units = "satellites"
     )
         AdditionalInfoItem(
             modifier = Modifier.width(120.dp),
             imageRes = R.drawable.altitude_icon,
-            value = "6429",
+            value = "${speedViewModel.altitude.observeAsState().value}",
             units = "m.n.m"
         )
 //        ProgressBar(
@@ -404,7 +397,7 @@ fun StatisticsPart(modifier: Modifier) {
                         selected = pagerState.currentPage == index,
                         text = { Row(verticalAlignment = Alignment.CenterVertically) {
 //                            Icon(painter = painterResource(id = R.drawable.trip_icon), contentDescription = "Trip icon",modifier=Modifier.size(25.dp))
-                            Text(title, fontSize = 16.sp, modifier = Modifier.padding(start = 4.dp))
+                            Text(title, fontSize = 16.sp, modifier = Modifier.padding(start = 4.dp), color = Color.Black)
                         } },
                         onClick = { coroutineScope.launch {
                             pagerState.animateScrollToPage(index)
