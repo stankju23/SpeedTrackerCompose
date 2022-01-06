@@ -1,4 +1,4 @@
-package com.speedtracker.mainscreen
+package com.speedtracker.app.screens.mainscreen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues

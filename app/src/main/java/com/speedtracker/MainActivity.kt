@@ -22,8 +22,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.speedtracker.helper.NavDrawerItem
-import com.speedtracker.mainscreen.SpeedViewModel
-import com.speedtracker.pages.MainScreenView
+import com.speedtracker.app.screens.mainscreen.speed.SpeedViewModel
+import com.speedtracker.app.screens.mainscreen.statistics.StatisticsViewModel
+import com.speedtracker.app.screens.walkthrough.WalkthroughViewModel
+import com.speedtracker.app.screens.walkthrough.pages.MainScreenView
+import com.speedtracker.app.screens.walkthrough.pages.WalkthroughScreen
 import com.speedtracker.ui.theme.SpeedTrackerComposeTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -32,6 +35,9 @@ import kotlinx.coroutines.launch
 class MainActivity : DrawerView() {
 
     val speedViewModel by viewModels<SpeedViewModel>()
+    val statisticsViewModel by viewModels<StatisticsViewModel>()
+    val walkthroughViewModel by viewModels<WalkthroughViewModel>()
+
     lateinit var scaffoldState:ScaffoldState
     lateinit var scope:CoroutineScope
 
@@ -77,7 +83,8 @@ class MainActivity : DrawerView() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MainScreenView(scope,scaffoldState,speedViewModel)
+                    WalkthroughScreen(context = this@MainActivity, walkthroughViewModel = walkthroughViewModel)
+//                    MainScreenView(scope,scaffoldState,speedViewModel)
                 }
             }
             composable(NavDrawerItem.Settings.route) {

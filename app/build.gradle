@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id("kotlin-kapt")
 }
 
 android {
@@ -54,12 +55,22 @@ dependencies {
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
     implementation 'androidx.activity:activity-compose:1.3.1'
+    implementation "androidx.compose.material:material-icons-extended:1.1.0-rc01"
     implementation 'androidx.compose.runtime:runtime-livedata:1.1.0-rc01'
 
     implementation "com.google.accompanist:accompanist-pager:0.22.0-rc"
     // If using indicators, also depend on
     implementation "com.google.accompanist:accompanist-pager-indicators:0.22.0-rc"
     implementation("androidx.navigation:navigation-compose:2.4.0-rc01")
+    implementation "androidx.constraintlayout:constraintlayout-compose:1.0.0-beta02"
+    implementation 'com.google.code.gson:gson:2.8.6'
+
+    implementation "androidx.room:room-runtime:2.4.0-rc01"
+    annotationProcessor "androidx.room:room-compiler:2.4.0-rc01"
+    kapt 'androidx.room:room-compiler:2.4.0-rc01'
+
+    // optional - Kotlin Extensions and Coroutines support for Room
+    implementation("androidx.room:room-ktx:2.3.0")
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

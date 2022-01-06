@@ -1,15 +1,16 @@
-package com.speedtracker.mainscreen
+package com.speedtracker.app.screens.mainscreen.speed
 
 import android.animation.ValueAnimator
+import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class SpeedViewModel:ViewModel() {
+class SpeedViewModel():ViewModel() {
 
     var speed:MutableLiveData<Float> = MutableLiveData(0f)
     var altitude:MutableLiveData<Float> = MutableLiveData(0f)
-    var connectedSattelites:MutableLiveData<Int> = MutableLiveData(0)
-    var allSattelites:MutableLiveData<Int> = MutableLiveData(0)
+    var connectedSatelites:MutableLiveData<Int> = MutableLiveData(0)
+    var allSatelites:MutableLiveData<Int> = MutableLiveData(0)
     var searchingForGPSLocation:MutableLiveData<Boolean> = MutableLiveData(true)
 
     fun animate0To200And200To0() {

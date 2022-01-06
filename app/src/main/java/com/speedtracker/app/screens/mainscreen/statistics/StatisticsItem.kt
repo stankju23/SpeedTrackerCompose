@@ -1,4 +1,4 @@
-package com.speedtracker.mainscreen
+package com.speedtracker.app.screens.mainscreen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

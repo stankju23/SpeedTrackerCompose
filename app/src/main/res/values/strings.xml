@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">SpeedTrackerCompose</string>
+
+
+    // dialog for missing car prefs
+    <string name="missing_prefs_dialog_mess">Before you continue to app, please check the datas you choose. The problem is with following things: </string>
+    <string name="no_car_brand">You didn\'t choose car brand.</string>
+    <string name="no_car_model">You didn\'t choose car model.</string>
+    <string name="no_car_year">You didn\'t type in manufactured year.</string>
+    <string name="car_year_not_correct">You probably type wrong manufactured year.</string>
+
+
 </resources>
