@@ -22,6 +22,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
@@ -36,7 +38,7 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun WalkthroughScreen(context: Context,walkthroughViewModel: WalkthroughViewModel) {
+fun WalkthroughScreen(context: Context,walkthroughViewModel: WalkthroughViewModel,navigationController: NavHostController) {
     val mainButtonColor = ButtonDefaults.buttonColors(
         containerColor = MainGradientStartColor,
         contentColor = MaterialTheme.colorScheme.surface
@@ -86,7 +88,11 @@ fun WalkthroughScreen(context: Context,walkthroughViewModel: WalkthroughViewMode
             OutlinedButton(
                 onClick = {
                     if (pagerState.currentPage == 1) {
-                        walkthroughViewModel.storeCarPreferences()
+                        var moveToApp = walkthroughViewModel.storeCarPreferences(scope = scope, context = context)
+                        if (moveToApp) {
+                            // nav to speed view
+                            navigationController.navigate("")
+                        }
                     } else {
                         scope.launch {
                             pagerState.animateScrollToPage(pagerState.currentPage + 1)

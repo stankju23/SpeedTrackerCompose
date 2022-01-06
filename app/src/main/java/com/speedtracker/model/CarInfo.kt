@@ -3,8 +3,6 @@ package com.speedtracker.model
 import android.content.Context
 import androidx.room.*
 import androidx.room.OnConflictStrategy.IGNORE
-import java.util.*
-import kotlin.collections.ArrayList
 
 @Entity
 data class CarInfo(
@@ -17,25 +15,34 @@ data class CarInfo(
 )
 
 @Entity
-data class TripData (
-    @PrimaryKey()  var id: Long = System.currentTimeMillis(),
+data class TripInfo (
+    @PrimaryKey()  var tripId: Long = System.currentTimeMillis(),
     @ColumnInfo(name = "tripName") var tripName: String? = null,
     @ColumnInfo(name = "sumOfTripSpeed") var sumOfTripSpeed: Int = 0,
     @ColumnInfo(name = "countOfUpdates") var countOfUpdates: Int = 0,
     @ColumnInfo(name = "maxSpeed") var maxSpeed: Int = 0,
     @ColumnInfo(name = "distance") var distance: Float = 0F,
-    @ColumnInfo(name = "tripStartDate") var tripStartDate: Date? = null,
-    @ColumnInfo(name = "tripEndDate") var tripEndDate: Date? = null,
-    @ColumnInfo(name = "locations") var locations: List<Location> = ArrayList()
+    @ColumnInfo(name = "tripStartDate") var tripStartDate: Long? = null,
+    @ColumnInfo(name = "tripEndDate") var tripEndDate: Long? = null
 )
 
 @Entity
-open class Location (
-    @PrimaryKey(autoGenerate = true) var id:Int?,
+data class Location (
+    @PrimaryKey(autoGenerate = true) var locationId:Int?,
+    @ColumnInfo(name = "tripIdentifier") val tripIdentifier: Long,
     @ColumnInfo(name = "latitude") var latitude: Double = 0.0,
     @ColumnInfo(name = "longitude") var longitude: Double = 0.0,
     @ColumnInfo(name = "altitude") var altitude: Double = 0.0,
     @ColumnInfo(name = "time") var time: Long = 0,
+)
+
+data class TripData (
+    @Embedded val tripInfo: TripInfo,
+    @Relation(
+        parentColumn = "tripId",
+        entityColumn = "tripIdentifier"
+    )
+    val locations: List<Location>
 )
 
 
@@ -53,18 +60,19 @@ interface CarInfoDao {
 @Dao
 interface TripDao {
 
-    @Query("SELECT * from TripData")
+    @Transaction
+    @Query("SELECT * FROM TripInfo")
     suspend fun getAllTripData(): List<TripData>
 
     @Insert(onConflict = IGNORE)
-    suspend fun insertTripData(tripData: TripData)
+    suspend fun insertTripInfo(tripInfo: TripInfo)
 
     @Update
-    suspend fun updateTripData(tripData: TripData)
+    suspend fun updateTripData(tripInfo: TripInfo)
 
 }
 
-@Database(entities = [CarInfo::class,TripData::class,Location::class], exportSchema = false, version = 1)
+@Database(entities = [CarInfo::class,TripInfo::class,Location::class], exportSchema = false, version = 1)
 abstract class AppDatabase: RoomDatabase() {
 
     abstract fun carInfoDao():CarInfoDao

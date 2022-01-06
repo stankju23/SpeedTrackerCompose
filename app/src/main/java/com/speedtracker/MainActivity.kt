@@ -77,15 +77,18 @@ class MainActivity : DrawerView() {
 
     @Composable
     fun Navigation(navController: NavHostController, scope: CoroutineScope, scaffoldState: ScaffoldState) {
-        NavHost(navController, startDestination = NavDrawerItem.SpeedMeter.route) {
-            composable(NavDrawerItem.SpeedMeter.route) {
+        var startDestination = ""
+        NavHost(navController, startDestination = startDestination) {
+            composable("speed-meter") {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    WalkthroughScreen(context = this@MainActivity, walkthroughViewModel = walkthroughViewModel)
-//                    MainScreenView(scope,scaffoldState,speedViewModel)
+                    MainScreenView(scope,scaffoldState,speedViewModel)
                 }
+            }
+            composable("walkthrough") {
+                WalkthroughScreen(context = this@MainActivity, walkthroughViewModel = walkthroughViewModel, navigationController = navController)
             }
             composable(NavDrawerItem.Settings.route) {
                 Column(modifier = Modifier

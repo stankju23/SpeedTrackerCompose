@@ -8,6 +8,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.speedtracker.R
+import com.speedtracker.model.AppDatabase
+import com.speedtracker.model.CarInfo
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -29,11 +33,29 @@ class WalkthroughViewModel:ViewModel() {
     var errors:ArrayList<Errors> = ArrayList()
 
 
-    fun storeCarPreferences(){
+    // return value for moving to app
+    fun storeCarPreferences(context: Context,scope: CoroutineScope):Boolean{
         validateData()
         if (errors.size > 0) {
             showErrorDialog.value = true
+            return false
+        } else {
+            if (errors.size == 0) {
+                var carInfo = CarInfo(
+                    id = null,
+                    carIdentifier = UUID.randomUUID().toString(),
+                    carBrand = carBrand.value!!,
+                    carModel = carModel.value!!,
+                    carManufacturedYear = manufacturedYear.value!!.toString(),
+                    carPhotoPath = if (carImageUri.value != null) carImageUri.value!!.path else null
+                )
+                scope.launch {
+                    AppDatabase.getDatabase(context = context).carInfoDao().insertCarInfo(carInfo = carInfo)
+                }
+                return true
+            }
         }
+        return false
     }
 
     private fun validateData() {
