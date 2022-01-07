@@ -27,6 +27,7 @@ import com.speedtracker.app.screens.mainscreen.statistics.StatisticsViewModel
 import com.speedtracker.app.screens.walkthrough.WalkthroughViewModel
 import com.speedtracker.app.screens.walkthrough.pages.MainScreenView
 import com.speedtracker.app.screens.walkthrough.pages.WalkthroughScreen
+import com.speedtracker.model.AppDatabase
 import com.speedtracker.ui.theme.SpeedTrackerComposeTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -40,6 +41,8 @@ class MainActivity : DrawerView() {
 
     lateinit var scaffoldState:ScaffoldState
     lateinit var scope:CoroutineScope
+    lateinit var navController:NavHostController
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,7 +50,8 @@ class MainActivity : DrawerView() {
             SpeedTrackerComposeTheme {
                 scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
                 scope = rememberCoroutineScope()
-                val navController = rememberNavController()
+                navController = rememberNavController()
+
                 // A surface container using the 'background' color from the theme
                 Scaffold(
                     scaffoldState = scaffoldState,
@@ -77,8 +81,19 @@ class MainActivity : DrawerView() {
 
     @Composable
     fun Navigation(navController: NavHostController, scope: CoroutineScope, scaffoldState: ScaffoldState) {
-        var startDestination = ""
-        NavHost(navController, startDestination = startDestination) {
+
+        scope.launch {
+            var carInfos = AppDatabase.getDatabase(this@MainActivity).carInfoDao().getAllCarInfos()
+            if (carInfos != null && carInfos.size > 0) {
+                navController.navigate("speed-meter")
+            } else {
+                navController.navigate("walkthrough")
+            }
+
+        }
+
+
+        NavHost(navController, startDestination = "base") {
             composable("speed-meter") {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -97,6 +112,7 @@ class MainActivity : DrawerView() {
                     Text(text = "This is Settings Screen")
                 }
             }
+            composable("base"){}
         }
     }
 
@@ -107,7 +123,13 @@ class MainActivity : DrawerView() {
                     scaffoldState.drawerState.close()
                 }
             } else {
-                super.onBackPressed()
+                if (navController.currentDestination != null) {
+                    if (navController.currentDestination!!.route != "speed-meter") {
+                        super.onBackPressed()
+                    }
+                } else {
+                    super.onBackPressed()
+                }
             }
         }
     }

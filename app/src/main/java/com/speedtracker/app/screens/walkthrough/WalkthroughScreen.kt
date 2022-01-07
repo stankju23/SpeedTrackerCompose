@@ -91,7 +91,8 @@ fun WalkthroughScreen(context: Context,walkthroughViewModel: WalkthroughViewMode
                         var moveToApp = walkthroughViewModel.storeCarPreferences(scope = scope, context = context)
                         if (moveToApp) {
                             // nav to speed view
-                            navigationController.navigate("")
+                            navigationController.popBackStack()
+                            navigationController.navigate("speed-meter")
                         }
                     } else {
                         scope.launch {
