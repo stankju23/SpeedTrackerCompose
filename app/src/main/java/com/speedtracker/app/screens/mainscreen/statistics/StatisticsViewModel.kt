@@ -12,6 +12,7 @@ import com.speedtracker.model.Location
 import com.speedtracker.model.OverallData
 import com.speedtracker.model.TripInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.util.*
 import javax.inject.Inject
@@ -28,26 +29,39 @@ class StatisticsViewModel @Inject constructor(
     var trip:TripInfo? = null
     var overallData:OverallData = OverallData()
 
-    fun initializeStatisticsData(context: Context) {
-        overallStatisticsList = listOf<Statistic>(
-            Statistic("Avg speed:", MutableLiveData(0), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
-                R.string.speed_units_metric)) else MutableLiveData(context.getString(R.string.speed_units_imperial))),
-            Statistic("Max speed:", MutableLiveData(0), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
-                R.string.speed_units_metric)) else MutableLiveData(context.getString(R.string.speed_units_imperial))),
-            Statistic("Overall distance:", MutableLiveData(0), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
-                R.string.measute_units_metric)) else MutableLiveData(context.getString(R.string.measute_units_imperial)))
-        )
+    suspend fun initializeStatisticsData(context: Context) {
 
-       tripStatisticsList = listOf<Statistic>(
-           Statistic("Avg speed:", MutableLiveData(0), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
-               R.string.speed_units_metric)) else MutableLiveData(context.getString(R.string.speed_units_imperial))),
-           Statistic("Max speed:", MutableLiveData(0), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
-               R.string.speed_units_metric)) else MutableLiveData(context.getString(R.string.speed_units_imperial))),
-           Statistic("Trip distance:", MutableLiveData(0), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
-               R.string.measute_units_metric)) else MutableLiveData(context.getString(R.string.measute_units_imperial))),
-            Statistic("Trip avg altitude:", MutableLiveData(0), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
-                R.string.altitudeI_units_metric)) else MutableLiveData(context.getString(R.string.altitudeI_units_imperial)))
-        )
+        appDataStoreImpl.getOverallData().collect { overallData ->
+            if (overallData != null) {
+                overallStatisticsList = listOf(
+                    Statistic("Avg speed:", MutableLiveData(overallData.sumOfSpeeds/overallData.countOfUpdates), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
+                        R.string.speed_units_metric)) else MutableLiveData(context.getString(R.string.speed_units_imperial))),
+                    Statistic("Max speed:", MutableLiveData(overallData.maxSpeed), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
+                        R.string.speed_units_metric)) else MutableLiveData(context.getString(R.string.speed_units_imperial))),
+                    Statistic("Overall distance:", MutableLiveData(overallData.sumOfDistancesInM), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
+                        R.string.measute_units_metric)) else MutableLiveData(context.getString(R.string.measute_units_imperial)))
+                )
+            } else {
+                overallStatisticsList = listOf(
+                    Statistic("Avg speed:", MutableLiveData(0), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
+                        R.string.speed_units_metric)) else MutableLiveData(context.getString(R.string.speed_units_imperial))),
+                    Statistic("Max speed:", MutableLiveData(0), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
+                        R.string.speed_units_metric)) else MutableLiveData(context.getString(R.string.speed_units_imperial))),
+                    Statistic("Overall distance:", MutableLiveData(0), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
+                        R.string.measute_units_metric)) else MutableLiveData(context.getString(R.string.measute_units_imperial)))
+                )
+            }
+            tripStatisticsList = listOf(
+                Statistic("Avg speed:", MutableLiveData(0), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
+                    R.string.speed_units_metric)) else MutableLiveData(context.getString(R.string.speed_units_imperial))),
+                Statistic("Max speed:", MutableLiveData(0), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
+                    R.string.speed_units_metric)) else MutableLiveData(context.getString(R.string.speed_units_imperial))),
+                Statistic("Trip distance:", MutableLiveData(0), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
+                    R.string.measute_units_metric)) else MutableLiveData(context.getString(R.string.measute_units_imperial))),
+                Statistic("Trip avg altitude:", MutableLiveData(0), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
+                    R.string.altitudeI_units_metric)) else MutableLiveData(context.getString(R.string.altitudeI_units_imperial)))
+            )
+        }
     }
 
     fun startTrip(tripName: String,context: Context) {
@@ -57,7 +71,6 @@ class StatisticsViewModel @Inject constructor(
             AppDatabase.getDatabase(context).tripDao().insertTripInfo(trip!!)
         }
     }
-
 
     fun updateTrip(speed:Int,distanceToSave: Double,location: Location,context: Context) {
         trip!!.sumOfTripSpeed += speed
@@ -70,18 +83,22 @@ class StatisticsViewModel @Inject constructor(
     }
 
     fun updateOverallData(speed:Int,distanceToSave:Double) {
+        overallData.countOfUpdates ++
+        overallData.sumOfSpeeds += speed
+        overallData.sumOfDistancesInM += distanceToSave
+
+        if (overallData.maxSpeed < speed) {
+            overallData.maxSpeed = speed
+        }
+        overallStatisticsList.get(0).value.value = overallData.sumOfSpeeds / overallData.countOfUpdates
+        overallStatisticsList.get(1).value.value = overallData.maxSpeed
+        overallStatisticsList.get(2).value.value = overallData.sumOfDistancesInM
+
         viewModelScope.launch {
-            overallData.countOfUpdates ++
-            overallData.sumOfSpeeds += speed
-            overallData.sumOfDistancesInM += distanceToSave
             appDataStoreImpl.setOverallData(overallData)
         }
     }
 
-
-    fun closeTrip() {
-
-    }
 }
 
 class Statistic (

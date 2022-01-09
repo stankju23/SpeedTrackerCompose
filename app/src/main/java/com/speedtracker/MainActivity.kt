@@ -2,9 +2,13 @@
 
 package com.speedtracker
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Application
 import android.content.ContentValues.TAG
 import android.content.Context
+import android.content.IntentSender
+import android.content.pm.PackageManager
 import android.location.GnssStatus
 import android.location.GpsStatus
 import android.location.LocationManager
@@ -15,6 +19,7 @@ import android.util.Log
 import android.view.View
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.*
@@ -30,15 +35,19 @@ import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
+import com.google.android.gms.tasks.Task
 import com.speedtracker.helper.NavDrawerItem
 import com.speedtracker.app.screens.mainscreen.speed.SpeedViewModel
 import com.speedtracker.app.screens.mainscreen.statistics.Statistic
@@ -51,6 +60,8 @@ import com.speedtracker.helper.GenerallData
 import com.speedtracker.model.AppDatabase
 import com.speedtracker.model.Location
 import com.speedtracker.ui.theme.SpeedTrackerComposeTheme
+import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.HiltAndroidApp
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable.interval
 
@@ -61,7 +72,10 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
+@HiltAndroidApp
+class CoreApplication: Application()
 
+@AndroidEntryPoint
 class MainActivity : DrawerView(),GpsStatus.Listener {
 
     val speedViewModel by viewModels<SpeedViewModel>()
@@ -102,6 +116,7 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
                     },
                     drawerShape = customShape()
                 ) {
+                    checkGPSPermission()
                     Navigation(navController = navController,scope,scaffoldState)
                 }
 
@@ -120,16 +135,121 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
     }
 
     @Composable
+    fun checkGPSPermission() {
+//        val multiplePermissionsState = rememberMultiplePermissionsState(
+//            listOf(
+//                android.Manifest.permission.ACCESS_FINE_LOCATION,
+//                android.Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+//                android.Manifest.permission.ACCESS_COARSE_LOCATION
+//            )
+//        )
+//
+//        multiplePermissionsState.launchMultiplePermissionRequest()
+//
+//
+//        val context: Context = LocalContext.current
+//
+//        val settingResultRequest = rememberLauncherForActivityResult(
+//            contract = ActivityResultContracts.StartIntentSenderForResult()
+//        ) { activityResult ->
+//            if (activityResult.resultCode == RESULT_OK)
+//                Log.d("appDebug", "Accepted")
+//            else {
+//                Log.d("appDebug", "Denied")
+//            }
+//        }
+//            checkLocationSetting(
+//                context = context,
+//                onDisabled = { intentSenderRequest ->
+//                    settingResultRequest.launch(intentSenderRequest)
+//                },
+//                onEnabled = {
+//                /* This will call when setting is already enabled */
+//                }
+//            )
+
+        val permissionGranted = ContextCompat.checkSelfPermission(this,  Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+
+        if (permissionGranted) {
+            Log.d(TAG, "Permission already granted, exiting..")
+            startUpdatingLocation()
+            startStatsHandler()
+            return
+        }
+
+
+        val launcher = rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted: Boolean ->
+            if (isGranted) {
+                Log.d(TAG, "Permission provided by user")
+                // Permission Accepted
+                startUpdatingLocation()
+                startStatsHandler()
+            } else {
+                Log.d(TAG, "Permission denied by user")
+                // Permission Denied
+
+            }
+        }
+        SideEffect {
+            launcher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+
+
+    }
+
+
+    // call this function on button click
+    fun checkLocationSetting(
+        context: Context,
+        onDisabled: (IntentSenderRequest) -> Unit,
+        onEnabled: () -> Unit
+    ) {
+
+        val locationRequest = LocationRequest.create().apply {
+            interval = 1000
+            fastestInterval = 1000
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        }
+
+        val client: SettingsClient = LocationServices.getSettingsClient(context)
+        val builder: LocationSettingsRequest.Builder = LocationSettingsRequest
+            .Builder()
+            .addLocationRequest(locationRequest)
+
+        val gpsSettingTask: Task<LocationSettingsResponse> =
+            client.checkLocationSettings(builder.build())
+
+        gpsSettingTask.addOnSuccessListener { onEnabled() }
+        gpsSettingTask.addOnFailureListener { exception ->
+            if (exception is ResolvableApiException) {
+                try {
+                    val intentSenderRequest = IntentSenderRequest
+                        .Builder(exception.resolution)
+                        .build()
+                    onDisabled(intentSenderRequest)
+                } catch (sendEx: IntentSender.SendIntentException) {
+                    // ignore here
+                }
+            }
+        }
+
+    }
+
+    @Composable
     fun Navigation(navController: NavHostController, scope: CoroutineScope, scaffoldState: ScaffoldState) {
 
         scope.launch {
+
             var carInfos = AppDatabase.getDatabase(this@MainActivity).carInfoDao().getAllCarInfos()
             if (carInfos != null && carInfos.size > 0) {
                 navController.navigate("speed-meter")
+                this@MainActivity.statisticsViewModel.initializeStatisticsData(this@MainActivity)
             } else {
                 navController.navigate("walkthrough")
             }
-            this@MainActivity.statisticsViewModel.initializeStatisticsData(this@MainActivity)
+
         }
 
         NavHost(navController, startDestination = "base") {
@@ -184,11 +304,11 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
             var status = locationManager.getGpsStatus(null)
             if (status != null) {
                 val satellites = status.satellites
-                var usedSatellites =
-                    satellites.filter { satellite -> satellite.usedInFix() == true }
+                var usedSatellites = satellites.filter { satellite -> satellite.usedInFix() == true }
                 Log.i("         Used satelites", "\t${usedSatellites.size}")
+                this.speedViewModel.satellitesText.value = "${usedSatellites.size}/${satellites.count()}"
                 val maxSnr = usedSatellites.maxOf { satellite -> satellite.snr }
-                speedViewModel.searchingForGPSLocation.value = maxSnr > highSnrValue
+                this@MainActivity.speedViewModel.searchingForGPSLocation.value = maxSnr < highSnrValue
                 Log.i("          Max snr value", "\t${maxSnr}")
             }
         }
@@ -212,17 +332,18 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
                                     var usedSatellites =
                                         satellites.filter { satellite -> satellite.usedInFix() == true }
                                     Log.i("         Used satelites", "\t${usedSatellites.size}")
+                                    this@MainActivity.speedViewModel.satellitesText.value = "${usedSatellites.size}/${satellites.count()}"
                                     if (usedSatellites != null && usedSatellites.size != 0) {
                                         var maxSnr =
                                             usedSatellites.maxOf { satellite -> satellite.snr }
 
-                                        speedViewModel.searchingForGPSLocation.value =  maxSnr > highSnrValue
-                                        Log.d("GPS signal ready", speedViewModel.searchingForGPSLocation.value.toString())
+                                        speedViewModel.searchingForGPSLocation.value =  maxSnr < highSnrValue
+                                        Log.d("GPS searching for signal", speedViewModel.searchingForGPSLocation.value.toString())
                                         Log.d("GPS max snr value", "\t${maxSnr}")
                                     }
                                 }
                             } else {
-                                speedViewModel.searchingForGPSLocation.value = false
+                                speedViewModel.searchingForGPSLocation.value = true
                             }
                         }
                     }
@@ -267,7 +388,7 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
 //                    Toast.makeText(applicationContext,"Accuracy is ${locationResult.lastLocation.accuracy}",Toast.LENGTH_SHORT).show()
                     Log.i("Accuracy", "${locationResult.lastLocation.accuracy}")
 
-                    if (speedViewModel.searchingForGPSLocation.value!! && locationResult.lastLocation.accuracy < 20) {
+                    if (!speedViewModel.searchingForGPSLocation.value!! && locationResult.lastLocation.accuracy < 20) {
 
                         var currentSpeed: Int
                         var minValuableSpeed = 0
@@ -283,7 +404,7 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
                         Log.i("Current speed", currentSpeed.toString())
 
                         if (currentSpeed > minValuableSpeed) {
-                            speedViewModel.speed.value = (locationResult.lastLocation.speed * Constants.msToKmh).roundToInt()
+                            speedViewModel.animateSpeed(speedViewModel.speed.value!!, (locationResult.lastLocation.speed * Constants.msToKmh).roundToInt())
                             speedViewModel.actualLatitude = locationResult.lastLocation.latitude
                             speedViewModel.actualLongitude = locationResult.lastLocation.longitude
                             speedViewModel.altitude.value = locationResult.lastLocation.altitude
@@ -319,6 +440,7 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
                 var mm = "${(current / 60000) % 60}"
                 var ss = "${(current / 1000) % 60}"
 
+                Log.d("Satelites", speedViewModel.satellitesText.value!!)
                 Log.i("Observed", "true")
                 if (hh.length == 1) {
                     hh = "0" + hh
@@ -331,7 +453,7 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
                 }
 
                 var distanceToSave = 0.0
-                if (speedViewModel.searchingForGPSLocation.value!! && speedViewModel.speed.value != 0) {
+                if (!speedViewModel.searchingForGPSLocation.value!! && speedViewModel.speed.value != 0) {
                     if (speedViewModel.actualLatitude != 0.0 && speedViewModel.actualLongitude != 0.0) {
                         Log.i("         Rx java update", "\t" + hh + ":" + mm + ":" + ss)
                         if (speedViewModel.lastOverallLatitude != 0.0 && speedViewModel.lastOverallLongitude != 0.0) {
@@ -357,9 +479,4 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
                 }
             }
     }
-}
-
-sealed class PermissionAction {
-    object OnPermissionGranted : PermissionAction()
-    object OnPermissionDenied : PermissionAction()
 }

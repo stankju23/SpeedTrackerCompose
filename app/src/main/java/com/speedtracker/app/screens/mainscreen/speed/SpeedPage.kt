@@ -1,5 +1,6 @@
 package com.speedtracker.app.screens.mainscreen.speed
 
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -180,6 +181,7 @@ fun SpeedText(modifier: Modifier, speed: MutableLiveData<Int>) {
 
 @Composable
 fun AdditionalInfo(modifier: Modifier, speedViewModel: SpeedViewModel) {
+    Log.d("Satelites", "${speedViewModel.satellitesText.observeAsState().value}")
     Row(
         modifier = modifier.padding(bottom = 20.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -188,14 +190,14 @@ fun AdditionalInfo(modifier: Modifier, speedViewModel: SpeedViewModel) {
         AdditionalInfoItem(
             modifier = Modifier.width(150.dp),
             imageRes = R.drawable.satellite_icon,
-            value = "${speedViewModel.connectedSatelites.observeAsState().value}/${speedViewModel.allSatelites.observeAsState().value}",
-            units = "satellites"
+            value = MutableLiveData("${speedViewModel.satellitesText.observeAsState().value}"),
+            units = MutableLiveData("satellites")
         )
         AdditionalInfoItem(
             modifier = Modifier.width(120.dp),
             imageRes = R.drawable.altitude_icon,
-            value = "${speedViewModel.altitude.observeAsState().value}",
-            units = "m.n.m"
+            value = MutableLiveData("${speedViewModel.altitude.observeAsState().value}"),
+            units = MutableLiveData("m.n.m")
         )
 //        ProgressBar(
 //            progress = 0.8f,
@@ -210,7 +212,7 @@ fun AdditionalInfo(modifier: Modifier, speedViewModel: SpeedViewModel) {
 }
 
 @Composable
-fun AdditionalInfoItem(modifier: Modifier, imageRes:Int, value:String, units:String) {
+fun AdditionalInfoItem(modifier: Modifier, imageRes:Int, value:MutableLiveData<String>, units:MutableLiveData<String>) {
 
     var valueTextStyle by remember { mutableStateOf(Typography.titleLarge) }
 
@@ -226,7 +228,7 @@ fun AdditionalInfoItem(modifier: Modifier, imageRes:Int, value:String, units:Str
             Text(modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 16.dp),
-                text = value,
+                text = value.observeAsState().value!!,
                 color = Color.White,
                 fontSize = 20.sp,
                 maxLines = 1,
@@ -241,7 +243,7 @@ fun AdditionalInfoItem(modifier: Modifier, imageRes:Int, value:String, units:Str
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 16.dp),
-                text = units,
+                text = units.observeAsState().value!!,
                 color = Color.White,
                 fontSize = 12.sp,
                 textAlign = TextAlign.Left,

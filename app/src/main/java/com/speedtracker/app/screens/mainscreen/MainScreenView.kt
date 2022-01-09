@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.MutableLiveData
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.pagerTabIndicatorOffset
@@ -160,6 +161,7 @@ fun DefaultPreview() {
 @Composable
 fun AdditionInfoItemPreview() {
     SpeedTrackerComposeTheme {
-        AdditionalInfoItem(Modifier.width(130.dp),R.drawable.satellite_icon, "14/17","satellites")
+        AdditionalInfoItem(Modifier.width(130.dp),R.drawable.satellite_icon, MutableLiveData("14/17"),
+            MutableLiveData("satellites"))
     }
 }

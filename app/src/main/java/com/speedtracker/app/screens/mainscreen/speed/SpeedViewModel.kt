@@ -10,8 +10,7 @@ class SpeedViewModel():ViewModel() {
 
     var speed:MutableLiveData<Int> = MutableLiveData(0)
     var altitude:MutableLiveData<Double> = MutableLiveData(0.0)
-    var connectedSatelites:MutableLiveData<Int> = MutableLiveData(0)
-    var allSatelites:MutableLiveData<Int> = MutableLiveData(0)
+    var satellitesText:MutableLiveData<String> = MutableLiveData("0/0")
     var searchingForGPSLocation:MutableLiveData<Boolean> = MutableLiveData(true)
 
     var lastOverallLatitude = 0.0
