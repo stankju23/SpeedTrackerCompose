@@ -21,7 +21,7 @@ data class TripInfo (
     @ColumnInfo(name = "sumOfTripSpeed") var sumOfTripSpeed: Int = 0,
     @ColumnInfo(name = "countOfUpdates") var countOfUpdates: Int = 0,
     @ColumnInfo(name = "maxSpeed") var maxSpeed: Int = 0,
-    @ColumnInfo(name = "distance") var distance: Float = 0F,
+    @ColumnInfo(name = "distance") var distance: Double = 0.0,
     @ColumnInfo(name = "tripStartDate") var tripStartDate: Long? = null,
     @ColumnInfo(name = "tripEndDate") var tripEndDate: Long? = null
 )
@@ -69,6 +69,9 @@ interface TripDao {
 
     @Insert(onConflict = IGNORE)
     suspend fun addLocation(location: Location)
+
+    @Update
+    suspend fun updateTrip(tripInfo: TripInfo)
 
 }
 

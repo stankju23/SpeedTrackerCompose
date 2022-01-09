@@ -1,8 +1,9 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 
 package com.speedtracker
 
 import android.annotation.SuppressLint
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.location.GnssStatus
 import android.location.GpsStatus
@@ -12,13 +13,17 @@ import android.os.Bundle
 import android.os.Looper
 import android.util.Log
 import android.view.View
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.SnackbarDuration
+import androidx.compose.material.SnackbarResult
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.RoundRect
@@ -27,6 +32,7 @@ import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -51,6 +57,7 @@ import io.reactivex.rxjava3.core.Observable.interval
 import io.reactivex.rxjava3.disposables.Disposable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
@@ -187,6 +194,7 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
         }
     }
 
+
     @SuppressLint("MissingPermission")
     private fun startUpdatingLocation() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
@@ -301,6 +309,7 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
         }
     }
 
+
     private fun startStatsHandler() {
         observer = interval(2000, TimeUnit.MILLISECONDS)
             .observeOn(AndroidSchedulers.mainThread())
@@ -321,50 +330,36 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
                     ss = "0" + ss
                 }
 
-                var distanceToSave = 0f
+                var distanceToSave = 0.0
                 if (speedViewModel.searchingForGPSLocation.value!! && speedViewModel.speed.value != 0) {
                     if (speedViewModel.actualLatitude != 0.0 && speedViewModel.actualLongitude != 0.0) {
                         Log.i("         Rx java update", "\t" + hh + ":" + mm + ":" + ss)
                         if (speedViewModel.lastOverallLatitude != 0.0 && speedViewModel.lastOverallLongitude != 0.0) {
-                            distanceToSave = (Math.round(countCurrentDistance() * 10.0) / 10.0).toFloat()
-                            storeManager.saveOverallTripData(
-                                speed,
-                                this@MainActivity,
-                                distanceToSave
-                            )
+                            distanceToSave = (Math.round(speedViewModel.countCurrentDistance() * 10.0) / 10.0)
+                            statisticsViewModel.updateOverallData(speed = speedViewModel.speed.value!!,distanceToSave = distanceToSave)
                         } else {
                             speedViewModel.lastOverallLatitude = speedViewModel.actualLatitude
                             speedViewModel.lastOverallLongitude = speedViewModel.actualLongitude
                         }
 
-
-                        if (SingletonData.existsCurrentTrip) {
+                        if (statisticsViewModel.trip != null) {
                             val location = Location(
                                 tripIdentifier = statisticsViewModel.trip!!.tripId,
-                            latitude = speedViewModel.actualLatitude,
-                            longitude = speedViewModel.actualLongitude,
-                            altitude = speedViewModel.actualAltitude,
-                            time = speedViewModel.actualTime,
-                            locationId = )
+                                latitude = speedViewModel.actualLatitude,
+                                longitude = speedViewModel.actualLongitude,
+                                altitude = speedViewModel.actualAltitude,
+                                time = speedViewModel.actualTime,
+                                locationId = Calendar.getInstance().time.time.toInt())
                             Log.i("Current trip", "updated")
-                            storeManager.saveCurrentTripData(
-                                speed,
-                                location,
-                                SingletonData.currentTripId,
-                                distanceToSave
-                            )
-                            if (!SingletonData.appInBackground && !SingletonData.headUpShow) {
-                                try {
-                                    (adapter.getPage(1) as BottomStatsFragment).updateObjectList(
-                                        1
-                                    )
-                                } catch (e: Exception) {
-                                    Log.e("Overall stats error", e.localizedMessage)
-                                }
-                            }
+                            statisticsViewModel.updateTrip(speed = speedViewModel.speed.value!!, distanceToSave = distanceToSave, location = location, context = this)
                         }
                     }
                 }
             }
     }
+}
+
+sealed class PermissionAction {
+    object OnPermissionGranted : PermissionAction()
+    object OnPermissionDenied : PermissionAction()
 }

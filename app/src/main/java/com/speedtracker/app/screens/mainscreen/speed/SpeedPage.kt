@@ -31,6 +31,7 @@ import com.speedtracker.ui.theme.Typography
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActualSpeedPart(modifier: Modifier, speed: MutableLiveData<Int>, scope: CoroutineScope, scaffoldState: ScaffoldState, speedViewModel: SpeedViewModel) {

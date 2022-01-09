@@ -49,6 +49,7 @@ class StatisticsViewModel @Inject constructor(
                 R.string.altitudeI_units_metric)) else MutableLiveData(context.getString(R.string.altitudeI_units_imperial)))
         )
     }
+
     fun startTrip(tripName: String,context: Context) {
         trip = TripInfo(tripName = tripName, tripStartDate = Calendar.getInstance().time.time)
         viewModelScope.launch {
@@ -56,19 +57,27 @@ class StatisticsViewModel @Inject constructor(
             AppDatabase.getDatabase(context).tripDao().insertTripInfo(trip!!)
         }
     }
-    fun addLocation(location: Location,context: Context) {
+
+
+    fun updateTrip(speed:Int,distanceToSave: Double,location: Location,context: Context) {
+        trip!!.sumOfTripSpeed += speed
+        trip!!.countOfUpdates++
+        trip!!.distance += distanceToSave
         viewModelScope.launch {
-            AppDatabase.getDatabase(context).tripDao().addLocation(location = location)
+            AppDatabase.getDatabase(context = context).tripDao().updateTrip(trip!!)
+            AppDatabase.getDatabase(context = context).tripDao().addLocation(location = location)
         }
     }
 
-    fun updateOverallData(speed:Int) {
+    fun updateOverallData(speed:Int,distanceToSave:Double) {
         viewModelScope.launch {
             overallData.countOfUpdates ++
             overallData.sumOfSpeeds += speed
+            overallData.sumOfDistancesInM += distanceToSave
             appDataStoreImpl.setOverallData(overallData)
         }
     }
+
 
     fun closeTrip() {
 
