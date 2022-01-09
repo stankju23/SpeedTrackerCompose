@@ -28,13 +28,14 @@ import com.speedtracker.app.screens.mainscreen.speed.ActualSpeedPart
 import com.speedtracker.app.screens.mainscreen.speed.AdditionalInfoItem
 import com.speedtracker.app.screens.mainscreen.speed.SpeedViewModel
 import com.speedtracker.app.screens.mainscreen.StatisticsPage
+import com.speedtracker.app.screens.mainscreen.statistics.StatisticsViewModel
 import com.speedtracker.ui.theme.MainGradientBG
 import com.speedtracker.ui.theme.SpeedTrackerComposeTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
-fun MainScreenView(scope: CoroutineScope, scaffoldState: ScaffoldState,speedViewModel: SpeedViewModel) {
+fun MainScreenView(scope: CoroutineScope, scaffoldState: ScaffoldState,speedViewModel: SpeedViewModel,statisticsViewModel: StatisticsViewModel) {
     Column(modifier = Modifier
         .fillMaxSize()) {
         ActualSpeedPart(modifier = Modifier
@@ -49,7 +50,8 @@ fun MainScreenView(scope: CoroutineScope, scaffoldState: ScaffoldState,speedView
         StatisticsPart(modifier = Modifier
             .weight(1f)
             .fillMaxWidth()
-            .background(Color.White))
+            .background(Color.White),
+            statisticsViewModel = statisticsViewModel)
     }
 }
 
@@ -66,7 +68,7 @@ fun MainScreenView(scope: CoroutineScope, scaffoldState: ScaffoldState,speedView
 //}
 @OptIn(ExperimentalPagerApi::class)
 @Composable
-fun StatisticsPart(modifier: Modifier) {
+fun StatisticsPart(modifier: Modifier,statisticsViewModel: StatisticsViewModel) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
 
         val pagerState = rememberPagerState()
@@ -132,11 +134,10 @@ fun StatisticsPart(modifier: Modifier) {
             state = pagerState,
         ) { page ->
             if (page == 0) {
-                var itemsList = listOf("Overall distance", "Overll max speed", "Overal average speed")
-                StatisticsPage(itemList = itemsList)
+                StatisticsPage(statisticList = statisticsViewModel.overallStatisticsList)
             } else {
                 var itemsList = listOf("Trip distance", "Trip max speed", "Trip average speed","Trip average altitude")
-                StatisticsPage(itemList = itemsList)
+                StatisticsPage(statisticList = statisticsViewModel.tripStatisticsList)
             }
         }
     }

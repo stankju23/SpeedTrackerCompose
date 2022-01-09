@@ -33,7 +33,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ActualSpeedPart(modifier: Modifier, speed: MutableLiveData<Float>, scope: CoroutineScope, scaffoldState: ScaffoldState, speedViewModel: SpeedViewModel) {
+fun ActualSpeedPart(modifier: Modifier, speed: MutableLiveData<Int>, scope: CoroutineScope, scaffoldState: ScaffoldState, speedViewModel: SpeedViewModel) {
     Column(modifier = modifier) {
         ActualSpeedPartTopBar(scope, scaffoldState, speedViewModel = speedViewModel)
         Column(
@@ -121,7 +121,7 @@ fun ActualSpeedPartTopBar(scope: CoroutineScope, scaffoldState: ScaffoldState, s
 }
 
 @Composable
-fun SpeedText(modifier: Modifier, speed: MutableLiveData<Float>) {
+fun SpeedText(modifier: Modifier, speed: MutableLiveData<Int>) {
 
     var speedTextStyle by remember { mutableStateOf(Typography.bodyLarge) }
     var unitTextStyle by remember { mutableStateOf(Typography.titleLarge) }

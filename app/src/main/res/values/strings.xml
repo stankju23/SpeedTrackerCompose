@@ -9,5 +9,13 @@
     <string name="no_car_year">You didn\'t type in manufactured year.</string>
     <string name="car_year_not_correct">You probably type wrong manufactured year.</string>
 
+    <string name="measute_units_metric">km</string>
+    <string name="speed_units_metric">km/h</string>
+    <string name="altitudeI_units_metric">m</string>
+
+    <string name="measute_units_imperial">mil</string>
+    <string name="speed_units_imperial">mph</string>
+    <string name="altitudeI_units_imperial">feet</string>
+
 
 </resources>

@@ -9,14 +9,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.MutableLiveData
+import com.speedtracker.app.screens.mainscreen.statistics.Statistic
+import com.speedtracker.helper.GenerallData
 
 @Composable
-fun StatisticsPage(itemList: List<String>) {
-    LazyColumn(modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+fun StatisticsPage(statisticList: List<Statistic>) {
+    LazyColumn(modifier = Modifier
+        .fillMaxWidth()
+        .fillMaxHeight(),
         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        items(itemList.size) { index ->
-            StatisticsItem(title = itemList.get(index))
+        items(statisticList.size) { index ->
+            StatisticsItem(statistic = statisticList.get(index) )
         }
     }
 }
@@ -24,7 +29,7 @@ fun StatisticsPage(itemList: List<String>) {
 @Preview
 @Composable
 fun PreviewStatisticsPage() {
-    var itemsList = listOf<String>("Trip distance", "Trip max speed", "Trip average speed")
-    StatisticsPage(itemsList)
+    var itemsList = listOf<Statistic>(Statistic(name = "Overall max speed", value = MutableLiveData(1.2f),MutableLiveData("km/h")))
+    StatisticsPage(statisticList = itemsList)
 }
 

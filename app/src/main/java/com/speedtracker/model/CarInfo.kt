@@ -67,8 +67,8 @@ interface TripDao {
     @Insert(onConflict = IGNORE)
     suspend fun insertTripInfo(tripInfo: TripInfo)
 
-    @Update
-    suspend fun updateTripData(tripInfo: TripInfo)
+    @Insert(onConflict = IGNORE)
+    suspend fun addLocation(location: Location)
 
 }
 
