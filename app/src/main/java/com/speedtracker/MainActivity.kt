@@ -97,6 +97,10 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
 
     lateinit var observer: Disposable
 
+    var showTripDialog:MutableLiveData<Boolean> = MutableLiveData(false)
+    var tripName:MutableLiveData<String> = MutableLiveData("")
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -242,6 +246,7 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
 
         scope.launch {
 
+            statisticsViewModel.getAllTrips(context = this@MainActivity)
             var carInfos = AppDatabase.getDatabase(this@MainActivity).carInfoDao().getAllCarInfos()
             if (carInfos != null && carInfos.size > 0) {
                 navController.navigate("speed-meter")
@@ -261,7 +266,11 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
                     MainScreenView(scope = scope,
                         scaffoldState = scaffoldState,
                         speedViewModel = speedViewModel,
-                        statisticsViewModel = statisticsViewModel)
+                        statisticsViewModel = statisticsViewModel,
+                        context = this@MainActivity,
+                        showTripDialog = showTripDialog,
+                        tripName = tripName)
+
                 }
             }
             composable("walkthrough") {
@@ -464,9 +473,9 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
                             speedViewModel.lastOverallLongitude = speedViewModel.actualLongitude
                         }
 
-                        if (statisticsViewModel.trip != null) {
+                        if (statisticsViewModel.trip.value != null) {
                             val location = Location(
-                                tripIdentifier = statisticsViewModel.trip!!.tripId,
+                                tripIdentifier = statisticsViewModel.trip.value!!.tripId,
                                 latitude = speedViewModel.actualLatitude,
                                 longitude = speedViewModel.actualLongitude,
                                 altitude = speedViewModel.actualAltitude,

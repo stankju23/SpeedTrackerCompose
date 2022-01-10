@@ -1,5 +1,6 @@
 package com.speedtracker.app.screens.mainscreen.speed
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -28,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
 import com.speedtracker.R
+import com.speedtracker.app.screens.mainscreen.statistics.StatisticsViewModel
 import com.speedtracker.ui.theme.Typography
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -35,9 +37,9 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ActualSpeedPart(modifier: Modifier, speed: MutableLiveData<Int>, scope: CoroutineScope, scaffoldState: ScaffoldState, speedViewModel: SpeedViewModel) {
+fun ActualSpeedPart(context: Context,modifier: Modifier, speed: MutableLiveData<Int>, scope: CoroutineScope, scaffoldState: ScaffoldState, speedViewModel: SpeedViewModel,statisticsViewModel: StatisticsViewModel,showTripDialog:MutableLiveData<Boolean>) {
     Column(modifier = modifier) {
-        ActualSpeedPartTopBar(scope, scaffoldState, speedViewModel = speedViewModel)
+        ActualSpeedPartTopBar(context = context,scope, scaffoldState, speedViewModel = speedViewModel, showTripDialog = showTripDialog, statisticsViewModel = statisticsViewModel)
         Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.Center
@@ -60,7 +62,7 @@ fun ActualSpeedPart(modifier: Modifier, speed: MutableLiveData<Int>, scope: Coro
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ActualSpeedPartTopBar(scope: CoroutineScope, scaffoldState: ScaffoldState, speedViewModel: SpeedViewModel) {
+fun ActualSpeedPartTopBar(context: Context,scope: CoroutineScope, scaffoldState: ScaffoldState, speedViewModel: SpeedViewModel,statisticsViewModel: StatisticsViewModel,showTripDialog: MutableLiveData<Boolean>) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -112,9 +114,16 @@ fun ActualSpeedPartTopBar(scope: CoroutineScope, scaffoldState: ScaffoldState, s
         } else {
             Spacer(modifier = Modifier.weight(1f))
         }
-        IconButton(onClick = { speedViewModel.animate0To200And200To0() }) {
+        IconButton(onClick = {
+            if (statisticsViewModel.trip.value == null) {
+                showTripDialog.value = true
+            } else {
+                statisticsViewModel.closeTrip(context = context)
+            }
+        }) {
             Icon(
-                imageVector = Icons.Filled.Add,
+                painter = if (statisticsViewModel.trip.observeAsState().value != null) painterResource(
+                    id = R.drawable.ic_end_trip) else painterResource(id = R.drawable.ic_start_trip),
                 contentDescription = "Menu Btn",
                 tint = Color.White
             )

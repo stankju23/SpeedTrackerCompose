@@ -2,20 +2,30 @@
 
 package com.speedtracker.app.screens.walkthrough.pages
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ScaffoldState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.*
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.zIndex
@@ -30,13 +40,13 @@ import com.speedtracker.app.screens.mainscreen.speed.AdditionalInfoItem
 import com.speedtracker.app.screens.mainscreen.speed.SpeedViewModel
 import com.speedtracker.app.screens.mainscreen.StatisticsPage
 import com.speedtracker.app.screens.mainscreen.statistics.StatisticsViewModel
-import com.speedtracker.ui.theme.MainGradientBG
-import com.speedtracker.ui.theme.SpeedTrackerComposeTheme
+import com.speedtracker.ui.theme.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
+
 @Composable
-fun MainScreenView(scope: CoroutineScope, scaffoldState: ScaffoldState,speedViewModel: SpeedViewModel,statisticsViewModel: StatisticsViewModel) {
+fun MainScreenView(scope: CoroutineScope, scaffoldState: ScaffoldState,speedViewModel: SpeedViewModel,statisticsViewModel: StatisticsViewModel,context: Context,showTripDialog:MutableLiveData<Boolean>, tripName:MutableLiveData<String>,) {
     Column(modifier = Modifier
         .fillMaxSize()) {
         ActualSpeedPart(modifier = Modifier
@@ -46,13 +56,83 @@ fun MainScreenView(scope: CoroutineScope, scaffoldState: ScaffoldState,speedView
             speed = speedViewModel.speed,
             scope = scope,
             scaffoldState = scaffoldState,
-            speedViewModel = speedViewModel)
+            speedViewModel = speedViewModel,
+            context = context,
+            statisticsViewModel = statisticsViewModel,
+            showTripDialog = showTripDialog)
 
         StatisticsPart(modifier = Modifier
             .weight(1f)
             .fillMaxWidth()
             .background(Color.White),
             statisticsViewModel = statisticsViewModel)
+    }
+    TripDialog(showDialog = showTripDialog, tripName = tripName, context = context, statisticsViewModel = statisticsViewModel)
+}
+
+@Composable
+fun TripDialog(showDialog: MutableLiveData<Boolean>,tripName:MutableLiveData<String>,statisticsViewModel: StatisticsViewModel,context: Context) {
+    val mainButtonColor = ButtonDefaults.buttonColors(
+        containerColor = MainGradientEndColor,
+        contentColor = androidx.compose.material3.MaterialTheme.colorScheme.surface
+    )
+    var isError by rememberSaveable { mutableStateOf(false) }
+    var text by remember { mutableStateOf("") }
+
+    if (showDialog.observeAsState().value!!) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = {
+            },
+            title = {
+                Text("Please set the name fo the trip: ", color = MainGradientStartColor)
+            },
+            confirmButton = {
+                Button(
+                    colors = mainButtonColor,
+                    onClick = {
+                        // Change the state to close the dialog
+                        if (tripName.value!!.isEmpty()) {
+                            isError = true
+                        } else {
+                            statisticsViewModel.startTrip(tripName = tripName.value!!, context =  context)
+                            showDialog.value = false
+                        }
+                    },
+                ) {
+                    Text("Create trip")
+                }
+            },
+            text = {
+                TextField(
+                    value = text,
+                    textStyle = Typography.labelSmall,
+                    label = {
+                        androidx.compose.material.Text(
+                            text = "Trip name",
+                            color = Color.White
+                        )
+                    },
+                    onValueChange = {
+                        text = it
+                        tripName.value = it
+                    },
+                    trailingIcon = {
+                        if (isError)
+                            Icon(Icons.Filled.Info,"error", tint = androidx.compose.material.MaterialTheme.colors.error)
+                    },
+                    singleLine = true,
+                    isError = isError,
+                )
+                if (isError) {
+                    androidx.compose.material.Text(
+                        text = "Trip name cannot be empty",
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.error,
+                        style = androidx.compose.material.MaterialTheme.typography.caption,
+                        modifier = Modifier.padding(start = 16.dp)
+                    )
+                }
+            },
+        )
     }
 }
 

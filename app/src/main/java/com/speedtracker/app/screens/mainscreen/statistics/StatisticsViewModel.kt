@@ -1,6 +1,7 @@
 package com.speedtracker.app.screens.mainscreen.statistics
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -26,7 +27,7 @@ class StatisticsViewModel @Inject constructor(
     var overallStatisticsList:List<Statistic> = ArrayList()
     var tripStatisticsList:List<Statistic> = ArrayList()
 
-    var trip:TripInfo? = null
+    var trip:MutableLiveData<TripInfo?> = MutableLiveData(null)
     var overallData:OverallData = OverallData()
 
     suspend fun initializeStatisticsData(context: Context) {
@@ -65,19 +66,35 @@ class StatisticsViewModel @Inject constructor(
     }
 
     fun startTrip(tripName: String,context: Context) {
-        trip = TripInfo(tripName = tripName, tripStartDate = Calendar.getInstance().time.time)
+        trip.value = TripInfo(tripName = tripName, tripStartDate = Calendar.getInstance().time.time)
         viewModelScope.launch {
-            appDataStoreImpl.setCurrentlyStartedTrip(trip!!.tripId)
-            AppDatabase.getDatabase(context).tripDao().insertTripInfo(trip!!)
+            appDataStoreImpl.setCurrentlyStartedTrip(trip.value!!.tripId)
+            AppDatabase.getDatabase(context).tripDao().insertTripInfo(trip.value!!)
+        }
+    }
+
+    fun getAllTrips(context: Context){
+        viewModelScope.launch {
+            var allTrips = AppDatabase.getDatabase(context).tripDao().getAllTripData()
+            Log.d("Ahoj","Ako sa mas")
+        }
+    }
+
+    fun closeTrip(context: Context) {
+        trip.value!!.tripEndDate = Calendar.getInstance().time.time
+        viewModelScope.launch {
+            appDataStoreImpl.setCurrentlyStartedTrip(0)
+            AppDatabase.getDatabase(context).tripDao().updateTrip(trip.value!!)
+            trip.value = null
         }
     }
 
     fun updateTrip(speed:Int,distanceToSave: Double,location: Location,context: Context) {
-        trip!!.sumOfTripSpeed += speed
-        trip!!.countOfUpdates++
-        trip!!.distance += distanceToSave
+        trip.value!!.sumOfTripSpeed += speed
+        trip.value!!.countOfUpdates++
+        trip.value!!.distance += distanceToSave
         viewModelScope.launch {
-            AppDatabase.getDatabase(context = context).tripDao().updateTrip(trip!!)
+            AppDatabase.getDatabase(context = context).tripDao().updateTrip(trip.value!!)
             AppDatabase.getDatabase(context = context).tripDao().addLocation(location = location)
         }
     }
