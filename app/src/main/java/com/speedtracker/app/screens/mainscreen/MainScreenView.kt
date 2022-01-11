@@ -7,8 +7,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
@@ -25,7 +23,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.*
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.zIndex
@@ -71,82 +71,100 @@ fun MainScreenView(scope: CoroutineScope, scaffoldState: ScaffoldState,speedView
 }
 
 @Composable
-fun TripDialog(showDialog: MutableLiveData<Boolean>,tripName:MutableLiveData<String>,statisticsViewModel: StatisticsViewModel,context: Context) {
-    val mainButtonColor = ButtonDefaults.buttonColors(
-        containerColor = MainGradientEndColor,
-        contentColor = androidx.compose.material3.MaterialTheme.colorScheme.surface
+fun TripDialog(showDialog: MutableLiveData<Boolean>, tripName: MutableLiveData<String>, statisticsViewModel: StatisticsViewModel, context: Context) {
+    val confirmButtonColor = ButtonDefaults.buttonColors(
+            containerColor = Color.Transparent,
+            contentColor = androidx.compose.material3.MaterialTheme.colorScheme.surface
+    )
+    val dismissButtonColor = ButtonDefaults.buttonColors(
+            containerColor = Color.Transparent,
+            contentColor = androidx.compose.material3.MaterialTheme.colorScheme.surface
     )
     var isError by rememberSaveable { mutableStateOf(false) }
     var text by remember { mutableStateOf("") }
 
     if (showDialog.observeAsState().value!!) {
         androidx.compose.material3.AlertDialog(
-            onDismissRequest = {
-            },
-            title = {
-                Text("Please set the name fo the trip: ", color = MainGradientStartColor)
-            },
-            confirmButton = {
-                Button(
-                    colors = mainButtonColor,
-                    onClick = {
-                        // Change the state to close the dialog
-                        if (tripName.value!!.isEmpty()) {
-                            isError = true
-                        } else {
-                            statisticsViewModel.startTrip(tripName = tripName.value!!, context =  context)
-                            showDialog.value = false
-                        }
-                    },
-                ) {
-                    Text("Create trip")
-                }
-            },
-            text = {
-                TextField(
-                    value = text,
-                    textStyle = Typography.labelSmall,
-                    label = {
-                        androidx.compose.material.Text(
-                            text = "Trip name",
-                            color = Color.White
+                onDismissRequest = {
+                    showDialog.value = false
+                    isError = false
+                },
+                title = {
+                    Text("Start new trip", color = MainGradientStartColor, fontSize = 26.sp)
+                },
+                text = {
+                    Column(modifier = Modifier.height(75.dp)) {
+                        TextField(
+                                value = text,
+                                textStyle = TextStyle(
+                                        fontFamily = FontFamily.Default,
+                                        fontWeight = FontWeight.Medium,
+                                        fontSize = 18.sp,
+                                        lineHeight = 18.sp,
+                                        letterSpacing = 0.5.sp,
+                                        color = Color.Black,
+
+                                ),
+                                colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.Transparent),
+                                label = {
+                                    androidx.compose.material.Text(
+                                            text = "Trip name",
+                                            color = Color.Black
+                                    )
+                                },
+                                onValueChange = {
+                                    text = it
+                                    tripName.value = it
+                                },
+                                trailingIcon = {
+                                    if (isError)
+                                        Icon(Icons.Filled.Info, "error", tint = androidx.compose.material.MaterialTheme.colors.error)
+                                },
+                                singleLine = true,
+                                isError = isError,
                         )
-                    },
-                    onValueChange = {
-                        text = it
-                        tripName.value = it
-                    },
-                    trailingIcon = {
-                        if (isError)
-                            Icon(Icons.Filled.Info,"error", tint = androidx.compose.material.MaterialTheme.colors.error)
-                    },
-                    singleLine = true,
-                    isError = isError,
-                )
-                if (isError) {
-                    androidx.compose.material.Text(
-                        text = "Trip name cannot be empty",
-                        color = androidx.compose.material3.MaterialTheme.colorScheme.error,
-                        style = androidx.compose.material.MaterialTheme.typography.caption,
-                        modifier = Modifier.padding(start = 16.dp)
-                    )
+                        if (isError) {
+                            androidx.compose.material.Text(
+                                    text = "Trip name cannot be empty",
+                                    color = androidx.compose.material3.MaterialTheme.colorScheme.error,
+                                    style = androidx.compose.material.MaterialTheme.typography.caption,
+                                    modifier = Modifier.padding(start = 16.dp)
+                            )
+                        }
+                    }
+                },
+                confirmButton = {
+                    Button(
+                            colors = confirmButtonColor,
+                            onClick = {
+                                // Change the state to close the dialog
+                                if (tripName.value!!.isEmpty()) {
+                                    isError = true
+                                } else {
+                                    statisticsViewModel.startTrip(tripName = tripName.value!!, context = context)
+                                    showDialog.value = false
+                                }
+                            },
+                    ) {
+                        Text("Start", color = Color.Black, fontSize = 16.sp)
+                    }
+                },
+                dismissButton = {
+                    Button(
+                            colors = dismissButtonColor,
+                            onClick = {
+                                // Change the state to close the dialog
+                                showDialog.value = false
+                                isError = false
+                            },
+                    ) {
+                        Text("Cancel", color = Color.Black, fontSize = 16.sp)
+                    }
                 }
-            },
         )
     }
 }
 
-//@Composable
-//fun TestPath() {
-//
-//    Canvas(modifier = Modifier.fillMaxSize()) {
-//        drawIntoCanvas {
-//            val path = Path()
-//            path.addArc(RectF(0f, 100f, 200f, 300f), 270f, 180f)
-//            it.nativeCanvas.()
-//        }
-//    }
-//}
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun StatisticsPart(modifier: Modifier,statisticsViewModel: StatisticsViewModel) {
@@ -223,7 +241,6 @@ fun StatisticsPart(modifier: Modifier,statisticsViewModel: StatisticsViewModel) 
         }
     }
 }
-
 
 
 @Preview()
