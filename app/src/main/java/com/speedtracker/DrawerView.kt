@@ -30,6 +30,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.speedtracker.helper.NavDrawerItem
 import com.speedtracker.ui.theme.MainGradientBG
+import com.speedtracker.ui.theme.Nunito
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.w3c.dom.Text
@@ -227,6 +228,7 @@ open class DrawerView : ComponentActivity() {
             Text(
                 text = item.title,
                 fontSize = 14.sp,
+                fontFamily = Nunito,
                 color = Color.Black
             )
         }

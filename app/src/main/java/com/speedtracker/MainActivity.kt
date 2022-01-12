@@ -107,6 +107,8 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
     var showTripDialog:MutableLiveData<Boolean> = MutableLiveData(false)
     var tripName:MutableLiveData<String> = MutableLiveData("")
 
+    var startDestination:String = "base"
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -138,10 +140,14 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
 //            statisticsViewModel.getAllTrips(context = this@MainActivity)
             var carInfos = AppDatabase.getDatabase(this@MainActivity).carInfoDao().getAllCarInfos()
             if (carInfos != null && carInfos.size > 0) {
-                navController.navigate("speed-meter")
-                this@MainActivity.statisticsViewModel.initializeStatisticsData(this@MainActivity)
+                startDestination = "speed-meter"
+                runOnUiThread {
+                    this@MainActivity.statisticsViewModel.initializeStatisticsData(this@MainActivity)
+                }
+
             } else {
-                navController.navigate("walkthrough")
+                startDestination = "walkthrough"
+//                navController.navigate("walkthrough")
             }
         }
     }
@@ -195,7 +201,10 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
         if (permissionGranted) {
             Log.d(TAG, "Permission already granted, exiting..")
             startUpdatingLocation()
-            startStatsHandler()
+            SideEffect {
+                startStatsHandler()
+            }
+
             return
         }
 
@@ -262,7 +271,7 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
     @Composable
     fun Navigation(navController: NavHostController, scope: CoroutineScope, scaffoldState: ScaffoldState) {
 
-        NavHost(navController, startDestination = "base") {
+        NavHost(navController, startDestination = startDestination) {
             composable("speed-meter") {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -425,7 +434,8 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
                         Log.i("Current speed", currentSpeed.toString())
 
                         if (currentSpeed > minValuableSpeed) {
-                            speedViewModel.animateSpeed(speedViewModel.speed.value!!, (locationResult.lastLocation.speed * Constants.msToKmh).roundToInt())
+                            speedViewModel.speed.value = (locationResult.lastLocation.speed * Constants.msToKmh).roundToInt()
+//                            speedViewModel.animateSpeed(speedViewModel.speed.value!!, )
                             speedViewModel.actualLatitude = locationResult.lastLocation.latitude
                             speedViewModel.actualLongitude = locationResult.lastLocation.longitude
                             speedViewModel.altitude.value = locationResult.lastLocation.altitude
@@ -479,7 +489,7 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
                         Log.i("         Rx java update", "\t" + hh + ":" + mm + ":" + ss)
                         if (speedViewModel.lastOverallLatitude != 0.0 && speedViewModel.lastOverallLongitude != 0.0) {
                             distanceToSave = (Math.round(speedViewModel.countCurrentDistance() * 10.0) / 10.0)
-                            statisticsViewModel.updateOverallData(speed = speedViewModel.speed.value!!,distanceToSave = distanceToSave)
+                            statisticsViewModel.updateOverallData(speed = speedViewModel.speed.value!!,distanceToSave = distanceToSave, context = this)
                         } else {
                             speedViewModel.lastOverallLatitude = speedViewModel.actualLatitude
                             speedViewModel.lastOverallLongitude = speedViewModel.actualLongitude

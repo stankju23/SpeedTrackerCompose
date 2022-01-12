@@ -22,7 +22,7 @@ fun StatisticsPage(statisticList: List<Statistic>) {
         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)) {
         items(statisticList.size) { index ->
-            StatisticsItem(statistic = statisticList.get(index) )
+            StatisticsItem(statistic = statisticList.get(index))
         }
     }
 }
@@ -30,7 +30,7 @@ fun StatisticsPage(statisticList: List<Statistic>) {
 @Preview
 @Composable
 fun PreviewStatisticsPage() {
-    var itemsList = listOf(Statistic(iconDrawable = R.drawable.ic_avgspeed,name = "Overall max speed", value = MutableLiveData("1.2"),MutableLiveData("km/h")))
+    var itemsList = listOf(Statistic(iconDrawable = R.drawable.ic_avgspeed,name = "Overall max speed", value = "1.2","km/h"))
     StatisticsPage(statisticList = itemsList)
 }
 

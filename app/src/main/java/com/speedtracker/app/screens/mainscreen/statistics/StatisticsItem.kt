@@ -1,5 +1,6 @@
 package com.speedtracker.app.screens.mainscreen
 
+import android.graphics.drawable.Icon
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
@@ -42,7 +43,7 @@ fun StatisticsItem(statistic: Statistic) {
                 Text(text = "Overall distance from first run of the app", color = Color.LightGray, fontSize = 10.sp)
             }
             Spacer(modifier = Modifier.weight(1f))
-            Text(text = "${statistic.value.observeAsState().value} ${statistic.units.observeAsState().value}", modifier = Modifier.padding(end = 15.dp))
+            Text(text = "${statistic.value} ${statistic.units}", modifier = Modifier.padding(end = 15.dp))
         }
     }
 }
@@ -50,5 +51,5 @@ fun StatisticsItem(statistic: Statistic) {
 @Preview
 @Composable
 fun PreviewStatisticsItem() {
-    StatisticsItem(Statistic(iconDrawable = R.drawable.ic_avgspeed, name = "Trip max speed", MutableLiveData("1.2"), MutableLiveData("km/h")))
+//    StatisticsItem(Statistic(iconDrawable = R.drawable.ic_avgspeed, name = "Trip max speed", MutableLiveData("1.2"), MutableLiveData("km/h")))
 }

@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.icons.Icons
@@ -22,6 +23,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
@@ -47,7 +49,6 @@ fun ActualSpeedPart(context: Context,modifier: Modifier, speed: MutableLiveData<
             SpeedText(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(3f)
                     .align(Alignment.CenterHorizontally), speed = speed
             )
             AdditionalInfo(
@@ -138,7 +139,7 @@ fun SpeedText(modifier: Modifier, speed: MutableLiveData<Int>) {
     var unitTextStyle by remember { mutableStateOf(Typography.titleLarge) }
     var speedTextReadyToDraw by remember { mutableStateOf(false) }
     var unitTextReadyToDraw by remember { mutableStateOf(false) }
-    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
 
         Text(
             text = "${speed.observeAsState().value!!.toInt()}",
@@ -147,7 +148,6 @@ fun SpeedText(modifier: Modifier, speed: MutableLiveData<Int>) {
             style = speedTextStyle,
             textAlign = TextAlign.Right,
             modifier = Modifier
-                .weight(4f)
                 .alignByBaseline()
                 .padding(start = 10.dp)
 //                .drawWithContent {
@@ -167,7 +167,7 @@ fun SpeedText(modifier: Modifier, speed: MutableLiveData<Int>) {
 //            }
         )
 
-
+        
         Text(
             text = "km/h",
             color = Color.White,
@@ -175,16 +175,16 @@ fun SpeedText(modifier: Modifier, speed: MutableLiveData<Int>) {
             maxLines = 1,
             softWrap = false,
             modifier = Modifier
-                .weight(1f)
                 .alignByBaseline()
                 .padding(end = 20.dp),
-            onTextLayout = { textLayoutResult ->
-                if (textLayoutResult.didOverflowWidth) {
-                    unitTextStyle = unitTextStyle.copy(fontSize = unitTextStyle.fontSize * 0.9)
-                } else {
-                    unitTextReadyToDraw = true
-                }
-            })
+//            onTextLayout = { textLayoutResult ->
+//                if (textLayoutResult.didOverflowWidth) {
+//                    unitTextStyle = unitTextStyle.copy(fontSize = unitTextStyle.fontSize * 0.9)
+//                } else {
+//                    unitTextReadyToDraw = true
+//                }
+//            }
+          )
     }
 }
 

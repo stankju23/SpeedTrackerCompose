@@ -67,11 +67,11 @@ fun MainScreenView(scope: CoroutineScope, scaffoldState: ScaffoldState,speedView
             .background(Color.White),
             statisticsViewModel = statisticsViewModel)
     }
-    TripDialog(showDialog = showTripDialog, tripName = tripName, context = context, statisticsViewModel = statisticsViewModel)
+    TripDialog(showDialog = showTripDialog, tripName = tripName, context = context, statisticsViewModel = statisticsViewModel, speedViewModel = speedViewModel)
 }
 
 @Composable
-fun TripDialog(showDialog: MutableLiveData<Boolean>, tripName: MutableLiveData<String>, statisticsViewModel: StatisticsViewModel, context: Context) {
+fun TripDialog(showDialog: MutableLiveData<Boolean>, tripName: MutableLiveData<String>, statisticsViewModel: StatisticsViewModel, context: Context,speedViewModel: SpeedViewModel) {
     val confirmButtonColor = ButtonDefaults.buttonColors(
             containerColor = Color.Transparent,
             contentColor = androidx.compose.material3.MaterialTheme.colorScheme.surface

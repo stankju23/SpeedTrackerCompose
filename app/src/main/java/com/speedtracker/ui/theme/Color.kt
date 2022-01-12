@@ -13,8 +13,8 @@ val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
 
-val MainGradientStartColor = Color(0xFF122838)
-val MainGradientEndColor = Color(0xFF173A52)
+val MainGradientStartColor = Color(0xFF111317)
+val MainGradientEndColor = Color(0xFF2C323D)
 val MainGradientBG = Brush.verticalGradient(
     colors = listOf(
         MainGradientStartColor,
