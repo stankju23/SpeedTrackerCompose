@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.MutableLiveData
+import com.speedtracker.R
 import com.speedtracker.app.screens.mainscreen.statistics.Statistic
 import com.speedtracker.helper.GenerallData
 
@@ -29,7 +30,7 @@ fun StatisticsPage(statisticList: List<Statistic>) {
 @Preview
 @Composable
 fun PreviewStatisticsPage() {
-    var itemsList = listOf<Statistic>(Statistic(name = "Overall max speed", value = MutableLiveData(1.2f),MutableLiveData("km/h")))
+    var itemsList = listOf(Statistic(iconDrawable = R.drawable.ic_avgspeed,name = "Overall max speed", value = MutableLiveData("1.2"),MutableLiveData("km/h")))
     StatisticsPage(statisticList = itemsList)
 }
 

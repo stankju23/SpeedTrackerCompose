@@ -33,7 +33,7 @@ class SpeedViewModel():ViewModel() {
 
     fun animateSpeed(fromSpeed:Int, toSpeed:Int) {
         val va = ValueAnimator.ofInt(fromSpeed,toSpeed)
-        va.duration = 500 //in millis
+        va.duration = 1000 //in millis
         va.addUpdateListener { animation -> speed.value = animation.animatedValue as Int }
         va.start()
     }

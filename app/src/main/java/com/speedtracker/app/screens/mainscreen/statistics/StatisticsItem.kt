@@ -32,11 +32,11 @@ fun StatisticsItem(statistic: Statistic) {
             .fillMaxWidth()
             .fillMaxHeight(),
             verticalAlignment = Alignment.CenterVertically) {
-            Icon(painter = painterResource(id = R.drawable.satellite_icon),
+            Icon(painter = painterResource(id = statistic.iconDrawable),
                 contentDescription = "Statistics icon",
                 modifier = Modifier
                     .padding(start = 15.dp, end = 15.dp)
-                    .size(40.dp))
+                    .size(35.dp))
             Column() {
                 Text(text = statistic.name, color = Color.DarkGray, fontSize = 16.sp)
                 Text(text = "Overall distance from first run of the app", color = Color.LightGray, fontSize = 10.sp)
@@ -50,5 +50,5 @@ fun StatisticsItem(statistic: Statistic) {
 @Preview
 @Composable
 fun PreviewStatisticsItem() {
-    StatisticsItem(Statistic(name = "Trip max speed", MutableLiveData(1.2f), MutableLiveData("km/h")))
+    StatisticsItem(Statistic(iconDrawable = R.drawable.ic_avgspeed, name = "Trip max speed", MutableLiveData("1.2"), MutableLiveData("km/h")))
 }

@@ -22,6 +22,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.SnackbarDuration
 import androidx.compose.material.SnackbarResult
@@ -29,6 +31,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.RoundRect
@@ -36,6 +39,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -59,6 +63,7 @@ import com.speedtracker.helper.Constants
 import com.speedtracker.helper.GenerallData
 import com.speedtracker.model.AppDatabase
 import com.speedtracker.model.Location
+import com.speedtracker.ui.theme.MainGradientBG
 import com.speedtracker.ui.theme.SpeedTrackerComposeTheme
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.HiltAndroidApp
@@ -244,19 +249,6 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
     @Composable
     fun Navigation(navController: NavHostController, scope: CoroutineScope, scaffoldState: ScaffoldState) {
 
-        scope.launch {
-
-            statisticsViewModel.getAllTrips(context = this@MainActivity)
-            var carInfos = AppDatabase.getDatabase(this@MainActivity).carInfoDao().getAllCarInfos()
-            if (carInfos != null && carInfos.size > 0) {
-                navController.navigate("speed-meter")
-                this@MainActivity.statisticsViewModel.initializeStatisticsData(this@MainActivity)
-            } else {
-                navController.navigate("walkthrough")
-            }
-
-        }
-
         NavHost(navController, startDestination = "base") {
             composable("speed-meter") {
                 Surface(
@@ -285,7 +277,25 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
                     Text(text = "This is Settings Screen")
                 }
             }
-            composable("base"){}
+            composable("base"){
+                Box(modifier = Modifier
+                    .fillMaxSize()
+                    .background(brush = MainGradientBG),
+                    contentAlignment = Alignment.Center) {
+                    Image(modifier = Modifier.size(100.dp),painter = painterResource(id = R.drawable.ic_car_splash), contentDescription = "SplashIcon")
+                }
+            }
+        }
+
+        scope.launch {
+//            statisticsViewModel.getAllTrips(context = this@MainActivity)
+            var carInfos = AppDatabase.getDatabase(this@MainActivity).carInfoDao().getAllCarInfos()
+            if (carInfos != null && carInfos.size > 0) {
+                navController.navigate("speed-meter")
+                this@MainActivity.statisticsViewModel.initializeStatisticsData(this@MainActivity)
+            } else {
+                navController.navigate("walkthrough")
+            }
         }
     }
 
