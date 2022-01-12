@@ -73,6 +73,10 @@ interface TripDao {
     @Update
     suspend fun updateTrip(tripInfo: TripInfo)
 
+    @Transaction
+    @Query("SELECT * FROM TripInfo WHERE tripId = :id")
+    suspend fun getTripDataById(id: Long): TripData
+
 }
 
 @Database(entities = [CarInfo::class,TripInfo::class,Location::class], exportSchema = false, version = 1)

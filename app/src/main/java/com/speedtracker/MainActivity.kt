@@ -72,6 +72,8 @@ import io.reactivex.rxjava3.core.Observable.interval
 
 import io.reactivex.rxjava3.disposables.Disposable
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -129,6 +131,17 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
                     Navigation(navController = navController,scope,scaffoldState)
                 }
 
+            }
+        }
+
+        GlobalScope.launch((Dispatchers.IO)) {
+//            statisticsViewModel.getAllTrips(context = this@MainActivity)
+            var carInfos = AppDatabase.getDatabase(this@MainActivity).carInfoDao().getAllCarInfos()
+            if (carInfos != null && carInfos.size > 0) {
+                navController.navigate("speed-meter")
+                this@MainActivity.statisticsViewModel.initializeStatisticsData(this@MainActivity)
+            } else {
+                navController.navigate("walkthrough")
             }
         }
     }
@@ -284,17 +297,6 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
                     contentAlignment = Alignment.Center) {
                     Image(modifier = Modifier.size(100.dp),painter = painterResource(id = R.drawable.ic_car_splash), contentDescription = "SplashIcon")
                 }
-            }
-        }
-
-        scope.launch {
-//            statisticsViewModel.getAllTrips(context = this@MainActivity)
-            var carInfos = AppDatabase.getDatabase(this@MainActivity).carInfoDao().getAllCarInfos()
-            if (carInfos != null && carInfos.size > 0) {
-                navController.navigate("speed-meter")
-                this@MainActivity.statisticsViewModel.initializeStatisticsData(this@MainActivity)
-            } else {
-                navController.navigate("walkthrough")
             }
         }
     }

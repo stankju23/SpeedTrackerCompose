@@ -30,38 +30,91 @@ class StatisticsViewModel @Inject constructor(
     var trip:MutableLiveData<TripInfo?> = MutableLiveData(null)
     var overallData:OverallData = OverallData()
 
-    suspend fun initializeStatisticsData(context: Context) {
-
-        appDataStoreImpl.getOverallData().collect { overallData ->
-            if (overallData != null) {
-                overallStatisticsList = listOf(
-                    Statistic(iconDrawable = R.drawable.ic_avgspeed,"Avg speed:", MutableLiveData((overallData.sumOfSpeeds/overallData.countOfUpdates).toString()), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
-                        R.string.speed_units_metric)) else MutableLiveData(context.getString(R.string.speed_units_imperial))),
-                    Statistic(iconDrawable = R.drawable.ic_topspeed,"Max speed:", MutableLiveData(overallData.maxSpeed.toString()), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
-                        R.string.speed_units_metric)) else MutableLiveData(context.getString(R.string.speed_units_imperial))),
-                    Statistic(iconDrawable = R.drawable.ic_distance,"Overall distance:", MutableLiveData(overallData.sumOfDistancesInM.toString()), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
-                        R.string.measute_units_metric)) else MutableLiveData(context.getString(R.string.measute_units_imperial)))
-                )
-            } else {
-                overallStatisticsList = listOf(
-                    Statistic(iconDrawable = R.drawable.ic_avgspeed,"Avg speed:", MutableLiveData("0"), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
-                        R.string.speed_units_metric)) else MutableLiveData(context.getString(R.string.speed_units_imperial))),
-                    Statistic(iconDrawable = R.drawable.ic_topspeed,"Max speed:", MutableLiveData("0"), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
-                        R.string.speed_units_metric)) else MutableLiveData(context.getString(R.string.speed_units_imperial))),
-                    Statistic(iconDrawable = R.drawable.ic_distance,"Overall distance:", MutableLiveData("0"), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
-                        R.string.measute_units_metric)) else MutableLiveData(context.getString(R.string.measute_units_imperial)))
-                )
+    fun initializeStatisticsData(context: Context) {
+        viewModelScope.launch {
+            appDataStoreImpl.getOverallData().collect { overallData ->
+                if (overallData != null) {
+                    overallStatisticsList = listOf(
+                        Statistic(iconDrawable = R.drawable.ic_avgspeed,"Avg speed:", MutableLiveData((overallData.sumOfSpeeds/overallData.countOfUpdates).toString()), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
+                            R.string.speed_units_metric)) else MutableLiveData(context.getString(R.string.speed_units_imperial))),
+                        Statistic(iconDrawable = R.drawable.ic_topspeed,"Max speed:", MutableLiveData(overallData.maxSpeed.toString()), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
+                            R.string.speed_units_metric)) else MutableLiveData(context.getString(R.string.speed_units_imperial))),
+                        Statistic(iconDrawable = R.drawable.ic_distance,"Overall distance:", MutableLiveData(overallData.sumOfDistancesInM.toString()), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
+                            R.string.measute_units_metric)) else MutableLiveData(context.getString(R.string.measute_units_imperial)))
+                    )
+                } else {
+                    overallStatisticsList = listOf(
+                        Statistic(iconDrawable = R.drawable.ic_avgspeed,"Avg speed:", MutableLiveData("0"), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
+                            R.string.speed_units_metric)) else MutableLiveData(context.getString(R.string.speed_units_imperial))),
+                        Statistic(iconDrawable = R.drawable.ic_topspeed,"Max speed:", MutableLiveData("0"), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
+                            R.string.speed_units_metric)) else MutableLiveData(context.getString(R.string.speed_units_imperial))),
+                        Statistic(iconDrawable = R.drawable.ic_distance,"Overall distance:", MutableLiveData("0"), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
+                            R.string.measute_units_metric)) else MutableLiveData(context.getString(R.string.measute_units_imperial)))
+                    )
+                }
+                appDataStoreImpl.getCurrentlyStartedTrip().collect { tripId ->
+                    trip.value = TripInfo()
+                    if (tripId != null && tripId > 0) {
+    //                    var tripD = AppDatabase.getDatabase(context).tripDao().getTripDataById(tripId)
+                        trip.value = AppDatabase.getDatabase(context).tripDao().getTripDataById(tripId).tripInfo
+                        if (trip.value != null) {
+                            if (trip.value!!.countOfUpdates > 0) {
+                                tripStatisticsList = listOf(
+                                    Statistic(iconDrawable = R.drawable.ic_avgspeed,"Avg speed:", MutableLiveData((trip.value!!.sumOfTripSpeed/trip.value!!.countOfUpdates).toString()), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
+                                        R.string.speed_units_metric)) else MutableLiveData(context.getString(R.string.speed_units_imperial))),
+                                    Statistic(iconDrawable = R.drawable.ic_topspeed,"Max speed:", MutableLiveData(trip.value!!.maxSpeed.toString()), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
+                                        R.string.speed_units_metric)) else MutableLiveData(context.getString(R.string.speed_units_imperial))),
+                                    Statistic(iconDrawable = R.drawable.ic_distance,"Trip distance:", MutableLiveData(trip.value!!.distance.toString()), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
+                                        R.string.measute_units_metric)) else MutableLiveData(context.getString(R.string.measute_units_imperial))),
+                                )
+                            } else {
+                                getEmptyTripStatisticData(context)
+                            }
+                        } else {
+                            appDataStoreImpl.setCurrentlyStartedTrip(0)
+                            getEmptyTripStatisticData(context)
+                        }
+                    } else {
+                        getEmptyTripStatisticData(context)
+                    }
+                }
             }
-            
-            tripStatisticsList = listOf(
-                Statistic(iconDrawable = R.drawable.ic_avgspeed,"Avg speed:", MutableLiveData("0"), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
-                    R.string.speed_units_metric)) else MutableLiveData(context.getString(R.string.speed_units_imperial))),
-                Statistic(iconDrawable = R.drawable.ic_topspeed,"Max speed:", MutableLiveData("0"), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
-                    R.string.speed_units_metric)) else MutableLiveData(context.getString(R.string.speed_units_imperial))),
-                Statistic(iconDrawable = R.drawable.ic_distance,"Trip distance:", MutableLiveData("0"), if (GenerallData.isMetric.value!!)  MutableLiveData(context.getString(
-                    R.string.measute_units_metric)) else MutableLiveData(context.getString(R.string.measute_units_imperial))),
-            )
         }
+    }
+
+    fun getEmptyTripStatisticData(context: Context) {
+        tripStatisticsList = listOf(
+            Statistic(
+                iconDrawable = R.drawable.ic_avgspeed,
+                "Avg speed:",
+                MutableLiveData("0"),
+                if (GenerallData.isMetric.value!!) MutableLiveData(
+                    context.getString(
+                        R.string.speed_units_metric
+                    )
+                ) else MutableLiveData(context.getString(R.string.speed_units_imperial))
+            ),
+            Statistic(
+                iconDrawable = R.drawable.ic_topspeed,
+                "Max speed:",
+                MutableLiveData("0"),
+                if (GenerallData.isMetric.value!!) MutableLiveData(
+                    context.getString(
+                        R.string.speed_units_metric
+                    )
+                ) else MutableLiveData(context.getString(R.string.speed_units_imperial))
+            ),
+            Statistic(
+                iconDrawable = R.drawable.ic_distance,
+                "Trip distance:",
+                MutableLiveData("0"),
+                if (GenerallData.isMetric.value!!) MutableLiveData(
+                    context.getString(
+                        R.string.measute_units_metric
+                    )
+                ) else MutableLiveData(context.getString(R.string.measute_units_imperial))
+            ),
+        )
     }
 
     fun startTrip(tripName: String,context: Context) {
