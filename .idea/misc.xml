@@ -65,11 +65,14 @@
         <entry key="../../../../layout/compose-model-1642005214017.xml" value="0.11275337837837837" />
         <entry key="../../../../layout/compose-model-1642019396322.xml" value="0.18611111111111112" />
         <entry key="../../../../layout/compose-model-1642019588995.xml" value="0.18611111111111112" />
+        <entry key="../../../../layout/compose-model-1642093088809.xml" value="0.18611111111111112" />
+        <entry key="../../../../layout/compose-model-1642097971117.xml" value="0.1" />
         <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.153" />
         <entry key="app/src/main/res/drawable/altitude_icon.xml" value="0.153" />
         <entry key="app/src/main/res/drawable/car_icon.xml" value="0.1005" />
         <entry key="app/src/main/res/drawable/edit_icon.xml" value="0.3765" />
         <entry key="app/src/main/res/drawable/flag.xml" value="0.3765" />
+        <entry key="app/src/main/res/drawable/ic_add_photo.xml" value="0.1005" />
         <entry key="app/src/main/res/drawable/ic_altitude.xml" value="0.3765" />
         <entry key="app/src/main/res/drawable/ic_end_trip.xml" value="0.3765" />
         <entry key="app/src/main/res/drawable/ic_more.xml" value="0.3765" />

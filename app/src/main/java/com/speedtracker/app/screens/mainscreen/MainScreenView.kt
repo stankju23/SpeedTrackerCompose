@@ -50,7 +50,7 @@ fun MainScreenView(scope: CoroutineScope, scaffoldState: ScaffoldState,speedView
     Column(modifier = Modifier
         .fillMaxSize()) {
         ActualSpeedPart(modifier = Modifier
-            .weight(1f)
+            .weight(1.2f)
             .fillMaxWidth()
             .background(brush = MainGradientBG),
             speed = speedViewModel.speed,

@@ -49,7 +49,7 @@ class AppDataStoreImpl @Inject constructor(@ApplicationContext val context: Cont
     override fun getCurrentlyStartedTrip(): Flow<Long?> = context.overallDataStore.data.map { tripDataPref ->
         Log.d("Get Trip identifier","Called")
         var currentlyStartedTripIdentifier:Long? = null
-        if (tripDataPref[PreferencesKeys.OVERALL_DATA_SUM_OF_SPEEDS] != null) {
+        if (tripDataPref[PreferencesKeys.CURRENTLY_STARTED_TRIP] != null) {
             currentlyStartedTripIdentifier = tripDataPref[PreferencesKeys.CURRENTLY_STARTED_TRIP]
         }
         currentlyStartedTripIdentifier

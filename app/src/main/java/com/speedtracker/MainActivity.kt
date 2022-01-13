@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class)
 
 package com.speedtracker
 
@@ -16,7 +16,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
-import android.view.View
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.IntentSenderRequest
@@ -25,12 +24,9 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.SnackbarDuration
-import androidx.compose.material.SnackbarResult
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -38,7 +34,6 @@ import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
@@ -52,9 +47,9 @@ import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.Task
-import com.speedtracker.helper.NavDrawerItem
+import com.speedtracker.app.screens.mainscreen.drawer.DrawerView
+import com.speedtracker.app.screens.mainscreen.drawer.NavDrawerItem
 import com.speedtracker.app.screens.mainscreen.speed.SpeedViewModel
-import com.speedtracker.app.screens.mainscreen.statistics.Statistic
 import com.speedtracker.app.screens.mainscreen.statistics.StatisticsViewModel
 import com.speedtracker.app.screens.walkthrough.WalkthroughViewModel
 import com.speedtracker.app.screens.walkthrough.pages.MainScreenView
@@ -62,6 +57,7 @@ import com.speedtracker.app.screens.walkthrough.pages.WalkthroughScreen
 import com.speedtracker.helper.Constants
 import com.speedtracker.helper.GenerallData
 import com.speedtracker.model.AppDatabase
+import com.speedtracker.model.CarInfo
 import com.speedtracker.model.Location
 import com.speedtracker.ui.theme.MainGradientBG
 import com.speedtracker.ui.theme.SpeedTrackerComposeTheme
@@ -106,6 +102,7 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
 
     var showTripDialog:MutableLiveData<Boolean> = MutableLiveData(false)
     var tripName:MutableLiveData<String> = MutableLiveData("")
+    var carInfo:MutableLiveData<CarInfo?> = MutableLiveData()
 
     var startDestination:String = "base"
 
@@ -125,7 +122,7 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
                     drawerGesturesEnabled = false,
                     // scrimColor = Color.Red,  // Color for the fade background when you open/close the drawer
                     drawerContent = {
-                            Drawer(scope = scope, scaffoldState = scaffoldState, navController = navController)
+                            Drawer(scope = scope, scaffoldState = scaffoldState, navController = navController,carInfo = carInfo.observeAsState().value, context = this@MainActivity)
                     },
                     drawerShape = customShape()
                 ) {
@@ -143,6 +140,7 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
                 startDestination = "speed-meter"
                 runOnUiThread {
                     this@MainActivity.statisticsViewModel.initializeStatisticsData(this@MainActivity)
+                    carInfo.value = carInfos.get(0)
                 }
 
             } else {
@@ -290,7 +288,9 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
             composable("walkthrough") {
                 WalkthroughScreen(context = this@MainActivity,
                     walkthroughViewModel = walkthroughViewModel,
-                    navigationController = navController)
+                    navigationController = navController,
+                    statisticsViewModel = statisticsViewModel,
+                    carInfo = carInfo)
             }
             composable(NavDrawerItem.Settings.route) {
                 Column(modifier = Modifier

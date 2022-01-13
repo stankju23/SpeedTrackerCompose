@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -98,6 +99,7 @@ fun AddMoreCarInfo(manufacturedYear:MutableLiveData<Int>,imageUriLiveData:Mutabl
                 bitmap.value?.let {  btm ->
                     Image(bitmap = btm.asImageBitmap(),
                         contentDescription =null,
+                        contentScale = ContentScale.Crop,
                         modifier = Modifier.size(200.dp) .clip(CircleShape))
                 }
             }

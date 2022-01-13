@@ -29,16 +29,20 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.rememberPagerState
 import com.speedtracker.R
+import com.speedtracker.app.screens.mainscreen.statistics.StatisticsViewModel
 import com.speedtracker.app.screens.walkthrough.WalkthroughViewModel
 import com.speedtracker.helper.AssetsHelper
+import com.speedtracker.model.AppDatabase
+import com.speedtracker.model.CarInfo
 import com.speedtracker.ui.theme.MainGradientBG
 import com.speedtracker.ui.theme.MainGradientEndColor
 import com.speedtracker.ui.theme.MainGradientStartColor
 import kotlinx.coroutines.launch
+import java.util.*
 
 
 @Composable
-fun WalkthroughScreen(context: Context,walkthroughViewModel: WalkthroughViewModel,navigationController: NavHostController) {
+fun WalkthroughScreen(context: Context,walkthroughViewModel: WalkthroughViewModel,navigationController: NavHostController,statisticsViewModel: StatisticsViewModel,carInfo:MutableLiveData<CarInfo?>) {
     val mainButtonColor = ButtonDefaults.buttonColors(
         containerColor = MainGradientStartColor,
         contentColor = MaterialTheme.colorScheme.surface
@@ -93,6 +97,12 @@ fun WalkthroughScreen(context: Context,walkthroughViewModel: WalkthroughViewMode
                             // nav to speed view
                             navigationController.popBackStack()
                             navigationController.navigate("speed-meter")
+                            statisticsViewModel.initializeStatisticsData(context = context)
+                            var carInfoToStore = CarInfo(carModel = walkthroughViewModel.carModel.value!!, carBrand =  walkthroughViewModel.carBrand.value!!, carIdentifier = UUID.randomUUID().toString(), carManufacturedYear = walkthroughViewModel.manufacturedYear.value.toString(), carPhotoPath = if (walkthroughViewModel.carImageUri.value != null) walkthroughViewModel.carImageUri.value!!.toString() else null, id = Calendar.getInstance().time.time.toInt())
+                            carInfo.value = carInfoToStore
+                            scope.launch {
+                                AppDatabase.getDatabase(context = context).carInfoDao().insertCarInfo(carInfo = carInfoToStore)
+                            }
                         }
                     } else {
                         scope.launch {

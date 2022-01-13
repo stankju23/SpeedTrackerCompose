@@ -116,6 +116,7 @@ fun ActualSpeedPartTopBar(context: Context,scope: CoroutineScope, scaffoldState:
             Spacer(modifier = Modifier.weight(1f))
         }
         IconButton(onClick = {
+//            speedViewModel.speed.value = speedViewModel.speed.value!! + 30
             if (statisticsViewModel.trip.value == null) {
                 showTripDialog.value = true
             } else {
