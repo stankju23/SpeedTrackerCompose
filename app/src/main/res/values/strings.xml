@@ -17,5 +17,7 @@
     <string name="speed_units_imperial">mph</string>
     <string name="altitudeI_units_imperial">feet</string>
 
+    <string name="no_trip_info_text">Sorry you don\'t have any \ntrip to show. \nPlease start new tri."</string>
+
 
 </resources>

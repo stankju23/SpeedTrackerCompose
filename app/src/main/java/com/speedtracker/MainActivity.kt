@@ -51,6 +51,7 @@ import com.speedtracker.app.screens.mainscreen.drawer.DrawerView
 import com.speedtracker.app.screens.mainscreen.drawer.NavDrawerItem
 import com.speedtracker.app.screens.mainscreen.speed.SpeedViewModel
 import com.speedtracker.app.screens.mainscreen.statistics.StatisticsViewModel
+import com.speedtracker.app.screens.triplist.TripListPage
 import com.speedtracker.app.screens.walkthrough.WalkthroughViewModel
 import com.speedtracker.app.screens.walkthrough.pages.MainScreenView
 import com.speedtracker.app.screens.walkthrough.pages.WalkthroughScreen
@@ -305,6 +306,13 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
                     .background(brush = MainGradientBG),
                     contentAlignment = Alignment.Center) {
                     Image(modifier = Modifier.size(100.dp),painter = painterResource(id = R.drawable.ic_car_splash), contentDescription = "SplashIcon")
+                }
+            }
+            composable(NavDrawerItem.TripList.route){
+                Box(modifier = Modifier
+                    .fillMaxSize(),
+                    ) {
+                    TripListPage(this@MainActivity, scope = scope)
                 }
             }
         }

@@ -55,7 +55,7 @@ class StatisticsViewModel @Inject constructor(
                     overallStatisticsList = mutableListOf(
                         Statistic(iconDrawable = R.drawable.ic_avgspeed, "Avg speed:", (overallData.sumOfSpeeds / overallData.countOfUpdates).toString(), if (GenerallData.isMetric.value!!) context.getString(R.string.speed_units_metric) else context.getString(R.string.speed_units_imperial)),
                         Statistic(iconDrawable = R.drawable.ic_topspeed, "Max speed:", overallData.maxSpeed.toString(), if (GenerallData.isMetric.value!!) context.getString(R.string.speed_units_metric) else context.getString(R.string.speed_units_imperial)),
-                        Statistic(iconDrawable = R.drawable.ic_distance, "Overall distance:", Math.round(((overallData.sumOfDistancesInM/ (if (GenerallData.isMetric.value!!) Constants.mToKm else Constants.mToMil)) * 10.0) / 10.0).toString(), if (GenerallData.isMetric.value!!) context.getString(R.string.measute_units_metric) else context.getString(R.string.measute_units_imperial))
+                        Statistic(iconDrawable = R.drawable.ic_distance, "Overall distance:", (Math.round((overallData.sumOfDistancesInM/ (if (GenerallData.isMetric.value!!) Constants.mToKm else Constants.mToMil)) * 100.0) / 100.0).toString(), if (GenerallData.isMetric.value!!) context.getString(R.string.measute_units_metric) else context.getString(R.string.measute_units_imperial))
                     )
 //                    overallStatisticsList = overallStatisticsList.toMutableList().also {
 //                        Log.i("View model overall scope1", "Again called")
@@ -89,7 +89,7 @@ class StatisticsViewModel @Inject constructor(
                             tripStatisticsList = mutableListOf(
                                 Statistic(iconDrawable = R.drawable.ic_avgspeed, "Avg speed:", (trip.value!!.sumOfTripSpeed / trip.value!!.countOfUpdates).toString(), if (GenerallData.isMetric.value!!) context.getString(R.string.speed_units_metric) else context.getString(R.string.speed_units_imperial)),
                                 Statistic(iconDrawable = R.drawable.ic_topspeed, "Max speed:", trip.value!!.maxSpeed.toString(), if (GenerallData.isMetric.value!!) context.getString(R.string.speed_units_metric) else context.getString(R.string.speed_units_imperial)),
-                                Statistic(iconDrawable = R.drawable.ic_distance, "Trip distance:", Math.round(((trip.value!!.distance/ (if (GenerallData.isMetric.value!!) Constants.mToKm else Constants.mToMil)) * 10.0) / 10.0).toString(), if (GenerallData.isMetric.value!!) context.getString(R.string.measute_units_metric) else context.getString(R.string.measute_units_imperial))
+                                Statistic(iconDrawable = R.drawable.ic_distance, "Trip distance:", (Math.round((trip.value!!.distance/ (if (GenerallData.isMetric.value!!) Constants.mToKm else Constants.mToMil)) * 10.0) / 10.0).toString(), if (GenerallData.isMetric.value!!) context.getString(R.string.measute_units_metric) else context.getString(R.string.measute_units_imperial))
                             )
 //                            tripStatisticsList = tripStatisticsList.toMutableList().also {
 //                                Log.i("View model statistics scope1", "Again called")
@@ -151,6 +151,7 @@ class StatisticsViewModel @Inject constructor(
             appDataStoreImpl.setCurrentlyStartedTrip(0)
             AppDatabase.getDatabase(context).tripDao().updateTrip(trip.value!!)
             trip.value = null
+            getEmptyTripStatisticData(context = context)
         }
     }
 
@@ -167,7 +168,7 @@ class StatisticsViewModel @Inject constructor(
             Log.i("View model statistics scope2", "Again called")
             it[0] = Statistic(iconDrawable = R.drawable.ic_avgspeed, "Avg speed:",  (trip.value!!.sumOfTripSpeed / trip.value!!.countOfUpdates).toString(), if (GenerallData.isMetric.value!!) context.getString(R.string.speed_units_metric) else context.getString(R.string.speed_units_imperial))
             it[1] =  Statistic(iconDrawable = R.drawable.ic_topspeed, "Max speed:", trip.value!!.maxSpeed.toString(), if (GenerallData.isMetric.value!!) context.getString(R.string.speed_units_metric) else context.getString(R.string.speed_units_imperial))
-            it[2] = Statistic(iconDrawable = R.drawable.ic_distance, "Trip distance:", Math.round(((trip.value!!.distance/ (if (GenerallData.isMetric.value!!) Constants.mToKm else Constants.mToMil)) * 10.0) / 10.0).toString(), if (GenerallData.isMetric.value!!) context.getString(R.string.measute_units_metric) else context.getString(R.string.measute_units_imperial))
+            it[2] = Statistic(iconDrawable = R.drawable.ic_distance, "Trip distance:", (Math.round((trip.value!!.distance/ (if (GenerallData.isMetric.value!!) Constants.mToKm else Constants.mToMil)) * 10.0) / 10.0).toString(), if (GenerallData.isMetric.value!!) context.getString(R.string.measute_units_metric) else context.getString(R.string.measute_units_imperial))
         }
 
         viewModelScope.launch {
@@ -189,7 +190,7 @@ class StatisticsViewModel @Inject constructor(
             Log.i("View model overall scope3", "Again called")
             it[0] = Statistic(iconDrawable = R.drawable.ic_avgspeed, "Avg speed:",  (overallData.sumOfSpeeds / overallData.countOfUpdates).toString(), if (GenerallData.isMetric.value!!) context.getString(R.string.speed_units_metric) else context.getString(R.string.speed_units_imperial))
             it[1] =  Statistic(iconDrawable = R.drawable.ic_topspeed, "Max speed:", overallData.maxSpeed.toString(), if (GenerallData.isMetric.value!!) context.getString(R.string.speed_units_metric) else context.getString(R.string.speed_units_imperial))
-            it[2] = Statistic(iconDrawable = R.drawable.ic_distance, "Overall distance:", Math.round(((overallData.sumOfDistancesInM/ (if (GenerallData.isMetric.value!!) Constants.mToKm else Constants.mToMil)) * 10.0) / 10.0).toString(), if (GenerallData.isMetric.value!!) context.getString(R.string.measute_units_metric) else context.getString(R.string.measute_units_imperial))
+            it[2] = Statistic(iconDrawable = R.drawable.ic_distance, "Overall distance:", (Math.round((overallData.sumOfDistancesInM/ (if (GenerallData.isMetric.value!!) Constants.mToKm else Constants.mToMil)) * 10.0) / 10.0).toString(), if (GenerallData.isMetric.value!!) context.getString(R.string.measute_units_metric) else context.getString(R.string.measute_units_imperial))
         }
 //        overallStatisticsList.get(0).value.value = (overallData.sumOfSpeeds / overallData.countOfUpdates).toString()
 //        overallStatisticsList.get(1).value.value = overallData.maxSpeed.toString()
