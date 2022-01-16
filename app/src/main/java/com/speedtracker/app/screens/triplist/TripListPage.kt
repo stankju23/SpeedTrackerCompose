@@ -81,7 +81,7 @@ fun TripListPage(context: Context,scope: CoroutineScope) {
 //            }
 
             LaunchedEffect("") {
-                trips.value = ArrayList(AppDatabase.getDatabase(context = context).tripDao().getAllTripData())
+                trips.value = ArrayList(AppDatabase.getDatabase(context = context).tripDao().getAllTripData().reversed())
                 dataLoaded.value = true
             }
 

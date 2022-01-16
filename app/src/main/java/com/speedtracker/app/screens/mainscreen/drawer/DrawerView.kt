@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalCoilApi::class)
 
 package com.speedtracker.app.screens.mainscreen.drawer
 
@@ -9,6 +9,9 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContract
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -38,8 +41,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil.ImageLoader
+import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
+import com.skydoves.landscapist.glide.GlideImage
 import com.speedtracker.R
+import com.speedtracker.helper.AssetsHelper
 import com.speedtracker.model.CarInfo
 import com.speedtracker.ui.theme.MainGradientBG
 import com.speedtracker.ui.theme.Nunito
@@ -104,19 +111,30 @@ open class DrawerView : ComponentActivity() {
                                 .size(75.dp)
                                 .border(2.dp, color = Color.White, CircleShape),
                             onClick = {}) {
-                            val bitmap =  remember {
-                                mutableStateOf<Bitmap?>(null)
-                            }
+//                            val bitmap =  remember {
+//                                mutableStateOf<Bitmap?>(null)
+//                            }
 //                            if (carInfo != null && carInfo.carPhotoPath != null) {
 //                                if (Build.VERSION.SDK_INT < 28) {
-//                                    bitmap.value = MediaStore.Images
-//                                        .Media.getBitmap(
-//                                            context.contentResolver,
-//                                            Uri.parse(carInfo.carPhotoPath))
+////                                    "content:/"
+//                                    val launcher = rememberLauncherForActivityResult(
+//                                        contract = ActivityResultContracts.OpenDocument()
+//                                    ) {
+//                                        bitmap.value = AssetsHelper.bitmapResize(MediaStore.Images
+//                                            .Media.getBitmap(context.contentResolver,it),200,200)
+//                                    }
+//                                    launcher.launch(arrayOf(carInfo.carPhotoPath))
+//
 //                                } else {
-//                                    val source = ImageDecoder
-//                                        .createSource(context.contentResolver, Uri.parse(carInfo.carPhotoPath))
-//                                    bitmap.value = ImageDecoder.decodeBitmap(source)
+////                                    "content:/"
+//                                    val launcher = rememberLauncherForActivityResult(
+//                                        contract = ActivityResultContracts.OpenDocument()
+//                                    ) {
+//                                        val source = ImageDecoder
+//                                            .createSource(context.contentResolver, it)
+//                                        bitmap.value = ImageDecoder.decodeBitmap(source)
+//                                    }
+//                                    launcher.launch(arrayOf(carInfo.carPhotoPath))
 //                                }
 //                                bitmap.value?.let {  btm ->
 //                                    Image(bitmap = btm.asImageBitmap(),
@@ -126,8 +144,10 @@ open class DrawerView : ComponentActivity() {
 //                                            .size(if (carInfo != null && carInfo.carPhotoPath != null) 75.dp else 30.dp)
 //                                            .clip(CircleShape))
 //                                }
+
+
 //                            }
-//                            if (carInfo == null || carInfo!!.carPhotoPath ==  null) {
+                            if (carInfo == null || carInfo!!.carPhotoPath ==  null) {
                                 Image(
                                     painter = painterResource(id = R.drawable.ic_add_photo),
                                     contentDescription = "Car icon",
@@ -135,7 +155,17 @@ open class DrawerView : ComponentActivity() {
                                     modifier = Modifier
                                         .size(30.dp)
                                 )
-//                            }
+                            } else {
+                                Image(
+                                    painter = rememberImagePainter(
+                                        data = Uri.parse(carInfo.carPhotoPath)
+                                    ),
+                                        contentDescription =null,
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier
+                                            .size(if (carInfo != null && carInfo.carPhotoPath != null) 75.dp else 30.dp)
+                                            .clip(CircleShape))
+                            }
                     }
                     Row(
                         modifier = Modifier

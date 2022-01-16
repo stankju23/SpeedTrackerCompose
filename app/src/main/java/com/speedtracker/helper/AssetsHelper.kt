@@ -1,16 +1,17 @@
 package com.speedtracker.helper
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.speedtracker.model.Car
 import java.io.IOException
 import java.io.InputStream
+import java.lang.Byte.decode
 import java.util.*
-import kotlin.Comparator
-import kotlin.collections.ArrayList
 
-class AssetsHelper {
+object AssetsHelper {
 
     fun loadJSONFromAsset(contextVar: Context): String? {
         var json: String? = null
@@ -48,5 +49,9 @@ class AssetsHelper {
                 return o1!!.compareTo(o2!!,true)
             }
         })
+    }
+
+    fun bitmapResize(image:Bitmap,width:Int, height:Int) : Bitmap {
+        return Bitmap.createScaledBitmap(image, width, height, false);
     }
 }

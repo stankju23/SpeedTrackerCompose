@@ -51,9 +51,8 @@ fun CarBrandModelPage(carList:List<Car>,walkthroughViewModel: WalkthroughViewMod
             color = Color.White)
         Spacer(modifier = Modifier.weight(1f))
 
-        var assetsHelper = AssetsHelper()
         var brandStringList = carList.map { car -> car.brand }
-        assetsHelper.sortArrayAlphabetically(brandStringList as ArrayList<String>)
+        AssetsHelper.sortArrayAlphabetically(brandStringList as ArrayList<String>)
         brandStringList.add(0,"Choose your brand")
 
         walkthroughViewModel.brandList.value = brandStringList

@@ -37,7 +37,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
+import coil.compose.rememberImagePainter
 import com.speedtracker.R
+import com.speedtracker.helper.AssetsHelper
 import com.speedtracker.ui.theme.Typography
 import java.util.*
 
@@ -52,9 +54,9 @@ fun AddMoreCarInfo(manufacturedYear:MutableLiveData<Int>,imageUriLiveData:Mutabl
         imageUri = uri
         imageUriLiveData.value = uri
     }
-    val bitmap =  remember {
-        mutableStateOf<Bitmap?>(null)
-    }
+//    val bitmap =  remember {
+//        mutableStateOf<Bitmap?>(null)
+//    }
 
     Column(modifier = Modifier
         .fillMaxWidth()
@@ -86,22 +88,29 @@ fun AddMoreCarInfo(manufacturedYear:MutableLiveData<Int>,imageUriLiveData:Mutabl
             })
         {
             imageUri?.let {
-                if (Build.VERSION.SDK_INT < 28) {
-                    bitmap.value = MediaStore.Images
-                        .Media.getBitmap(context.contentResolver,it)
+//                if (Build.VERSION.SDK_INT < 28) {
+//                    bitmap.value = AssetsHelper.bitmapResize(MediaStore.Images
+//                        .Media.getBitmap(context.contentResolver,it),200,200)
+//                } else {
+//                    val source = ImageDecoder
+//                        .createSource(context.contentResolver,it)
+//                    bitmap.value = AssetsHelper.bitmapResize(ImageDecoder.decodeBitmap(source),200,200)
+//                }
+//
+//                bitmap.value?.let {  btm ->
+//                    Image(bitmap = btm.asImageBitmap(),
+//                        contentDescription =null,
+//                        contentScale = ContentScale.Crop,
+//                        modifier = Modifier.size(200.dp) .clip(CircleShape))
+//                }
+                var ImageUriString = imageUri.toString()
+                Image(
+                    painter = rememberImagePainter(
+                    data = Uri.parse(ImageUriString)),
+                    contentDescription =null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.size(200.dp) .clip(CircleShape))
 
-                } else {
-                    val source = ImageDecoder
-                        .createSource(context.contentResolver,it)
-                    bitmap.value = ImageDecoder.decodeBitmap(source)
-                }
-
-                bitmap.value?.let {  btm ->
-                    Image(bitmap = btm.asImageBitmap(),
-                        contentDescription =null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.size(200.dp) .clip(CircleShape))
-                }
             }
             if (imageUri == null) {
                 Icon(

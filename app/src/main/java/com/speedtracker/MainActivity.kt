@@ -107,6 +107,8 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
 
     var startDestination:String = "base"
 
+    var canUpdateSpeed:Boolean = false
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -137,15 +139,17 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
         GlobalScope.launch((Dispatchers.IO)) {
 //            statisticsViewModel.getAllTrips(context = this@MainActivity)
             var carInfos = AppDatabase.getDatabase(this@MainActivity).carInfoDao().getAllCarInfos()
+//            AppDatabase.getDatabase(this@MainActivity).carInfoDao().deleteCarInfos()
             if (carInfos != null && carInfos.size > 0) {
                 startDestination = "speed-meter"
                 runOnUiThread {
                     this@MainActivity.statisticsViewModel.initializeStatisticsData(this@MainActivity)
-                    carInfo.value = carInfos.get(0)
+                    canUpdateSpeed = true
+                    carInfo.value = carInfos.last()
                 }
-
             } else {
                 startDestination = "walkthrough"
+                canUpdateSpeed = false
 //                navController.navigate("walkthrough")
             }
         }
@@ -474,45 +478,47 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
         observer = interval(2000, TimeUnit.MILLISECONDS)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe {
-                val current = System.currentTimeMillis()
-                var hh = "${(current / 3600000) % 24}"
-                var mm = "${(current / 60000) % 60}"
-                var ss = "${(current / 1000) % 60}"
+                if (canUpdateSpeed) {
+                    val current = System.currentTimeMillis()
+                    var hh = "${(current / 3600000) % 24}"
+                    var mm = "${(current / 60000) % 60}"
+                    var ss = "${(current / 1000) % 60}"
 
-                Log.d("Satelites", speedViewModel.satellitesText.value!!)
-                Log.i("Observed", "true")
-                if (hh.length == 1) {
-                    hh = "0" + hh
-                }
-                if (mm.length == 1) {
-                    mm = "0" + mm
-                }
-                if (ss.length == 1) {
-                    ss = "0" + ss
-                }
+                    Log.d("Satelites", speedViewModel.satellitesText.value!!)
+                    Log.i("Observed", "true")
+                    if (hh.length == 1) {
+                        hh = "0" + hh
+                    }
+                    if (mm.length == 1) {
+                        mm = "0" + mm
+                    }
+                    if (ss.length == 1) {
+                        ss = "0" + ss
+                    }
 
-                var distanceToSave = 0.0
-                if (!speedViewModel.searchingForGPSLocation.value!! && speedViewModel.speed.value != 0) {
-                    if (speedViewModel.actualLatitude != 0.0 && speedViewModel.actualLongitude != 0.0) {
-                        Log.i("         Rx java update", "\t" + hh + ":" + mm + ":" + ss)
-                        if (speedViewModel.lastOverallLatitude != 0.0 && speedViewModel.lastOverallLongitude != 0.0) {
-                            distanceToSave = (Math.round(speedViewModel.countCurrentDistance() * 10.0) / 10.0)
-                            statisticsViewModel.updateOverallData(speed = speedViewModel.speed.value!!,distanceToSave = distanceToSave, context = this)
-                        } else {
-                            speedViewModel.lastOverallLatitude = speedViewModel.actualLatitude
-                            speedViewModel.lastOverallLongitude = speedViewModel.actualLongitude
-                        }
+                    var distanceToSave = 0.0
+                    if (!speedViewModel.searchingForGPSLocation.value!! && speedViewModel.speed.value != 0) {
+                        if (speedViewModel.actualLatitude != 0.0 && speedViewModel.actualLongitude != 0.0) {
+                            Log.i("         Rx java update", "\t" + hh + ":" + mm + ":" + ss)
+                            if (speedViewModel.lastOverallLatitude != 0.0 && speedViewModel.lastOverallLongitude != 0.0) {
+                                distanceToSave = (Math.round(speedViewModel.countCurrentDistance() * 10.0) / 10.0)
+                                statisticsViewModel.updateOverallData(speed = speedViewModel.speed.value!!,distanceToSave = distanceToSave, context = this)
+                            } else {
+                                speedViewModel.lastOverallLatitude = speedViewModel.actualLatitude
+                                speedViewModel.lastOverallLongitude = speedViewModel.actualLongitude
+                            }
 
-                        if (statisticsViewModel.trip.value != null) {
-                            val location = Location(
-                                tripIdentifier = statisticsViewModel.trip.value!!.tripId,
-                                latitude = speedViewModel.actualLatitude,
-                                longitude = speedViewModel.actualLongitude,
-                                altitude = speedViewModel.actualAltitude,
-                                time = speedViewModel.actualTime,
-                                locationId = Calendar.getInstance().time.time.toInt())
-                            Log.i("Current trip", "updated")
-                            statisticsViewModel.updateTrip(speed = speedViewModel.speed.value!!, distanceToSave = distanceToSave, location = location, context = this)
+                            if (statisticsViewModel.trip.value != null) {
+                                val location = Location(
+                                    tripIdentifier = statisticsViewModel.trip.value!!.tripId,
+                                    latitude = speedViewModel.actualLatitude,
+                                    longitude = speedViewModel.actualLongitude,
+                                    altitude = speedViewModel.actualAltitude,
+                                    time = speedViewModel.actualTime,
+                                    locationId = Calendar.getInstance().time.time.toInt())
+                                Log.i("Current trip", "updated")
+                                statisticsViewModel.updateTrip(speed = speedViewModel.speed.value!!, distanceToSave = distanceToSave, location = location, context = this)
+                            }
                         }
                     }
                 }

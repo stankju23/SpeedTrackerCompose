@@ -51,7 +51,7 @@ class StatisticsViewModel @Inject constructor(
         viewModelScope.launch {
             appDataStoreImpl.getOverallData().collect { overallData ->
                 if (overallData != null) {
-
+                    this@StatisticsViewModel.overallData = overallData
                     overallStatisticsList = mutableListOf(
                         Statistic(iconDrawable = R.drawable.ic_avgspeed, "Avg speed:", (overallData.sumOfSpeeds / overallData.countOfUpdates).toString(), if (GenerallData.isMetric.value!!) context.getString(R.string.speed_units_metric) else context.getString(R.string.speed_units_imperial)),
                         Statistic(iconDrawable = R.drawable.ic_topspeed, "Max speed:", overallData.maxSpeed.toString(), if (GenerallData.isMetric.value!!) context.getString(R.string.speed_units_metric) else context.getString(R.string.speed_units_imperial)),

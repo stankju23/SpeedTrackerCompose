@@ -49,6 +49,9 @@ data class TripData (
 @Dao
 interface CarInfoDao {
 
+    @Query("DELETE  FROM Carinfo")
+    fun deleteCarInfos()
+
     @Query("SELECT * from Carinfo")
     suspend fun getAllCarInfos(): List<CarInfo>
 

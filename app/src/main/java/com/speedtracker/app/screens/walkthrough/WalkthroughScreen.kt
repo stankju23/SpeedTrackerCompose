@@ -53,7 +53,7 @@ fun WalkthroughScreen(context: Context,walkthroughViewModel: WalkthroughViewMode
         .fillMaxHeight()
         .background(brush = MainGradientBG)) {
 
-        var assetsHelper = AssetsHelper()
+
 
         val pagerState = rememberPagerState()
         // Display 10 items
@@ -65,7 +65,7 @@ fun WalkthroughScreen(context: Context,walkthroughViewModel: WalkthroughViewMode
             // Our page content
             when(page) {
                 0 -> {
-                    CarBrandModelPage(assetsHelper.parseCarsBrands(context),walkthroughViewModel = walkthroughViewModel)
+                    CarBrandModelPage(AssetsHelper.parseCarsBrands(context),walkthroughViewModel = walkthroughViewModel)
                 }
                 1 -> {
                     AddMoreCarInfo(manufacturedYear = walkthroughViewModel.manufacturedYear, context = context, imageUriLiveData = walkthroughViewModel.carImageUri)
@@ -98,7 +98,13 @@ fun WalkthroughScreen(context: Context,walkthroughViewModel: WalkthroughViewMode
                             navigationController.popBackStack()
                             navigationController.navigate("speed-meter")
                             statisticsViewModel.initializeStatisticsData(context = context)
-                            var carInfoToStore = CarInfo(carModel = walkthroughViewModel.carModel.value!!, carBrand =  walkthroughViewModel.carBrand.value!!, carIdentifier = UUID.randomUUID().toString(), carManufacturedYear = walkthroughViewModel.manufacturedYear.value.toString(), carPhotoPath = if (walkthroughViewModel.carImageUri.value != null) walkthroughViewModel.carImageUri.value!!.toString() else null, id = Calendar.getInstance().time.time.toInt())
+                            var ImageUriString = walkthroughViewModel.carImageUri.value!!.toString()
+                            var carInfoToStore = CarInfo(carModel = walkthroughViewModel.carModel.value!!,
+                                carBrand =  walkthroughViewModel.carBrand.value!!,
+                                carIdentifier = UUID.randomUUID().toString(),
+                                carManufacturedYear = walkthroughViewModel.manufacturedYear.value.toString(),
+                                carPhotoPath = if (walkthroughViewModel.carImageUri.value != null) ImageUriString else null,
+                                id = Calendar.getInstance().time.time.toInt())
                             carInfo.value = carInfoToStore
                             scope.launch {
                                 AppDatabase.getDatabase(context = context).carInfoDao().insertCarInfo(carInfo = carInfoToStore)
