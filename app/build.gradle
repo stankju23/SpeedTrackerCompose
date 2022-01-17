@@ -1,3 +1,5 @@
+
+//import com.speedtracker.buildsrc.Libs
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
@@ -84,6 +86,19 @@ dependencies {
     implementation "io.reactivex.rxjava3:rxjava:3.0.11-RC5"
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
 
+//    implementation("com.google.android.libraries.maps:maps:3.1.0-beta")
+//    implementation("com.google.maps.android:maps-v3-ktx:2.2.0")
+//    implementation("androidx.fragment:fragment:1.4.0")
+
+        implementation("com.google.android.gms:play-services-maps:18.0.2")
+
+//    implementation Libs.GoogleMaps.mapsKtx
+//    constraints {
+//        // Volley is a transitive dependency of maps
+//        implementation(Libs.Volley.volley) {
+//            because("Only volley 1.2.0 or newer are available on maven.google.com")
+//        }
+//    }
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

@@ -52,6 +52,7 @@ import com.speedtracker.app.screens.mainscreen.drawer.NavDrawerItem
 import com.speedtracker.app.screens.mainscreen.speed.SpeedViewModel
 import com.speedtracker.app.screens.mainscreen.statistics.StatisticsViewModel
 import com.speedtracker.app.screens.triplist.TripListPage
+import com.speedtracker.app.screens.triplist.TripNavigation
 import com.speedtracker.app.screens.walkthrough.WalkthroughViewModel
 import com.speedtracker.app.screens.walkthrough.pages.MainScreenView
 import com.speedtracker.app.screens.walkthrough.pages.WalkthroughScreen
@@ -304,6 +305,7 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
                     Text(text = "This is Settings Screen")
                 }
             }
+
             composable("base"){
                 Box(modifier = Modifier
                     .fillMaxSize()
@@ -316,7 +318,8 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
                 Box(modifier = Modifier
                     .fillMaxSize(),
                     ) {
-                    TripListPage(this@MainActivity, scope = scope)
+                    TripNavigation(context = this@MainActivity, scope = scope)
+//                    TripListPage(this@MainActivity, scope = scope)
                 }
             }
         }

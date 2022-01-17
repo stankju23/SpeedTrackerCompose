@@ -10,6 +10,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,8 +40,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
+import androidx.navigation.NavHost
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.speedtracker.R
 import com.speedtracker.app.screens.mainscreen.StatisticsItem
+import com.speedtracker.app.screens.tripscreen.TripPage
 import com.speedtracker.helper.Formatter
 import com.speedtracker.model.AppDatabase
 import com.speedtracker.model.Location
@@ -56,6 +63,19 @@ import kotlin.collections.ArrayList
 var dataLoaded:MutableLiveData<Boolean> = MutableLiveData(false)
 var showNoTripData:MutableLiveData<Boolean> = MutableLiveData(false)
 var trips:MutableLiveData<ArrayList<TripData>> = MutableLiveData(arrayListOf())
+var choosedTrip:TripData? = null
+
+lateinit var navController:NavHostController
+
+@Composable
+fun TripNavigation(context: Context,scope: CoroutineScope) {
+    navController = rememberNavController()
+    NavHost(navController = navController, startDestination = "trip-list") {
+        composable("trip-list") { TripListPage(context = context, scope = scope)}
+        composable("trip-detail") { TripPage(choosedTrip!!, context = context)}
+    }
+}
+
 
 @Composable
 fun TripListPage(context: Context,scope: CoroutineScope) {
@@ -246,7 +266,11 @@ fun TripListItem(tripData: TripData,context:Context) {
         } else {
             Row(modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(),
+                .fillMaxHeight()
+                .clickable {
+                    navController.navigate("trip-detail")
+                    choosedTrip = tripData
+                },
                 verticalAlignment = Alignment.CenterVertically) {
                 androidx.compose.material.Icon(
                     painter = painterResource(id =R.drawable.car_icon),
@@ -285,7 +309,6 @@ fun TripListItem(tripData: TripData,context:Context) {
                             fontFamily = Nunito,
                             fontSize = 10.sp,
                             color = Color.Gray)
-
                     }
                 }
             }

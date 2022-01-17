@@ -22,10 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -147,6 +144,9 @@ open class DrawerView : ComponentActivity() {
 
 
 //                            }
+
+
+
                             if (carInfo == null || carInfo!!.carPhotoPath ==  null) {
                                 Image(
                                     painter = painterResource(id = R.drawable.ic_add_photo),
@@ -156,16 +156,33 @@ open class DrawerView : ComponentActivity() {
                                         .size(30.dp)
                                 )
                             } else {
+//                                var imageUri by remember {
+//                                    mutableStateOf<Uri?>(null)
+//                                }
+//                                val launcher = rememberLauncherForActivityResult(
+//                                    contract = ActivityResultContracts.OpenDocument()
+//                                ) {
+//                                    imageUri = it
+//                                }
+//                                SideEffect {
+//                                    launcher.launch(arrayOf(carInfo.carPhotoPath))
+//                                }
+//
+//                                imageUri?.let {
+//
+//                                }
                                 Image(
                                     painter = rememberImagePainter(
                                         data = Uri.parse(carInfo.carPhotoPath)
                                     ),
-                                        contentDescription =null,
-                                        contentScale = ContentScale.Crop,
-                                        modifier = Modifier
-                                            .size(if (carInfo != null && carInfo.carPhotoPath != null) 75.dp else 30.dp)
-                                            .clip(CircleShape))
+                                    contentDescription =null,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .size(if (carInfo != null && carInfo.carPhotoPath != null) 75.dp else 30.dp)
+                                        .clip(CircleShape))
                             }
+
+
                     }
                     Row(
                         modifier = Modifier
