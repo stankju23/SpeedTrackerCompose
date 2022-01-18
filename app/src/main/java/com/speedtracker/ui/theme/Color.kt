@@ -21,3 +21,5 @@ val MainGradientBG = Brush.verticalGradient(
         MainGradientEndColor
     )
 )
+
+val mapsLineColor = Color(0xFF83e6e3)

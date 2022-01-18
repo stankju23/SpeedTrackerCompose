@@ -449,7 +449,7 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
                         Log.i("Current speed", currentSpeed.toString())
 
                         if (currentSpeed > minValuableSpeed) {
-                            speedViewModel.speed.value = (locationResult.lastLocation.speed * Constants.msToKmh).roundToInt()
+                            speedViewModel.speed.value = (locationResult.lastLocation.speed).roundToInt()
 //                            speedViewModel.animateSpeed(speedViewModel.speed.value!!, )
                             speedViewModel.actualLatitude = locationResult.lastLocation.latitude
                             speedViewModel.actualLongitude = locationResult.lastLocation.longitude

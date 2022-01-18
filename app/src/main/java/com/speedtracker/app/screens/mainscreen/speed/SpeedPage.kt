@@ -32,6 +32,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
 import com.speedtracker.R
 import com.speedtracker.app.screens.mainscreen.statistics.StatisticsViewModel
+import com.speedtracker.helper.Constants
+import com.speedtracker.helper.GenerallData
 import com.speedtracker.ui.theme.Typography
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -143,7 +145,7 @@ fun SpeedText(modifier: Modifier, speed: MutableLiveData<Int>) {
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
 
         Text(
-            text = "${speed.observeAsState().value!!.toInt()}",
+            text = "${ if(GenerallData.isMetric.value!!) (speed.observeAsState().value!! * Constants.msToKmh).toInt() else (speed.observeAsState().value!!.toInt() * Constants.msToMph).toInt() } ",
             color = Color.White,
             maxLines = 1,
             style = speedTextStyle,
