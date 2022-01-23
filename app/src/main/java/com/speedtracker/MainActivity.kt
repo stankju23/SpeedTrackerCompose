@@ -47,12 +47,13 @@ import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.Task
+import com.speedtracker.app.screens.headup.HeadUpScreen
 import com.speedtracker.app.screens.mainscreen.drawer.DrawerView
 import com.speedtracker.app.screens.mainscreen.drawer.NavDrawerItem
 import com.speedtracker.app.screens.mainscreen.speed.SpeedViewModel
 import com.speedtracker.app.screens.mainscreen.statistics.StatisticsViewModel
-import com.speedtracker.app.screens.triplist.TripListPage
-import com.speedtracker.app.screens.triplist.TripNavigation
+import com.speedtracker.app.screens.trips.triplist.TripNavigation
+import com.speedtracker.app.screens.trips.TripViewModel
 import com.speedtracker.app.screens.walkthrough.WalkthroughViewModel
 import com.speedtracker.app.screens.walkthrough.pages.MainScreenView
 import com.speedtracker.app.screens.walkthrough.pages.WalkthroughScreen
@@ -81,11 +82,12 @@ import kotlin.math.roundToInt
 class CoreApplication: Application()
 
 @AndroidEntryPoint
-class MainActivity : DrawerView(),GpsStatus.Listener {
+class MainActivity : DrawerView(), GpsStatus.Listener {
 
     val speedViewModel by viewModels<SpeedViewModel>()
     val statisticsViewModel by viewModels<StatisticsViewModel>()
     val walkthroughViewModel by viewModels<WalkthroughViewModel>()
+    val tripViewModel by viewModels<TripViewModel>()
 
     lateinit var scaffoldState:ScaffoldState
     lateinit var scope:CoroutineScope
@@ -314,11 +316,21 @@ class MainActivity : DrawerView(),GpsStatus.Listener {
                     Image(modifier = Modifier.size(100.dp),painter = painterResource(id = R.drawable.ic_car_splash), contentDescription = "SplashIcon")
                 }
             }
+
             composable(NavDrawerItem.TripList.route){
                 Box(modifier = Modifier
                     .fillMaxSize(),
                     ) {
-                    TripNavigation(context = this@MainActivity, scope = scope)
+                    TripNavigation(context = this@MainActivity, scope = scope, tripViewModel = this@MainActivity.tripViewModel)
+//                    TripListPage(this@MainActivity, scope = scope)
+                }
+            }
+
+            composable(NavDrawerItem.HeadUpDisplay.route){
+                Box(modifier = Modifier
+                    .fillMaxSize(),
+                ) {
+                    HeadUpScreen(speedViewModel = this@MainActivity.speedViewModel)
 //                    TripListPage(this@MainActivity, scope = scope)
                 }
             }

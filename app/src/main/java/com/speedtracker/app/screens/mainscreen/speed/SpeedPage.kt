@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -31,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
 import com.speedtracker.R
+import com.speedtracker.app.screens.components.LoadingComponent
 import com.speedtracker.app.screens.mainscreen.statistics.StatisticsViewModel
 import com.speedtracker.helper.Constants
 import com.speedtracker.helper.GenerallData
@@ -85,35 +87,9 @@ fun ActualSpeedPartTopBar(context: Context,scope: CoroutineScope, scaffoldState:
             )
         }
         if (speedViewModel.searchingForGPSLocation.observeAsState().value == true) {
-            Row(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .width(15.dp)
-                        .height(15.dp),
-                    color = Color.White,
-                    strokeWidth = 1.5.dp
-                )
-
-                Column(
-                    modifier = Modifier
-                        .padding(start = 6.dp),
-                ) {
-                    Text(
-                        textAlign = TextAlign.Center,
-                        text = "Searching for GPS location...",
-                        color = Color.White,
-                        fontSize = 12.sp
-                    )
-                }
-
-            }
+            LoadingComponent(modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight())
         } else {
             Spacer(modifier = Modifier.weight(1f))
         }
@@ -172,7 +148,7 @@ fun SpeedText(modifier: Modifier, speed: MutableLiveData<Int>) {
 
         
         Text(
-            text = "km/h",
+            text = if(GenerallData.isMetric.value!!) stringResource(id = R.string.speed_units_metric) else stringResource(id = R.string.speed_units_imperial),
             color = Color.White,
             style = unitTextStyle,
             maxLines = 1,

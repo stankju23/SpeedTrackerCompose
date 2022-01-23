@@ -243,16 +243,6 @@ fun StatisticsPart(modifier: Modifier,statisticsViewModel: StatisticsViewModel) 
 }
 
 
-@Preview()
-@Composable
-fun DefaultPreview() {
-    SpeedTrackerComposeTheme {
-        val scope = rememberCoroutineScope()
-        val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
-//        MainScreenView(MutableLiveData(0f),scope,scaffoldState)
-    }
-}
-
 
 @Preview()
 @Composable
