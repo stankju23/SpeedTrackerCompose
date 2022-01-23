@@ -120,7 +120,7 @@ fun TripMapPage(context: Context,tripViewModel: TripViewModel) {
                     .weight(0.5f)
             ) { googleMap ->
                 googleMap.setMapStyle(MapStyleOptions(context.resources.getString(R.string.style_json)))
-                trackOptions.width(20f)
+                trackOptions.width(10f)
                 trackOptions.visible(true)
                 trackOptions.jointType(JointType.ROUND)
                 setMapPaddingBotttom(

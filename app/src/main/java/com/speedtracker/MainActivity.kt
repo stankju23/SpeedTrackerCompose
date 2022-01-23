@@ -52,6 +52,7 @@ import com.speedtracker.app.screens.mainscreen.drawer.DrawerView
 import com.speedtracker.app.screens.mainscreen.drawer.NavDrawerItem
 import com.speedtracker.app.screens.mainscreen.speed.SpeedViewModel
 import com.speedtracker.app.screens.mainscreen.statistics.StatisticsViewModel
+import com.speedtracker.app.screens.settings.SettingsScreen
 import com.speedtracker.app.screens.trips.triplist.TripNavigation
 import com.speedtracker.app.screens.trips.TripViewModel
 import com.speedtracker.app.screens.walkthrough.WalkthroughViewModel
@@ -108,7 +109,7 @@ class MainActivity : DrawerView(), GpsStatus.Listener {
     var tripName:MutableLiveData<String> = MutableLiveData("")
     var carInfo:MutableLiveData<CarInfo?> = MutableLiveData()
 
-    var startDestination:String = "base"
+    var startDestination:String = "splash-screen"
 
     var canUpdateSpeed:Boolean = false
 
@@ -301,14 +302,10 @@ class MainActivity : DrawerView(), GpsStatus.Listener {
                     carInfo = carInfo)
             }
             composable(NavDrawerItem.Settings.route) {
-                Column(modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth()) {
-                    Text(text = "This is Settings Screen")
-                }
+                SettingsScreen(context = this@MainActivity)
             }
 
-            composable("base"){
+            composable("splash-screen"){
                 Box(modifier = Modifier
                     .fillMaxSize()
                     .background(brush = MainGradientBG),
