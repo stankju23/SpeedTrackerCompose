@@ -86,6 +86,9 @@ dependencies {
     implementation "io.reactivex.rxjava3:rxjava:3.0.11-RC5"
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
 
+    implementation 'com.github.alorma:compose-settings-ui:0.7.2'
+//    implementation "com.github.JamalMulla:ComposePrefs:1.0.0"
+
 //    implementation("com.google.android.libraries.maps:maps:3.1.0-beta")
 //    implementation("com.google.maps.android:maps-v3-ktx:2.2.0")
 //    implementation("androidx.fragment:fragment:1.4.0")

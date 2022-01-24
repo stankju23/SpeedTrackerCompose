@@ -61,7 +61,7 @@ fun TripMapPage(context: Context,tripViewModel: TripViewModel) {
         topBar = {
             TopAppBar(
                 title = { androidx.compose.material.Text(text = tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.tripName!!, color = Color.White, fontFamily = Nunito) },
-                backgroundColor = MainGradientEndColor,
+                backgroundColor = MainGradientStartColor,
                 navigationIcon = {
                     IconButton(onClick = {(context as Activity).onBackPressed()}) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "BackArrow", tint = Color.White)
