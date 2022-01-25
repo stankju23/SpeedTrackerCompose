@@ -8,6 +8,7 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContract
@@ -44,6 +45,7 @@ import coil.compose.rememberImagePainter
 import com.skydoves.landscapist.glide.GlideImage
 import com.speedtracker.R
 import com.speedtracker.helper.AssetsHelper
+import com.speedtracker.helper.ImageBitmapString
 import com.speedtracker.model.CarInfo
 import com.speedtracker.ui.theme.MainGradientBG
 import com.speedtracker.ui.theme.Nunito
@@ -108,46 +110,8 @@ open class DrawerView : ComponentActivity() {
                                 .size(75.dp)
                                 .border(2.dp, color = Color.White, CircleShape),
                             onClick = {}) {
-//                            val bitmap =  remember {
-//                                mutableStateOf<Bitmap?>(null)
-//                            }
-//                            if (carInfo != null && carInfo.carPhotoPath != null) {
-//                                if (Build.VERSION.SDK_INT < 28) {
-////                                    "content:/"
-//                                    val launcher = rememberLauncherForActivityResult(
-//                                        contract = ActivityResultContracts.OpenDocument()
-//                                    ) {
-//                                        bitmap.value = AssetsHelper.bitmapResize(MediaStore.Images
-//                                            .Media.getBitmap(context.contentResolver,it),200,200)
-//                                    }
-//                                    launcher.launch(arrayOf(carInfo.carPhotoPath))
-//
-//                                } else {
-////                                    "content:/"
-//                                    val launcher = rememberLauncherForActivityResult(
-//                                        contract = ActivityResultContracts.OpenDocument()
-//                                    ) {
-//                                        val source = ImageDecoder
-//                                            .createSource(context.contentResolver, it)
-//                                        bitmap.value = ImageDecoder.decodeBitmap(source)
-//                                    }
-//                                    launcher.launch(arrayOf(carInfo.carPhotoPath))
-//                                }
-//                                bitmap.value?.let {  btm ->
-//                                    Image(bitmap = btm.asImageBitmap(),
-//                                        contentDescription =null,
-//                                        contentScale = ContentScale.Crop,
-//                                        modifier = Modifier
-//                                            .size(if (carInfo != null && carInfo.carPhotoPath != null) 75.dp else 30.dp)
-//                                            .clip(CircleShape))
-//                                }
 
-
-//                            }
-
-
-
-                            if (carInfo == null || carInfo!!.carPhotoPath ==  null) {
+                            if (carInfo == null || carInfo!!.carPhoto ==  null) {
                                 Image(
                                     painter = painterResource(id = R.drawable.ic_add_photo),
                                     contentDescription = "Car icon",
@@ -156,30 +120,14 @@ open class DrawerView : ComponentActivity() {
                                         .size(30.dp)
                                 )
                             } else {
-//                                var imageUri by remember {
-//                                    mutableStateOf<Uri?>(null)
-//                                }
-//                                val launcher = rememberLauncherForActivityResult(
-//                                    contract = ActivityResultContracts.OpenDocument()
-//                                ) {
-//                                    imageUri = it
-//                                }
-//                                SideEffect {
-//                                    launcher.launch(arrayOf(carInfo.carPhotoPath))
-//                                }
-//
-//                                imageUri?.let {
-//
-//                                }
                                 Image(
-                                    painter = rememberImagePainter(
-                                        data = Uri.parse(carInfo.carPhotoPath)
-                                    ),
+                                    bitmap = ImageBitmapString.StringToBitMap(carInfo.carPhoto)!!.asImageBitmap(),
                                     contentDescription =null,
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier
-                                        .size(if (carInfo != null && carInfo.carPhotoPath != null) 75.dp else 30.dp)
+                                        .size(75.dp)
                                         .clip(CircleShape))
+//                                Log.i("tag333", carInfo.carPhotoPath.toString())
                             }
 
 

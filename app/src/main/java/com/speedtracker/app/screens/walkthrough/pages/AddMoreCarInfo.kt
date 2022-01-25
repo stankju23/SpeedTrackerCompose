@@ -6,6 +6,7 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -40,11 +41,12 @@ import androidx.lifecycle.MutableLiveData
 import coil.compose.rememberImagePainter
 import com.speedtracker.R
 import com.speedtracker.helper.AssetsHelper
+import com.speedtracker.helper.ImageBitmapString
 import com.speedtracker.ui.theme.Typography
 import java.util.*
 
 @Composable
-fun AddMoreCarInfo(manufacturedYear:MutableLiveData<Int>,imageUriLiveData:MutableLiveData<Uri>,context:Context) {
+fun AddMoreCarInfo(manufacturedYear:MutableLiveData<Int>, imageLiveData:MutableLiveData<String>, context:Context) {
 
     var imageUri by remember {
         mutableStateOf<Uri?>(null)
@@ -52,7 +54,6 @@ fun AddMoreCarInfo(manufacturedYear:MutableLiveData<Int>,imageUriLiveData:Mutabl
     val launcher = rememberLauncherForActivityResult(contract =
     ActivityResultContracts.GetContent()) { uri: Uri? ->
         imageUri = uri
-        imageUriLiveData.value = uri
     }
 //    val bitmap =  remember {
 //        mutableStateOf<Bitmap?>(null)
@@ -88,25 +89,18 @@ fun AddMoreCarInfo(manufacturedYear:MutableLiveData<Int>,imageUriLiveData:Mutabl
             })
         {
             imageUri?.let {
-//                if (Build.VERSION.SDK_INT < 28) {
-//                    bitmap.value = AssetsHelper.bitmapResize(MediaStore.Images
-//                        .Media.getBitmap(context.contentResolver,it),200,200)
-//                } else {
-//                    val source = ImageDecoder
-//                        .createSource(context.contentResolver,it)
-//                    bitmap.value = AssetsHelper.bitmapResize(ImageDecoder.decodeBitmap(source),200,200)
-//                }
-//
-//                bitmap.value?.let {  btm ->
-//                    Image(bitmap = btm.asImageBitmap(),
-//                        contentDescription =null,
-//                        contentScale = ContentScale.Crop,
-//                        modifier = Modifier.size(200.dp) .clip(CircleShape))
-//                }
-                var ImageUriString = imageUri.toString()
+                var image: Bitmap
+                if (Build.VERSION.SDK_INT < 28) {
+                    image = MediaStore.Images.Media.getBitmap(context.contentResolver,it)
+                    imageLiveData.value = ImageBitmapString.BitMapToString(image)
+                } else {
+                    val source = ImageDecoder.createSource(context.contentResolver,it)
+                    image =ImageDecoder.decodeBitmap(source)
+                    imageLiveData.value = ImageBitmapString.BitMapToString(image)
+                }
+
                 Image(
-                    painter = rememberImagePainter(
-                    data = Uri.parse(ImageUriString)),
+                    bitmap = image.asImageBitmap(),
                     contentDescription =null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.size(200.dp) .clip(CircleShape))

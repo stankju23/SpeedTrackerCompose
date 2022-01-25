@@ -5,14 +5,11 @@ package com.speedtracker.app.screens.walkthrough.pages
 import android.content.Context
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.rememberCompositionContext
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,7 +19,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -68,7 +64,7 @@ fun WalkthroughScreen(context: Context,walkthroughViewModel: WalkthroughViewMode
                     CarBrandModelPage(AssetsHelper.parseCarsBrands(context),walkthroughViewModel = walkthroughViewModel)
                 }
                 1 -> {
-                    AddMoreCarInfo(manufacturedYear = walkthroughViewModel.manufacturedYear, context = context, imageUriLiveData = walkthroughViewModel.carImageUri)
+                    AddMoreCarInfo(manufacturedYear = walkthroughViewModel.manufacturedYear, context = context, imageLiveData = walkthroughViewModel.carImage)
                 }
             }
         }
@@ -98,12 +94,11 @@ fun WalkthroughScreen(context: Context,walkthroughViewModel: WalkthroughViewMode
                             navigationController.popBackStack()
                             navigationController.navigate("speed-meter")
                             statisticsViewModel.initializeStatisticsData(context = context)
-                            var ImageUriString = walkthroughViewModel.carImageUri.value!!.toString()
                             var carInfoToStore = CarInfo(carModel = walkthroughViewModel.carModel.value!!,
                                 carBrand =  walkthroughViewModel.carBrand.value!!,
                                 carIdentifier = UUID.randomUUID().toString(),
                                 carManufacturedYear = walkthroughViewModel.manufacturedYear.value.toString(),
-                                carPhotoPath = if (walkthroughViewModel.carImageUri.value != null) ImageUriString else null,
+                                carPhoto = if (walkthroughViewModel.carImage.value != null) walkthroughViewModel.carImage.value!! else null,
                                 id = Calendar.getInstance().time.time.toInt())
                             carInfo.value = carInfoToStore
                             scope.launch {

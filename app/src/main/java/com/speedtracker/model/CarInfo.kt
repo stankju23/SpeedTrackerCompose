@@ -11,7 +11,7 @@ data class CarInfo(
     @ColumnInfo(name = "carBrand") var carBrand:String,
     @ColumnInfo(name = "carModel") var carModel:String,
     @ColumnInfo(name = "carManufacturedYear") var carManufacturedYear:String,
-    @ColumnInfo(name = "carPhotoPath")var carPhotoPath:String? = null,
+    @ColumnInfo(name = "carPhoto")var carPhoto:String? = null,
 )
 
 @Entity

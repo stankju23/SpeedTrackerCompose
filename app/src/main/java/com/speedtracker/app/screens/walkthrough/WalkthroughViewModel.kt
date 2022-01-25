@@ -1,10 +1,8 @@
 package com.speedtracker.app.screens.walkthrough
 
-import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
-import androidx.activity.result.contract.ActivityResultContracts
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.speedtracker.R
@@ -23,7 +21,7 @@ class WalkthroughViewModel:ViewModel() {
     var carBrand:MutableLiveData<String> = MutableLiveData("")
     var carModel:MutableLiveData<String> = MutableLiveData("")
 
-    var carImageUri:MutableLiveData<Uri> = MutableLiveData()
+    var carImage:MutableLiveData<String> = MutableLiveData()
     var manufacturedYear:MutableLiveData<Int> = MutableLiveData(0)
 
     var carBrandIndex:MutableLiveData<Int> = MutableLiveData(0)
@@ -47,8 +45,9 @@ class WalkthroughViewModel:ViewModel() {
                     carBrand = carBrand.value!!,
                     carModel = carModel.value!!,
                     carManufacturedYear = manufacturedYear.value!!.toString(),
-                    carPhotoPath = if (carImageUri.value != null) carImageUri.value!!.path else null
+                    carPhoto = if (carImage.value != null) carImage.value!! else null
                 )
+//                Log.i("tag222", carInfo.carPhotoPath.toString())
                 scope.launch {
                     AppDatabase.getDatabase(context = context).carInfoDao().insertCarInfo(carInfo = carInfo)
                 }
