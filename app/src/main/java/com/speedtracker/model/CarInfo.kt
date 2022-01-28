@@ -58,6 +58,9 @@ interface CarInfoDao {
     @Insert(onConflict = IGNORE)
     suspend fun insertCarInfo(carInfo: CarInfo)
 
+    @Update
+    suspend fun updateCarInfo(carInfo: CarInfo)
+
 }
 
 @Dao

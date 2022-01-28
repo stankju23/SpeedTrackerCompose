@@ -43,18 +43,12 @@ import com.speedtracker.R
 import com.speedtracker.helper.AssetsHelper
 import com.speedtracker.helper.ImageBitmapString
 import com.speedtracker.ui.theme.Typography
+import kotlinx.coroutines.launch
 import java.util.*
 
 @Composable
 fun AddMoreCarInfo(manufacturedYear:MutableLiveData<Int>, imageLiveData:MutableLiveData<String>, context:Context) {
 
-    var imageUri by remember {
-        mutableStateOf<Uri?>(null)
-    }
-    val launcher = rememberLauncherForActivityResult(contract =
-    ActivityResultContracts.GetContent()) { uri: Uri? ->
-        imageUri = uri
-    }
 //    val bitmap =  remember {
 //        mutableStateOf<Bitmap?>(null)
 //    }
@@ -75,48 +69,7 @@ fun AddMoreCarInfo(manufacturedYear:MutableLiveData<Int>, imageLiveData:MutableL
 
         Spacer(modifier = Modifier.weight(1f))
 
-        IconButton(
-            modifier = Modifier
-                .width(200.dp)
-                .height(200.dp)
-                .border(
-                    width = 2.dp,
-                    color = Color.White,
-                    shape = CircleShape
-                ),
-            onClick = {
-                launcher.launch("image/*")
-            })
-        {
-            imageUri?.let {
-                var image: Bitmap
-                if (Build.VERSION.SDK_INT < 28) {
-                    image = MediaStore.Images.Media.getBitmap(context.contentResolver,it)
-                    imageLiveData.value = ImageBitmapString.BitMapToString(image)
-                } else {
-                    val source = ImageDecoder.createSource(context.contentResolver,it)
-                    image =ImageDecoder.decodeBitmap(source)
-                    imageLiveData.value = ImageBitmapString.BitMapToString(image)
-                }
-
-                Image(
-                    bitmap = image.asImageBitmap(),
-                    contentDescription =null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(200.dp) .clip(CircleShape))
-
-            }
-            if (imageUri == null) {
-                Icon(
-                    Icons.Rounded.PhotoCamera,
-                    modifier = Modifier
-                        .width(50.dp)
-                        .height(50.dp),
-                    contentDescription = "Photo image",
-                    tint = Color.White)
-            }
-
-        }
+        CarPhotoImage(context = context, imageLiveData = imageLiveData)
 
         Spacer(modifier = Modifier.weight(1f))
 
@@ -127,29 +80,38 @@ fun AddMoreCarInfo(manufacturedYear:MutableLiveData<Int>, imageLiveData:MutableL
             color = Color.White,
         )
 
+
         Spacer(modifier = Modifier.weight(1f))
+        TypeYearTextField(manufacturedYear = manufacturedYear, initialText = "")
+        Spacer(modifier = Modifier.weight(1f))
+    }
+}
 
-        var text by remember { mutableStateOf("") }
-        var isError by rememberSaveable { mutableStateOf(false) }
+@Composable
+fun TypeYearTextField(manufacturedYear: MutableLiveData<Int>,initialText:String) {
+    var text by remember { mutableStateOf(initialText) }
+    var isError by rememberSaveable { mutableStateOf(false) }
 
-        fun validate(text: String) {
-            if (text.length == 4) {
+    fun validate(text: String) {
+        if (text.length == 4) {
+            try {
                 if (text.toInt() < 1950 || text.toInt() > Calendar.getInstance().get(Calendar.YEAR)) {
                     isError = true
                 } else {
                     isError = false
                 }
-            } else {
-                if (isError == true) {
-                    isError = false
-                }
+            } catch (e:Exception) {
+                isError = true
             }
 
+        } else {
+            if (isError == true) {
+                isError = false
+            }
         }
 
-        Spacer(modifier = Modifier.weight(1f))
-
-        Column {
+    }
+    Column {
         TextField(
             value = text,
             textStyle = Typography.labelSmall,
@@ -168,16 +130,73 @@ fun AddMoreCarInfo(manufacturedYear:MutableLiveData<Int>, imageLiveData:MutableL
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             keyboardActions = KeyboardActions { validate(text) }
         )
-            if (isError) {
-                Text(
-                    text = "Type correct year",
-                    color = MaterialTheme.colorScheme.error,
-                    style = androidx.compose.material.MaterialTheme.typography.caption,
-                    modifier = Modifier.padding(start = 16.dp)
-                )
-            }
+        if (isError) {
+            Text(
+                text = "Type correct year",
+                color = MaterialTheme.colorScheme.error,
+                style = androidx.compose.material.MaterialTheme.typography.caption,
+                modifier = Modifier.padding(start = 16.dp)
+            )
         }
-        Spacer(modifier = Modifier.weight(1f))
+    }
+}
+
+@Composable
+fun CarPhotoImage(context: Context, imageLiveData: MutableLiveData<String>) {
+
+    var imageUri by remember {
+        mutableStateOf<Uri?>(null)
+    }
+    val launcher = rememberLauncherForActivityResult(contract =
+    ActivityResultContracts.GetContent()) { uri: Uri? ->
+        imageUri = uri
+    }
+    IconButton(
+        modifier = Modifier
+            .width(200.dp)
+            .height(200.dp)
+            .border(
+                width = 2.dp,
+                color = Color.White,
+                shape = CircleShape
+            ),
+        onClick = {
+            launcher.launch("image/*")
+        })
+    {
+        imageUri?.let {
+            var image: Bitmap
+            if (Build.VERSION.SDK_INT < 28) {
+                image = MediaStore.Images.Media.getBitmap(
+                    context.contentResolver,it)
+            } else {
+                val source = ImageDecoder.createSource(context.contentResolver,it)
+                image =ImageDecoder.decodeBitmap(source)
+            }
+
+            Image(
+                bitmap = image.asImageBitmap(),
+                contentDescription =null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(200.dp)
+                    .clip(CircleShape))
+            imageLiveData.value = imageUri.toString()
+//                LaunchedEffect(key1 = "") {
+//                    imageLiveData.value = ImageBitmapString.BitMapToString(image)
+//                }
+
+        }
+        if (imageUri == null) {
+            Icon(
+                Icons.Rounded.PhotoCamera,
+                modifier = Modifier
+                    .width(50.dp)
+                    .height(50.dp),
+                contentDescription = "Photo image",
+                tint = Color.White)
+        }
+
     }
 }
 

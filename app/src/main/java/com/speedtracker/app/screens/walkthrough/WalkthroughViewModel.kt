@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.speedtracker.R
 import com.speedtracker.model.AppDatabase
+import com.speedtracker.model.Car
 import com.speedtracker.model.CarInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -39,14 +40,14 @@ class WalkthroughViewModel:ViewModel() {
             return false
         } else {
             if (errors.size == 0) {
-                var carInfo = CarInfo(
-                    id = null,
-                    carIdentifier = UUID.randomUUID().toString(),
-                    carBrand = carBrand.value!!,
-                    carModel = carModel.value!!,
-                    carManufacturedYear = manufacturedYear.value!!.toString(),
-                    carPhoto = if (carImage.value != null) carImage.value!! else null
-                )
+               var carInfo = CarInfo(
+                   id = null,
+                   carIdentifier = UUID.randomUUID().toString(),
+                   carBrand = carBrand.value!!,
+                   carModel = carModel.value!!,
+                   carManufacturedYear = manufacturedYear.value!!.toString(),
+                   carPhoto = if (carImage.value != null) carImage.value!! else null
+               )
 //                Log.i("tag222", carInfo.carPhotoPath.toString())
                 scope.launch {
                     AppDatabase.getDatabase(context = context).carInfoDao().insertCarInfo(carInfo = carInfo)
@@ -55,6 +56,37 @@ class WalkthroughViewModel:ViewModel() {
             }
         }
         return false
+    }
+
+    suspend fun updateCarPreferences(context: Context,carInfo: MutableLiveData<CarInfo?>) {
+        validateData()
+        if (errors.size > 0) {
+            showErrorDialog.value = true
+        } else {
+            if (errors.size == 0) {
+//                Log.i("tag222", carInfo.carPhotoPath.toString())
+                var carInfoValue = carInfo.value!!
+                carInfoValue.carBrand = carBrand.value!!
+                carInfoValue.carModel = carModel.value!!
+                carInfoValue.carManufacturedYear = manufacturedYear.value!!.toString()
+                AppDatabase.getDatabase(context = context).carInfoDao().updateCarInfo(carInfo = carInfoValue)
+                carInfo.value = carInfoValue
+            }
+        }
+    }
+
+    fun initializeBrandAndModelFromCarInfo(brand:String, model:String,carList:List<Car>,manufacturedYear:MutableLiveData<Int>) {
+        var brandIndex =  brandList.value!!.indexOf(brand)
+        carBrandIndex.value = brandIndex
+        carBrand.value = brand
+
+        modelList.value = carList[brandIndex - 1].models
+
+        var modelIndex = modelList.value!!.indexOf(model)
+        carModelIndex.value = modelIndex
+        carModel.value = model
+
+        this.manufacturedYear = manufacturedYear
     }
 
     private fun validateData() {

@@ -1,9 +1,10 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 
 package com.speedtracker
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.Application
 import android.content.ContentValues.TAG
 import android.content.Context
@@ -16,11 +17,15 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.animation.core.animateOffset
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -28,12 +33,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
@@ -47,8 +57,9 @@ import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.Task
+import com.speedtracker.app.screens.editcarinfo.EditCarInfoScreen
 import com.speedtracker.app.screens.headup.HeadUpScreen
-import com.speedtracker.app.screens.mainscreen.drawer.DrawerView
+import com.speedtracker.app.screens.mainscreen.drawer.Drawer
 import com.speedtracker.app.screens.mainscreen.drawer.NavDrawerItem
 import com.speedtracker.app.screens.mainscreen.speed.SpeedViewModel
 import com.speedtracker.app.screens.mainscreen.statistics.StatisticsViewModel
@@ -58,6 +69,7 @@ import com.speedtracker.app.screens.trips.TripViewModel
 import com.speedtracker.app.screens.walkthrough.WalkthroughViewModel
 import com.speedtracker.app.screens.walkthrough.pages.MainScreenView
 import com.speedtracker.app.screens.walkthrough.pages.WalkthroughScreen
+import com.speedtracker.helper.AssetsHelper
 import com.speedtracker.helper.Constants
 import com.speedtracker.helper.GenerallData
 import com.speedtracker.model.AppDatabase
@@ -83,14 +95,14 @@ import kotlin.math.roundToInt
 class CoreApplication: Application()
 
 @AndroidEntryPoint
-class MainActivity : DrawerView(), GpsStatus.Listener {
+class MainActivity : ComponentActivity(), GpsStatus.Listener {
 
     val speedViewModel by viewModels<SpeedViewModel>()
     val statisticsViewModel by viewModels<StatisticsViewModel>()
     val walkthroughViewModel by viewModels<WalkthroughViewModel>()
     val tripViewModel by viewModels<TripViewModel>()
 
-    lateinit var scaffoldState:ScaffoldState
+//    lateinit var scaffoldState:ScaffoldState
     lateinit var scope:CoroutineScope
     lateinit var navController:NavHostController
 
@@ -112,29 +124,66 @@ class MainActivity : DrawerView(), GpsStatus.Listener {
     var startDestination:String = "splash-screen"
 
     var canUpdateSpeed:Boolean = false
-
+    lateinit var drawerState:MutableState<DrawerValue>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         setContent {
             SpeedTrackerComposeTheme {
-                scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
+                drawerState = remember { mutableStateOf(DrawerValue.Closed) }
+
+
+//                scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
                 scope = rememberCoroutineScope()
                 navController = rememberNavController()
 
                 // A surface container using the 'background' color from the theme
                 Scaffold(
-                    scaffoldState = scaffoldState,
-                    drawerGesturesEnabled = false,
+                    drawerGesturesEnabled = false
                     // scrimColor = Color.Red,  // Color for the fade background when you open/close the drawer
-                    drawerContent = {
-                            Drawer(scope = scope, scaffoldState = scaffoldState, navController = navController,carInfo = carInfo.observeAsState().value, context = this@MainActivity)
-                    },
-                    drawerShape = customShape()
+//                    drawerContent = {
+//                        Drawer(scope = scope, scaffoldState = scaffoldState, navController = navController,carInfo = carInfo)
+//                    },
+//                    drawerShape = customShape()
                 ) {
                     checkGPSPermission()
-                    Navigation(navController = navController,scope,scaffoldState)
+                    Box {
+                        Navigation(navController = navController,scope,drawerState)
+
+//                        val configuration = LocalConfiguration.current
+
+//                        val screenWidth = configuration.screenWidthDp.dp
+//                        val drawerWidth = screenWidth/5*4
+
+
+//                        val transition = updateTransition(targetState = drawerState)
+//                        val slide by transition.animateOffset(transitionSpec = {
+//                            if (this.targetState.value == DrawerValue.Open) {
+//                                tween(1000)
+//                            } else {
+//                                tween(3000)
+//                                //spring(dampingRatio = Spring.DampingRatioLowBouncy) - I want this spec too
+//                            }
+//
+//                        }) {
+//                            if (it.value == DrawerValue.Open) {
+//                                Offset(0f,0f)
+//                            }  else {
+//                                Offset(-drawerWidth.value,0f)
+//                            }
+//                        }
+
+                        if(drawerState.value == DrawerValue.Open) {
+                            Box(modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.2f))) {
+                                Drawer(modifier = Modifier, scope = scope, scaffoldState = drawerState, navController = navController,carInfo = carInfo)
+                            }
+                        }
+                    }
+
+
                 }
 
             }
@@ -276,7 +325,7 @@ class MainActivity : DrawerView(), GpsStatus.Listener {
     }
 
     @Composable
-    fun Navigation(navController: NavHostController, scope: CoroutineScope, scaffoldState: ScaffoldState) {
+    fun Navigation(navController: NavHostController, scope: CoroutineScope, scaffoldState: MutableState<DrawerValue>) {
 
         NavHost(navController, startDestination = startDestination) {
             composable("speed-meter") {
@@ -303,6 +352,18 @@ class MainActivity : DrawerView(), GpsStatus.Listener {
             }
             composable(NavDrawerItem.Settings.route) {
                 SettingsScreen(context = this@MainActivity)
+            }
+
+            composable("edit-car-info") {
+                var carList = AssetsHelper.parseCarsBrands(this@MainActivity)
+                var brandStringList = carList.map { car -> car.brand }
+                AssetsHelper.sortArrayAlphabetically(brandStringList as ArrayList<String>)
+                brandStringList.add(0,"Choose your brand")
+                walkthroughViewModel.brandList.value = brandStringList
+                Log.d("Manufactured year", MutableLiveData(carInfo.value!!.carManufacturedYear.toInt()).toString())
+                walkthroughViewModel.initializeBrandAndModelFromCarInfo(brand = carInfo.value!!.carBrand, model = carInfo.value!!.carModel, carList = carList, manufacturedYear = MutableLiveData(carInfo.value!!.carManufacturedYear.toInt()))
+
+                EditCarInfoScreen(carList = carList, walkthroughViewModel = this@MainActivity.walkthroughViewModel, context = this@MainActivity, carInfo = this@MainActivity.carInfo , scope = scope)
             }
 
             composable("splash-screen"){
@@ -335,10 +396,11 @@ class MainActivity : DrawerView(), GpsStatus.Listener {
     }
 
     override fun onBackPressed() {
-        if (scope != null && scaffoldState != null) {
-            if (scaffoldState.drawerState.isOpen) {
+        if (scope != null && drawerState != null) {
+            if (drawerState.value == DrawerValue.Open) {
                 scope.launch {
-                    scaffoldState.drawerState.close()
+                    drawerState.value = DrawerValue.Closed
+//                    scaffoldState.drawerState.close()
                 }
             } else {
                 if (navController.currentDestination != null) {
@@ -536,4 +598,19 @@ class MainActivity : DrawerView(), GpsStatus.Listener {
                 }
             }
     }
+}
+
+/**
+ * Possible values of [DrawerState].
+ */
+enum class DrawerValue {
+    /**
+     * The state of the drawer when it is closed.
+     */
+    Closed,
+
+    /**
+     * The state of the drawer when it is open.
+     */
+    Open
 }

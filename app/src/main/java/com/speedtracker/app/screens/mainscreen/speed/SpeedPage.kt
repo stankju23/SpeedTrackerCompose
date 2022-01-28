@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
+import com.speedtracker.DrawerValue
 import com.speedtracker.R
 import com.speedtracker.app.screens.components.LoadingComponent
 import com.speedtracker.app.screens.mainscreen.statistics.StatisticsViewModel
@@ -43,7 +44,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ActualSpeedPart(context: Context,modifier: Modifier, speed: MutableLiveData<Int>, scope: CoroutineScope, scaffoldState: ScaffoldState, speedViewModel: SpeedViewModel,statisticsViewModel: StatisticsViewModel,showTripDialog:MutableLiveData<Boolean>) {
+fun ActualSpeedPart(context: Context, modifier: Modifier, speed: MutableLiveData<Int>, scope: CoroutineScope, scaffoldState:  MutableState<DrawerValue>, speedViewModel: SpeedViewModel, statisticsViewModel: StatisticsViewModel, showTripDialog:MutableLiveData<Boolean>) {
     Column(modifier = modifier) {
         ActualSpeedPartTopBar(context = context,scope, scaffoldState, speedViewModel = speedViewModel, showTripDialog = showTripDialog, statisticsViewModel = statisticsViewModel)
         Column(
@@ -67,7 +68,7 @@ fun ActualSpeedPart(context: Context,modifier: Modifier, speed: MutableLiveData<
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ActualSpeedPartTopBar(context: Context,scope: CoroutineScope, scaffoldState: ScaffoldState, speedViewModel: SpeedViewModel,statisticsViewModel: StatisticsViewModel,showTripDialog: MutableLiveData<Boolean>) {
+fun ActualSpeedPartTopBar(context: Context,scope: CoroutineScope, scaffoldState:  MutableState<DrawerValue>, speedViewModel: SpeedViewModel,statisticsViewModel: StatisticsViewModel,showTripDialog: MutableLiveData<Boolean>) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -76,7 +77,7 @@ fun ActualSpeedPartTopBar(context: Context,scope: CoroutineScope, scaffoldState:
     ) {
         IconButton(onClick = {
             scope.launch {
-                scaffoldState.drawerState.open()
+                scaffoldState.value = DrawerValue.Open
             }
         })
         {
@@ -95,10 +96,12 @@ fun ActualSpeedPartTopBar(context: Context,scope: CoroutineScope, scaffoldState:
         }
         IconButton(onClick = {
 //            speedViewModel.speed.value = speedViewModel.speed.value!! + 30
-            if (statisticsViewModel.trip.value == null) {
-                showTripDialog.value = true
-            } else {
-                statisticsViewModel.closeTrip(context = context)
+            if (scaffoldState.value == DrawerValue.Closed) {
+                if (statisticsViewModel.trip.value == null) {
+                    showTripDialog.value = true
+                } else {
+                    statisticsViewModel.closeTrip(context = context)
+                }
             }
         }) {
             Icon(

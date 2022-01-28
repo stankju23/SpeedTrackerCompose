@@ -13,7 +13,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ScaffoldState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -34,6 +33,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
+import com.speedtracker.DrawerValue
 import com.speedtracker.R
 import com.speedtracker.app.screens.mainscreen.speed.ActualSpeedPart
 import com.speedtracker.app.screens.mainscreen.speed.AdditionalInfoItem
@@ -46,7 +46,7 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun MainScreenView(scope: CoroutineScope, scaffoldState: ScaffoldState,speedViewModel: SpeedViewModel,statisticsViewModel: StatisticsViewModel,context: Context,showTripDialog:MutableLiveData<Boolean>, tripName:MutableLiveData<String>,) {
+fun MainScreenView(scope: CoroutineScope, scaffoldState: MutableState<DrawerValue>, speedViewModel: SpeedViewModel, statisticsViewModel: StatisticsViewModel, context: Context, showTripDialog:MutableLiveData<Boolean>, tripName:MutableLiveData<String>,) {
     Column(modifier = Modifier
         .fillMaxSize()) {
         ActualSpeedPart(modifier = Modifier

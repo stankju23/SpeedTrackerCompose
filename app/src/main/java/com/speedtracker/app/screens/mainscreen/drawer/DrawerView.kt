@@ -2,6 +2,7 @@
 
 package com.speedtracker.app.screens.mainscreen.drawer
 
+import android.content.ContentUris
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,6 +39,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
+import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.ImageLoader
@@ -53,9 +57,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.io.File
 
-open class DrawerView : ComponentActivity() {
     @Composable
-    fun Drawer(scope: CoroutineScope, scaffoldState: ScaffoldState, navController: NavController,carInfo:CarInfo?,context:Context) {
+    fun Drawer(modifier: Modifier,scope: CoroutineScope, scaffoldState: MutableState<com.speedtracker.DrawerValue>, navController: NavController,carInfo:MutableLiveData<CarInfo?>) {
         val items = listOf(
             NavDrawerItem.TripList,
             NavDrawerItem.HeadUpDisplay,
@@ -69,7 +72,7 @@ open class DrawerView : ComponentActivity() {
         val drawerWidth = screenWidth/5*4
 
         Column(
-            modifier = Modifier.width(drawerWidth)
+            modifier = modifier.width(drawerWidth).background(Color.White)
         ) {
             // Header
             Column(
@@ -87,17 +90,24 @@ open class DrawerView : ComponentActivity() {
                         )
                         Spacer(modifier = Modifier.weight(1f))
                     }
-                    Icon(
-                        painter = painterResource(
-                            id = R.drawable.edit_icon
-                        ),
-                        contentDescription = "This is edit icon.",
+                    IconButton(
                         modifier = Modifier
                             .size(30.dp)
                             .align(Alignment.TopEnd)
                             .padding(end = 10.dp),
-                        tint = Color.White
-                    )
+                        onClick = {
+                            navController.navigate("edit-car-info")
+                            // Close drawer
+                            scope.launch {
+                                scaffoldState.value = com.speedtracker.DrawerValue.Closed
+                            }
+                        }) {
+                        Icon(painter = painterResource(
+                            id = R.drawable.edit_icon),
+                            contentDescription = "This is edit icon.",
+
+                            tint = Color.White,)
+                    }
                 }
                 Row(
                     modifier = Modifier
@@ -111,7 +121,7 @@ open class DrawerView : ComponentActivity() {
                                 .border(2.dp, color = Color.White, CircleShape),
                             onClick = {}) {
 
-                            if (carInfo == null || carInfo!!.carPhoto ==  null) {
+                            if (carInfo.observeAsState().value == null || carInfo.observeAsState().value!!.carPhoto ==  null) {
                                 Image(
                                     painter = painterResource(id = R.drawable.ic_add_photo),
                                     contentDescription = "Car icon",
@@ -120,8 +130,16 @@ open class DrawerView : ComponentActivity() {
                                         .size(30.dp)
                                 )
                             } else {
+                                Log.i("Image Uri", carInfo.observeAsState().value!!.carPhoto!!.toUri().toString())
+//                                val uriId = ContentUris.parseId(Uri.parse(carInfo.carPhoto))
+//                                val contentUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,uriId)
+                                val painter = rememberImagePainter(
+                                    data = Uri.parse(carInfo.observeAsState().value!!.carPhoto)
+                                )
+                                Log.i("Image Uri", carInfo.observeAsState().value!!.carPhoto!!.toUri().toString())
+//                                bitmap = ImageBitmapString.StringToBitMap(carInfo.carPhoto)!!.asImageBitmap()
                                 Image(
-                                    bitmap = ImageBitmapString.StringToBitMap(carInfo.carPhoto)!!.asImageBitmap(),
+                                    painter = painter,
                                     contentDescription =null,
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier
@@ -145,13 +163,13 @@ open class DrawerView : ComponentActivity() {
                             CarInfoText(
                                 modifier = Modifier.fillMaxWidth(),
                                 title = "Car Brand",
-                                message = if (carInfo!=null) carInfo.carBrand else "Unknown",
+                                message = if (carInfo.observeAsState().value != null) carInfo.observeAsState().value!!.carBrand else "Unknown",
                                 textAlign = TextAlign.Start
                             )
                             CarInfoText(
                                 modifier = Modifier.fillMaxWidth(),
                                 title = "Car Model",
-                                message =  if (carInfo!=null) carInfo.carModel else "Unknown",
+                                message =  if (carInfo.observeAsState().value != null) carInfo.observeAsState().value!!.carModel else "Unknown",
                                 textAlign = TextAlign.Start
                             )
                         }
@@ -165,7 +183,7 @@ open class DrawerView : ComponentActivity() {
                                     .fillMaxWidth()
                                     .padding(start = 10.dp),
                                 title = "Year",
-                                message = if (carInfo!=null) carInfo.carManufacturedYear else "Unknown",
+                                message = if (carInfo.observeAsState().value != null) carInfo.observeAsState().value!!.carManufacturedYear else "Unknown",
                                 textAlign = TextAlign.Start
                             )
                         }
@@ -201,7 +219,7 @@ open class DrawerView : ComponentActivity() {
                     }
                     // Close drawer
                     scope.launch {
-                        scaffoldState.drawerState.close()
+                        scaffoldState.value = com.speedtracker.DrawerValue.Closed
                     }
                 })
             }
@@ -268,7 +286,7 @@ open class DrawerView : ComponentActivity() {
     }
 
     @Composable
-    fun CloseDraweBottomView(modifier: Modifier,scope: CoroutineScope, scaffoldState: ScaffoldState) {
+    fun CloseDraweBottomView(modifier: Modifier,scope: CoroutineScope, scaffoldState: MutableState<com.speedtracker.DrawerValue>) {
         Row(modifier = modifier
             .height(50.dp)
             .background(brush = MainGradientBG),
@@ -276,7 +294,7 @@ open class DrawerView : ComponentActivity() {
             verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = {
                 scope.launch {
-                    scaffoldState.drawerState.close()
+                    scaffoldState.value = com.speedtracker.DrawerValue.Closed
                 }
             }) {
                 Icon(Icons.Default.ArrowBack,
@@ -289,8 +307,8 @@ open class DrawerView : ComponentActivity() {
     @Composable
     fun PreviewCloseDraweBottomView() {
         val scope = rememberCoroutineScope()
-        val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
-        CloseDraweBottomView(modifier = Modifier.fillMaxWidth(), scope = scope, scaffoldState = scaffoldState)
+//        val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
+//        CloseDraweBottomView(modifier = Modifier.fillMaxWidth(), scope = scope, scaffoldState = scaffoldState)
     }
 
     @Preview(showBackground = false)
@@ -298,4 +316,3 @@ open class DrawerView : ComponentActivity() {
     fun DrawerItemPreview() {
         DrawerItem(item = NavDrawerItem.SpeedMeter, onItemClick = {})
     }
-}
