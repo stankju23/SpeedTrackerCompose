@@ -356,6 +356,7 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    canUpdateSpeed = true
                     MainScreenView(scope = scope,
                         scaffoldState = scaffoldState,
                         speedViewModel = speedViewModel,
@@ -457,7 +458,8 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                             easing = FastOutSlowInEasing
                         )
                     )
-                }
+                },
+                popEnterTransition = {null}
             ) {
                 TripListPage(context = this@MainActivity, tripViewModel = tripViewModel,navController = navController)
             }
