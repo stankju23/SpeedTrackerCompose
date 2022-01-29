@@ -83,6 +83,12 @@ interface TripDao {
     @Query("SELECT * FROM TripInfo WHERE tripId = :id")
     suspend fun getTripDataById(id: Long): TripData
 
+    @Query("DELETE FROM TripInfo WHERE tripId = :tripId")
+    suspend fun removeTrip(tripId: Long)
+
+    @Query("DELETE FROM Location WHERE tripIdentifier = :tripId")
+    suspend fun removeLocations(tripId: Long)
+
 }
 
 @Database(entities = [CarInfo::class,TripInfo::class,Location::class], exportSchema = false, version = 1)

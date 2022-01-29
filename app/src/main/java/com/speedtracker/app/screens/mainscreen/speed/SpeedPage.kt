@@ -124,7 +124,7 @@ fun SpeedText(modifier: Modifier, speed: MutableLiveData<Int>) {
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
 
         Text(
-            text = "${ if(GenerallData.isMetric.value!!) (speed.observeAsState().value!! * Constants.msToKmh).toInt() else (speed.observeAsState().value!!.toInt() * Constants.msToMph).toInt() } ",
+            text = "${ if(GenerallData.isMetric.observeAsState().value!!) (speed.observeAsState().value!! * Constants.msToKmh).toInt() else (speed.observeAsState().value!!.toInt() * Constants.msToMph).toInt() } ",
             color = Color.White,
             maxLines = 1,
             style = speedTextStyle,

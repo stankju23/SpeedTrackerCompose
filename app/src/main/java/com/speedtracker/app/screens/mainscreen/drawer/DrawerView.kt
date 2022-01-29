@@ -62,8 +62,7 @@ import java.io.File
         val items = listOf(
             NavDrawerItem.TripList,
             NavDrawerItem.HeadUpDisplay,
-            NavDrawerItem.Settings,
-            NavDrawerItem.About
+            NavDrawerItem.Settings
 
         )
         val configuration = LocalConfiguration.current

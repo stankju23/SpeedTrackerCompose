@@ -1,4 +1,6 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class,
+    ExperimentalAnimationApi::class
+)
 
 package com.speedtracker
 
@@ -23,9 +25,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.animation.core.animateOffset
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -42,7 +43,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Density
@@ -50,10 +50,11 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.navigation.animation.AnimatedNavHost
+import com.google.accompanist.navigation.animation.composable
+import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.Task
@@ -64,8 +65,10 @@ import com.speedtracker.app.screens.mainscreen.drawer.NavDrawerItem
 import com.speedtracker.app.screens.mainscreen.speed.SpeedViewModel
 import com.speedtracker.app.screens.mainscreen.statistics.StatisticsViewModel
 import com.speedtracker.app.screens.settings.SettingsScreen
-import com.speedtracker.app.screens.trips.triplist.TripNavigation
+import com.speedtracker.app.screens.settings.SettingsViewModel
 import com.speedtracker.app.screens.trips.TripViewModel
+import com.speedtracker.app.screens.trips.triplist.TripListPage
+import com.speedtracker.app.screens.trips.tripmap.TripMapPage
 import com.speedtracker.app.screens.walkthrough.WalkthroughViewModel
 import com.speedtracker.app.screens.walkthrough.pages.MainScreenView
 import com.speedtracker.app.screens.walkthrough.pages.WalkthroughScreen
@@ -101,6 +104,7 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
     val statisticsViewModel by viewModels<StatisticsViewModel>()
     val walkthroughViewModel by viewModels<WalkthroughViewModel>()
     val tripViewModel by viewModels<TripViewModel>()
+    val settingsViewModel by viewModels<SettingsViewModel>()
 
 //    lateinit var scaffoldState:ScaffoldState
     lateinit var scope:CoroutineScope
@@ -136,7 +140,7 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
 
 //                scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
                 scope = rememberCoroutineScope()
-                navController = rememberNavController()
+                navController = rememberAnimatedNavController()
 
                 // A surface container using the 'background' color from the theme
                 Scaffold(
@@ -148,42 +152,56 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
 //                    drawerShape = customShape()
                 ) {
                     checkGPSPermission()
-                    Box {
-                        Navigation(navController = navController,scope,drawerState)
-
-//                        val configuration = LocalConfiguration.current
-
-//                        val screenWidth = configuration.screenWidthDp.dp
-//                        val drawerWidth = screenWidth/5*4
 
 
-//                        val transition = updateTransition(targetState = drawerState)
-//                        val slide by transition.animateOffset(transitionSpec = {
-//                            if (this.targetState.value == DrawerValue.Open) {
-//                                tween(1000)
-//                            } else {
-//                                tween(3000)
-//                                //spring(dampingRatio = Spring.DampingRatioLowBouncy) - I want this spec too
-//                            }
-//
-//                        }) {
-//                            if (it.value == DrawerValue.Open) {
-//                                Offset(0f,0f)
-//                            }  else {
-//                                Offset(-drawerWidth.value,0f)
-//                            }
-//                        }
+                    val configuration = LocalConfiguration.current
 
-                        if(drawerState.value == DrawerValue.Open) {
-                            Box(modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.Black.copy(alpha = 0.2f))) {
-                                Drawer(modifier = Modifier, scope = scope, scaffoldState = drawerState, navController = navController,carInfo = carInfo)
+                    val screenWidth = configuration.screenWidthDp.dp
+
+                    val xOffset by animateDpAsState(
+                        targetValue = if (drawerState.value == DrawerValue.Open) screenWidth / 5 * 4  else 0.dp
+                    )
+
+
+                    BoxWithConstraints() {
+
+//                        val mainContentAnimation = animateOffsetAsState(
+//                            targetValue = Offset(
+//                                x = if (drawerState.value == DrawerValue.Open) {
+//                                    screenWidth.value / 5 * 4
+//                                } else {
+//                                    0f
+//                                },
+//                                y = 0f
+//                            ),
+//                            animationSpec = TweenSpec(
+//                                durationMillis = 250,
+//                                easing = FastOutSlowInEasing
+//                            )
+//                        )
+
+                        Box {
+                            if (xOffset.value != 0f) {
+                                Drawer(
+                                    modifier = Modifier,
+                                    scope = scope,
+                                    scaffoldState = drawerState,
+                                    navController = navController,
+                                    carInfo = carInfo
+                                )
                             }
+                            Box(
+                                modifier = Modifier.offset(
+                                    x = xOffset
+                                )
+                            ) {
+                                Navigation(navController = navController, scope, drawerState)
+                            }
+
                         }
+
+
                     }
-
-
                 }
 
             }
@@ -196,9 +214,10 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
             if (carInfos != null && carInfos.size > 0) {
                 startDestination = "speed-meter"
                 runOnUiThread {
-                    this@MainActivity.statisticsViewModel.initializeStatisticsData(this@MainActivity)
+                    this@MainActivity.statisticsViewModel.initializeStatisticsData(this@MainActivity, settingsViewModel = settingsViewModel)
                     canUpdateSpeed = true
                     carInfo.value = carInfos.last()
+
                 }
             } else {
                 startDestination = "walkthrough"
@@ -327,8 +346,12 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
     @Composable
     fun Navigation(navController: NavHostController, scope: CoroutineScope, scaffoldState: MutableState<DrawerValue>) {
 
-        NavHost(navController, startDestination = startDestination) {
-            composable("speed-meter") {
+        AnimatedNavHost(navController, startDestination = startDestination) {
+            composable("speed-meter" ,
+                enterTransition = { null },
+                popEnterTransition = { null},
+                exitTransition = {null},
+                popExitTransition = {null}) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -343,28 +366,69 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
 
                 }
             }
+
             composable("walkthrough") {
                 WalkthroughScreen(context = this@MainActivity,
                     walkthroughViewModel = walkthroughViewModel,
                     navigationController = navController,
                     statisticsViewModel = statisticsViewModel,
-                    carInfo = carInfo)
-            }
-            composable(NavDrawerItem.Settings.route) {
-                SettingsScreen(context = this@MainActivity)
+                    carInfo = carInfo,
+                    settingsViewModel = this@MainActivity.settingsViewModel)
             }
 
-            composable("edit-car-info") {
-                var carList = AssetsHelper.parseCarsBrands(this@MainActivity)
-                var brandStringList = carList.map { car -> car.brand }
-                AssetsHelper.sortArrayAlphabetically(brandStringList as ArrayList<String>)
-                brandStringList.add(0,"Choose your brand")
-                walkthroughViewModel.brandList.value = brandStringList
-                Log.d("Manufactured year", MutableLiveData(carInfo.value!!.carManufacturedYear.toInt()).toString())
-                walkthroughViewModel.initializeBrandAndModelFromCarInfo(brand = carInfo.value!!.carBrand, model = carInfo.value!!.carModel, carList = carList, manufacturedYear = MutableLiveData(carInfo.value!!.carManufacturedYear.toInt()))
-
-                EditCarInfoScreen(carList = carList, walkthroughViewModel = this@MainActivity.walkthroughViewModel, context = this@MainActivity, carInfo = this@MainActivity.carInfo , scope = scope)
+            composable(route = NavDrawerItem.Settings.route,
+                enterTransition = {
+                    slideInHorizontally (
+                        initialOffsetX = {300},
+                        animationSpec = tween(
+                            durationMillis = 300,
+                            easing = FastOutSlowInEasing
+                        )
+                    )
+                },
+                popExitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = {300},
+                        animationSpec = tween(
+                            durationMillis = 300,
+                            easing = FastOutSlowInEasing
+                        )
+                    )
+                }) {
+                SettingsScreen(context = this@MainActivity, settingsViewModel = this@MainActivity.settingsViewModel, statisticsViewModel = this@MainActivity.statisticsViewModel)
             }
+
+            composable("edit-car-info",
+                enterTransition = {
+                    slideInHorizontally (
+                        initialOffsetX = {300},
+                        animationSpec = tween(
+                            durationMillis = 300,
+                            easing = FastOutSlowInEasing
+                        )
+                    )
+                },
+                popExitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = {300},
+                        animationSpec = tween(
+                            durationMillis = 300,
+                            easing = FastOutSlowInEasing
+                        )
+                    )
+                }) {
+                    var carList = AssetsHelper.parseCarsBrands(this@MainActivity)
+                    var brandStringList = carList.map { car -> car.brand }
+                    AssetsHelper.sortArrayAlphabetically(brandStringList as ArrayList<String>)
+                    brandStringList.add(0,"Choose your brand")
+                    walkthroughViewModel.brandList.value = brandStringList
+                    Log.d("Manufactured year", MutableLiveData(carInfo.value!!.carManufacturedYear.toInt()).toString())
+                    walkthroughViewModel.initializeBrandAndModelFromCarInfo(brand = carInfo.value!!.carBrand, model = carInfo.value!!.carModel, carList = carList, manufacturedYear = MutableLiveData(carInfo.value!!.carManufacturedYear.toInt()))
+
+                    EditCarInfoScreen(carList = carList, walkthroughViewModel = this@MainActivity.walkthroughViewModel, context = this@MainActivity, carInfo = this@MainActivity.carInfo , scope = scope)
+
+                }
+
 
             composable("splash-screen"){
                 Box(modifier = Modifier
@@ -375,16 +439,72 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                 }
             }
 
-            composable(NavDrawerItem.TripList.route){
-                Box(modifier = Modifier
-                    .fillMaxSize(),
-                    ) {
-                    TripNavigation(context = this@MainActivity, scope = scope, tripViewModel = this@MainActivity.tripViewModel)
-//                    TripListPage(this@MainActivity, scope = scope)
+            composable(NavDrawerItem.TripList.route,
+                enterTransition = {
+                    slideInHorizontally (
+                        initialOffsetX = {300},
+                        animationSpec = tween(
+                            durationMillis = 300,
+                            easing = FastOutSlowInEasing
+                        )
+                    )
+                },
+                popExitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = {300},
+                        animationSpec = tween(
+                            durationMillis = 300,
+                            easing = FastOutSlowInEasing
+                        )
+                    )
                 }
+            ) {
+                TripListPage(context = this@MainActivity, tripViewModel = tripViewModel,navController = navController)
             }
 
-            composable(NavDrawerItem.HeadUpDisplay.route){
+            composable("trip-detail",
+                enterTransition = {
+                    slideInHorizontally (
+                        initialOffsetX = {300},
+                        animationSpec = tween(
+                            durationMillis = 300,
+                            easing = FastOutSlowInEasing
+                        )
+                    )
+                },
+                popExitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = {300},
+                        animationSpec = tween(
+                            durationMillis = 300,
+                            easing = FastOutSlowInEasing
+                        )
+                    )
+                }
+            ) {
+                TripMapPage(context = this@MainActivity, tripViewModel = tripViewModel)
+            }
+
+            composable(NavDrawerItem.HeadUpDisplay.route,
+                enterTransition = {
+                    slideInHorizontally (
+                        initialOffsetX = {300},
+                        animationSpec = tween(
+                            durationMillis = 300,
+                            easing = FastOutSlowInEasing
+                        )
+                    )
+                },
+                popExitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = {300},
+                        animationSpec = tween(
+                            durationMillis = 300,
+                            easing = FastOutSlowInEasing
+                        )
+                    )
+                }
+            ) {
                 Box(modifier = Modifier
                     .fillMaxSize(),
                 ) {
@@ -394,6 +514,7 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
             }
         }
     }
+
 
     override fun onBackPressed() {
         if (scope != null && drawerState != null) {

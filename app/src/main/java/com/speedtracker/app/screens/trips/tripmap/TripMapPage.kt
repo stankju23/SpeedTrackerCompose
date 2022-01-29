@@ -166,7 +166,7 @@ fun TripMapPage(context: Context,tripViewModel: TripViewModel) {
                             .fillMaxHeight()
                             .border(1.dp, color = MainGradientStartColor.copy(alpha = 0.5f)),
                         image = R.drawable.ic_avgspeed,
-                        value = if (GenerallData.isMetric.observeAsState().value!!) if (tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.countOfUpdates == 0) "0.0" else "${(tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.sumOfTripSpeed / tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.countOfUpdates / Constants.msToKmh).toInt()}" else if (tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.countOfUpdates == 0) "0.0" else "${(tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.sumOfTripSpeed / tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.countOfUpdates / Constants.msToMph).toInt()}",
+                        value = if (GenerallData.isMetric.observeAsState().value!!) if (tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.countOfUpdates == 0) "0.0" else "${(tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.sumOfTripSpeed / tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.countOfUpdates * Constants.msToKmh).toInt()}" else if (tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.countOfUpdates == 0) "0.0" else "${(tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.sumOfTripSpeed / tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.countOfUpdates * Constants.msToMph).toInt()}",
                         description = "Average speed",
                         unit = if (GenerallData.isMetric.value!!) "km/h" else "mph"
                     )
@@ -182,7 +182,7 @@ fun TripMapPage(context: Context,tripViewModel: TripViewModel) {
                             .fillMaxHeight()
                             .border(1.dp, color = MainGradientStartColor.copy(alpha = 0.5f)),
                         image = R.drawable.ic_topspeed,
-                        value = if (GenerallData.isMetric.observeAsState().value!!) "${(tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.maxSpeed / Constants.msToKmh).toInt()}" else "${(tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.maxSpeed / Constants.msToMph).toInt()}",
+                        value = if (GenerallData.isMetric.observeAsState().value!!) "${(tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.maxSpeed * Constants.msToKmh).toInt()}" else "${(tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.maxSpeed * Constants.msToMph).toInt()}",
                         description = "Top Speed",
                         unit = if (GenerallData.isMetric.value!!) "km/h" else "mph"
                     )

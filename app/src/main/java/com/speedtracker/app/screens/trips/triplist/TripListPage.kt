@@ -1,11 +1,12 @@
 @file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class,
-    ExperimentalMaterialApi::class
+    ExperimentalMaterialApi::class, ExperimentalAnimationApi::class
 )
 
 package com.speedtracker.app.screens.trips.triplist
 
 import android.app.Activity
 import android.content.Context
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -30,34 +31,19 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.speedtracker.R
-import com.speedtracker.app.screens.trips.tripmap.TripMapPage
 import com.speedtracker.app.screens.trips.TripViewModel
 import com.speedtracker.ui.theme.MainGradientStartColor
 import com.speedtracker.ui.theme.Nunito
-import kotlinx.coroutines.CoroutineScope
 
 var dataLoaded:MutableLiveData<Boolean> = MutableLiveData(false)
 var showNoTripData:MutableLiveData<Boolean> = MutableLiveData(false)
 
-lateinit var navController:NavHostController
 
 @Composable
-fun TripNavigation(context: Context,scope: CoroutineScope,tripViewModel: TripViewModel) {
-    navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "trip-list") {
-        composable("trip-list") { TripListPage(context = context, tripViewModel = tripViewModel)}
-        composable("trip-detail") { TripMapPage(context = context, tripViewModel = tripViewModel) }
-    }
-}
-
-
-@Composable
-fun TripListPage(context: Context,tripViewModel: TripViewModel) {
+fun TripListPage(context: Context,tripViewModel: TripViewModel,navController: NavHostController) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -94,7 +80,7 @@ fun TripListPage(context: Context,tripViewModel: TripViewModel) {
             if (showNoTripData.observeAsState().value!!) {
                 NoTrip()
             } else {
-                TripList(context = context, tripViewModel = tripViewModel)
+                TripList(context = context, tripViewModel = tripViewModel, navController = navController)
             }
         }
 
@@ -138,7 +124,7 @@ fun NoTrip() {
 }
 
 @Composable
-fun TripList(context: Context,tripViewModel: TripViewModel) {
+fun TripList(context: Context,tripViewModel: TripViewModel,navController: NavHostController) {
     LazyColumn(modifier = Modifier
         .fillMaxWidth()
         .fillMaxHeight()
@@ -150,7 +136,9 @@ fun TripList(context: Context,tripViewModel: TripViewModel) {
             val dismissState = rememberDismissState()
 
             if (dismissState.isDismissed(DismissDirection.EndToStart)) {
+                tripViewModel.deleteTrip(index = index, context = context)
                 tripViewModel.tripList.value!!.removeAt(index)
+
             }
 
             SwipeToDismiss(
@@ -182,7 +170,7 @@ fun TripList(context: Context,tripViewModel: TripViewModel) {
                 },
                 dismissContent = {
                     if (tripViewModel.tripList.value!!.size != 0) {
-                        TripListItem(index = index, context = context, tripViewModel = tripViewModel)
+                        TripListItem(index = index, context = context, tripViewModel = tripViewModel, navController = navController)
                     } else {
                         showNoTripData.value = true
                     }

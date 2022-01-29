@@ -10,4 +10,8 @@ interface AppDataStore {
 
     fun getCurrentlyStartedTrip():Flow<Long?>
     suspend fun setCurrentlyStartedTrip(identifier:Long)
+
+    fun getIsMetric():Flow<Boolean?>
+    suspend fun setIsMetric(isMetric:Boolean)
+
 }

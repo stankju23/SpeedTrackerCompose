@@ -18,14 +18,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.speedtracker.R
 import com.speedtracker.app.screens.trips.TripViewModel
 import com.speedtracker.helper.Formatter
 import com.speedtracker.ui.theme.Nunito
 
 @Composable
-fun TripListItem(index:Int, context: Context, tripViewModel: TripViewModel) {
-
+fun TripListItem(index:Int, context: Context, tripViewModel: TripViewModel,navController: NavHostController) {
 //    var filterLocations = tripData.locations
     var tripData = tripViewModel.tripList.value!!.get(index)
     var filterLocations = tripData.locations.filter { location -> location.latitude != 0.0 && location.longitude != 0.0 }

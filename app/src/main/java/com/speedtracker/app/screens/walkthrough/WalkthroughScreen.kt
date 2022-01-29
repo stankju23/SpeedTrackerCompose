@@ -26,6 +26,7 @@ import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.rememberPagerState
 import com.speedtracker.R
 import com.speedtracker.app.screens.mainscreen.statistics.StatisticsViewModel
+import com.speedtracker.app.screens.settings.SettingsViewModel
 import com.speedtracker.app.screens.walkthrough.WalkthroughViewModel
 import com.speedtracker.helper.AssetsHelper
 import com.speedtracker.model.AppDatabase
@@ -38,7 +39,7 @@ import java.util.*
 
 
 @Composable
-fun WalkthroughScreen(context: Context,walkthroughViewModel: WalkthroughViewModel,navigationController: NavHostController,statisticsViewModel: StatisticsViewModel,carInfo:MutableLiveData<CarInfo?>) {
+fun WalkthroughScreen(context: Context,walkthroughViewModel: WalkthroughViewModel,navigationController: NavHostController,statisticsViewModel: StatisticsViewModel,settingsViewModel: SettingsViewModel,carInfo:MutableLiveData<CarInfo?>) {
     val mainButtonColor = ButtonDefaults.buttonColors(
         containerColor = MainGradientStartColor,
         contentColor = MaterialTheme.colorScheme.surface
@@ -93,7 +94,7 @@ fun WalkthroughScreen(context: Context,walkthroughViewModel: WalkthroughViewMode
                             // nav to speed view
                             navigationController.popBackStack()
                             navigationController.navigate("speed-meter")
-                            statisticsViewModel.initializeStatisticsData(context = context)
+                            statisticsViewModel.initializeStatisticsData(context = context, settingsViewModel = settingsViewModel)
                             var carInfoToStore = CarInfo(carModel = walkthroughViewModel.carModel.value!!,
                                 carBrand =  walkthroughViewModel.carBrand.value!!,
                                 carIdentifier = UUID.randomUUID().toString(),

@@ -6,9 +6,12 @@ import android.location.Geocoder
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.room.Index
 import com.speedtracker.model.AppDatabase
 import com.speedtracker.model.Location
 import com.speedtracker.model.TripData
+import kotlinx.coroutines.launch
 import java.lang.Exception
 import java.util.*
 import kotlin.collections.ArrayList
@@ -56,5 +59,13 @@ class TripViewModel : ViewModel() {
 
     suspend fun loadTrips(context:Context) {
         tripList.value = ArrayList(AppDatabase.getDatabase(context = context).tripDao().getAllTripData().reversed())
+    }
+
+    fun deleteTrip(index: Int, context: Context) {
+        viewModelScope.launch {
+            var tripID = tripList.value!!.get(index).tripInfo.tripId
+            AppDatabase.getDatabase(context = context).tripDao().removeTrip(tripID)
+            AppDatabase.getDatabase(context = context).tripDao().removeLocations(tripID)
+        }
     }
 }

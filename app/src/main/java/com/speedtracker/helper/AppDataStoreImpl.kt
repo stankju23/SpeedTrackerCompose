@@ -61,6 +61,21 @@ class AppDataStoreImpl @Inject constructor(@ApplicationContext val context: Cont
         }
     }
 
+    override fun getIsMetric(): Flow<Boolean?> = context.overallDataStore.data.map { isMetricPref ->
+        Log.d("Get Is Metric","Called")
+        var isMetric:Boolean? = null
+        if (isMetricPref[PreferencesKeys.IS_METRIC] != null) {
+            isMetric = isMetricPref[PreferencesKeys.IS_METRIC]
+        }
+        isMetric
+    }
+
+    override suspend fun setIsMetric(isMetric: Boolean) {
+        context.overallDataStore.edit { dataStore ->
+            dataStore[PreferencesKeys.IS_METRIC] = isMetric
+        }
+    }
+
 }
 
 private object PreferencesKeys {
@@ -71,4 +86,6 @@ private object PreferencesKeys {
 
 
     val CURRENTLY_STARTED_TRIP = longPreferencesKey("currently_started_trip")
+
+    val IS_METRIC = booleanPreferencesKey("is_metric")
 }

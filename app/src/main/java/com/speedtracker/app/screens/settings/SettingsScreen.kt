@@ -31,16 +31,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
+import com.speedtracker.app.screens.mainscreen.statistics.StatisticsViewModel
+import com.speedtracker.helper.GenerallData
 import com.speedtracker.ui.theme.MainGradientEndColor
 import com.speedtracker.ui.theme.MainGradientStartColor
 import com.speedtracker.ui.theme.Nunito
 import com.speedtracker.ui.theme.Pink40
 
-var resetApp: MutableLiveData<Boolean> = MutableLiveData(false)
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun SettingsScreen(context: Context) {
+fun SettingsScreen(context: Context, settingsViewModel: SettingsViewModel,statisticsViewModel:StatisticsViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -64,8 +64,14 @@ fun SettingsScreen(context: Context) {
                         title = "Metric system",
                         subtitle = "You can choose between metric or imperial unit system. Metric is set by default.",
                         rightPart = {
-                            val checkedState = remember { mutableStateOf(true) }
-                            Switch(modifier = Modifier.padding(start = 20.dp,end = 12.dp),checked = checkedState.value, onCheckedChange = {checkedState.value = it})
+                            val checkedState = remember { mutableStateOf(GenerallData.isMetric.value!!) }
+                            Switch(modifier = Modifier.padding(start = 20.dp,end = 12.dp),
+                                checked = checkedState.value,
+                                onCheckedChange = {
+                                    checkedState.value = it
+                                    GenerallData.isMetric.value = it
+                                    settingsViewModel.updateIsMetricSetting(it, statisticsViewModel = statisticsViewModel, context = context)
+                                })
                         })
                     Separator()
                     SettingsItem(modifier = Modifier.clickable { }, title = "Reset App", subtitle = "Click to remove all stored data.", rightPart = null)
@@ -182,8 +188,8 @@ fun PreviewSettingsItem() {
     })
 }
 
-@Preview
-@Composable
-fun PreviewSettingsScreen() {
-    SettingsScreen(context = LocalContext.current)
-}
+//@Preview
+//@Composable
+//fun PreviewSettingsScreen() {
+//    SettingsScreen(context = LocalContext.current, SettingsViewModel())
+//}
