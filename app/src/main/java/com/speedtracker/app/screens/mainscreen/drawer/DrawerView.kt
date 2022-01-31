@@ -48,6 +48,7 @@ import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.skydoves.landscapist.glide.GlideImage
 import com.speedtracker.R
+import com.speedtracker.app.screens.walkthrough.WalkthroughViewModel
 import com.speedtracker.helper.AssetsHelper
 import com.speedtracker.helper.ImageBitmapString
 import com.speedtracker.model.CarInfo
@@ -58,7 +59,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 
     @Composable
-    fun Drawer(modifier: Modifier,scope: CoroutineScope, scaffoldState: MutableState<com.speedtracker.DrawerValue>, navController: NavController,carInfo:MutableLiveData<CarInfo?>) {
+    fun Drawer(context:Context,modifier: Modifier,scope: CoroutineScope, scaffoldState: MutableState<com.speedtracker.DrawerValue>, navController: NavController,carInfo:MutableLiveData<CarInfo?>,walkthroughViewModel:WalkthroughViewModel) {
         val items = listOf(
             NavDrawerItem.TripList,
             NavDrawerItem.HeadUpDisplay,
@@ -69,6 +70,16 @@ import java.io.File
 
         val screenWidth = configuration.screenWidthDp.dp
         val drawerWidth = screenWidth/5*4
+
+        val launcher = rememberLauncherForActivityResult(contract =
+        ActivityResultContracts.GetContent()) { uri: Uri? ->
+            var carInfoValue = carInfo.value
+            carInfoValue!!.carPhoto =  uri.toString()
+            carInfo.value = carInfoValue
+            scope.launch {
+                walkthroughViewModel.updateCarPreferences(context = context, carInfo = carInfo)
+            }
+        }
 
         Column(
             modifier = modifier.width(drawerWidth).background(Color.White)
@@ -118,7 +129,9 @@ import java.io.File
                             modifier = Modifier
                                 .size(75.dp)
                                 .border(2.dp, color = Color.White, CircleShape),
-                            onClick = {}) {
+                            onClick = {
+                                launcher.launch("image/*")
+                            }) {
 
                             if (carInfo.observeAsState().value == null || carInfo.observeAsState().value!!.carPhoto ==  null) {
                                 Image(
@@ -266,7 +279,7 @@ import java.io.File
                 .padding(start = 10.dp)
         ) {
             Image(
-                painter = painterResource(id = item.icon),
+                painter = painterResource(id = item.icon!!),
                 contentDescription = item.title,
                 colorFilter = ColorFilter.tint(Color.Black),
                 contentScale = ContentScale.Fit,

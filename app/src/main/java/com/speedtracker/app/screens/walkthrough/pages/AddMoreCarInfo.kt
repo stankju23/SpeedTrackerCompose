@@ -38,12 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
-import coil.compose.rememberImagePainter
-import com.speedtracker.R
-import com.speedtracker.helper.AssetsHelper
-import com.speedtracker.helper.ImageBitmapString
 import com.speedtracker.ui.theme.Typography
-import kotlinx.coroutines.launch
 import java.util.*
 
 @Composable
@@ -144,13 +139,19 @@ fun TypeYearTextField(manufacturedYear: MutableLiveData<Int>,initialText:String)
 @Composable
 fun CarPhotoImage(context: Context, imageLiveData: MutableLiveData<String>) {
 
+
     var imageUri by remember {
         mutableStateOf<Uri?>(null)
     }
+
+
     val launcher = rememberLauncherForActivityResult(contract =
     ActivityResultContracts.GetContent()) { uri: Uri? ->
+        imageLiveData.value = uri.toString()
         imageUri = uri
     }
+
+
     IconButton(
         modifier = Modifier
             .width(200.dp)

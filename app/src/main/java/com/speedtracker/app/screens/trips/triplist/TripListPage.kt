@@ -48,14 +48,14 @@ fun TripListPage(context: Context,tripViewModel: TripViewModel,navController: Na
         topBar = {
             TopAppBar(
                 title = { Text(text = "Trip List", color = Color.White, fontFamily = Nunito) },
-               backgroundColor = MainGradientStartColor,
-                navigationIcon = {
-                    IconButton(onClick = {(context as Activity).onBackPressed()}) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "BackArrow", tint = Color.White)
-                        dataLoaded.value = false
-                        showNoTripData.value = false
-                    }
-                },
+                backgroundColor = MainGradientStartColor
+//                navigationIcon = {
+//                    IconButton(onClick = {(context as Activity).onBackPressed()}) {
+//                        Icon(Icons.Default.ArrowBack, contentDescription = "BackArrow", tint = Color.White)
+//                        dataLoaded.value = false
+//                        showNoTripData.value = false
+//                    }
+//                },
             )
         }
     ) {

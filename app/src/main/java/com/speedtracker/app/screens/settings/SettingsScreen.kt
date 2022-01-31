@@ -45,12 +45,12 @@ fun SettingsScreen(context: Context, settingsViewModel: SettingsViewModel,statis
         topBar = {
             TopAppBar(
                 title = { Text(text = "Settings", color = Color.White, fontFamily = Nunito) },
-                backgroundColor = MainGradientStartColor,
-                navigationIcon = {
-                    IconButton(onClick = {(context as Activity).onBackPressed()}) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "BackArrow", tint = Color.White)
-                    }
-                }
+                backgroundColor = MainGradientStartColor
+//                navigationIcon = {
+//                    IconButton(onClick = {(context as Activity).onBackPressed()}) {
+//                        Icon(Icons.Default.ArrowBack, contentDescription = "BackArrow", tint = Color.White)
+//                    }
+//                }
             )
         }
     ) {

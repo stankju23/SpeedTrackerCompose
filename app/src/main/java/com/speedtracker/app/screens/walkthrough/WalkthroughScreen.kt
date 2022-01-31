@@ -24,6 +24,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.rememberPagerState
+import com.speedtracker.MainActivity
 import com.speedtracker.R
 import com.speedtracker.app.screens.mainscreen.statistics.StatisticsViewModel
 import com.speedtracker.app.screens.settings.SettingsViewModel
@@ -93,7 +94,6 @@ fun WalkthroughScreen(context: Context,walkthroughViewModel: WalkthroughViewMode
                         if (moveToApp) {
                             // nav to speed view
                             navigationController.popBackStack()
-                            navigationController.navigate("speed-meter")
                             statisticsViewModel.initializeStatisticsData(context = context, settingsViewModel = settingsViewModel)
                             var carInfoToStore = CarInfo(carModel = walkthroughViewModel.carModel.value!!,
                                 carBrand =  walkthroughViewModel.carBrand.value!!,
@@ -105,6 +105,9 @@ fun WalkthroughScreen(context: Context,walkthroughViewModel: WalkthroughViewMode
                             scope.launch {
                                 AppDatabase.getDatabase(context = context).carInfoDao().insertCarInfo(carInfo = carInfoToStore)
                             }
+//                            navigationController.navigate(route = "speed-meter")
+                            (context as MainActivity).showBottomView.value = true
+
                         }
                     } else {
                         scope.launch {
