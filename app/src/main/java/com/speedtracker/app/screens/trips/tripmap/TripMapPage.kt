@@ -60,7 +60,7 @@ fun TripMapPage(paddingValues: PaddingValues,context: Context,tripViewModel: Tri
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { androidx.compose.material.Text(text = tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.tripName!!, color = Color.White, fontFamily = Nunito) },
+                title = { androidx.compose.material.Text(text = tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.tripName!!.replaceFirstChar { it.uppercase()}, color = Color.White, fontFamily = Nunito) },
                 backgroundColor = MainGradientStartColor,
                 navigationIcon = {
                     IconButton(onClick = {(context as Activity).onBackPressed()}) {
@@ -72,6 +72,7 @@ fun TripMapPage(paddingValues: PaddingValues,context: Context,tripViewModel: Tri
     ) {
         Column(modifier = Modifier
             .fillMaxSize()
+            .padding(bottom = paddingValues.calculateBottomPadding())
             .background(color = MainGradientEndColor)) {
             val configuration = LocalConfiguration.current
             var mapWidth = configuration.screenWidthDp

@@ -30,7 +30,7 @@ fun StatisticsPage(statisticList: List<Statistic>) {
 @Preview
 @Composable
 fun PreviewStatisticsPage() {
-    var itemsList = listOf(Statistic(iconDrawable = R.drawable.ic_avgspeed,name = "Overall max speed", value = "1.2","km/h"))
+    var itemsList = listOf(Statistic(iconDrawable = R.drawable.ic_avgspeed,name = "Overall max speed", desc = "", value = "1.2","km/h"))
     StatisticsPage(statisticList = itemsList)
 }
 

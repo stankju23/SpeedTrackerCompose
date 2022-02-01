@@ -19,7 +19,7 @@ val Typography = Typography(
     bodyLarge = TextStyle(
         fontFamily = Nunito,
         fontWeight = FontWeight.Normal,
-        fontSize = 160.sp,
+        fontSize = 150.sp,
         color = Color.White
     ),
 

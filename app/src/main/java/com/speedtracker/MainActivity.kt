@@ -249,7 +249,7 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                     modifier = Modifier
                         .background(Color.Transparent),
                     cutoutShape = CircleShape,
-                    backgroundColor = MainGradientEndColor
+                    backgroundColor = MainGradientStartColor
 
                 ) {
                     BottomNavigation(navController = navController)
@@ -268,7 +268,7 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                         restoreState = true
                     }
                 },
-                    backgroundColor = MainGradientEndColor
+                    backgroundColor = MainGradientStartColor
                 ) {
                     Icon(painter = painterResource(id = R.drawable.tachometer), "", tint = Color.White)
                 }
@@ -311,7 +311,7 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
 
         )
         BottomNavigation(
-            backgroundColor = MainGradientEndColor
+            backgroundColor = MainGradientStartColor
         ) {
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentRoute = navBackStackEntry?.destination?.route
@@ -754,7 +754,6 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                             "\t${(locationResult.lastLocation.speed * Constants.msToMph).toInt()} mil"
                         )
                     }
-
 //                    Toast.makeText(applicationContext,"Accuracy is ${locationResult.lastLocation.accuracy}",Toast.LENGTH_SHORT).show()
                     Log.i("Accuracy", "${locationResult.lastLocation.accuracy}")
 
@@ -774,8 +773,7 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                         Log.i("Current speed", currentSpeed.toString())
 
                         if (currentSpeed > minValuableSpeed) {
-                            speedViewModel.speed.value =
-                                (locationResult.lastLocation.speed).roundToInt()
+                            speedViewModel.speed.value = currentSpeed
 //                            speedViewModel.animateSpeed(speedViewModel.speed.value!!, )
                             speedViewModel.actualLatitude = locationResult.lastLocation.latitude
                             speedViewModel.actualLongitude = locationResult.lastLocation.longitude

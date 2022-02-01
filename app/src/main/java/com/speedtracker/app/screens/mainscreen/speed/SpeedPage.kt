@@ -44,9 +44,9 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ActualSpeedPart(context: Context, modifier: Modifier, speed: MutableLiveData<Int>, scope: CoroutineScope, scaffoldState:  MutableState<DrawerValue>, speedViewModel: SpeedViewModel, statisticsViewModel: StatisticsViewModel, showTripDialog:MutableLiveData<Boolean>) {
+fun ActualSpeedPart(context: Context, modifier: Modifier, speed: MutableLiveData<Int>, scaffoldState:  MutableState<DrawerValue>, speedViewModel: SpeedViewModel, statisticsViewModel: StatisticsViewModel, showTripDialog:MutableLiveData<Boolean>) {
     Column(modifier = modifier) {
-        ActualSpeedPartTopBar(context = context,scope, scaffoldState, speedViewModel = speedViewModel, showTripDialog = showTripDialog, statisticsViewModel = statisticsViewModel)
+        ActualSpeedPartTopBar(context = context, scaffoldState, speedViewModel = speedViewModel, showTripDialog = showTripDialog, statisticsViewModel = statisticsViewModel)
         Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.Center
@@ -68,7 +68,7 @@ fun ActualSpeedPart(context: Context, modifier: Modifier, speed: MutableLiveData
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ActualSpeedPartTopBar(context: Context,scope: CoroutineScope, scaffoldState:  MutableState<DrawerValue>, speedViewModel: SpeedViewModel,statisticsViewModel: StatisticsViewModel,showTripDialog: MutableLiveData<Boolean>) {
+fun ActualSpeedPartTopBar(context: Context, scaffoldState:  MutableState<DrawerValue>, speedViewModel: SpeedViewModel,statisticsViewModel: StatisticsViewModel,showTripDialog: MutableLiveData<Boolean>) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -124,7 +124,7 @@ fun SpeedText(modifier: Modifier, speed: MutableLiveData<Int>) {
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
 
         Text(
-            text = "${ if(GenerallData.isMetric.observeAsState().value!!) (speed.observeAsState().value!! * Constants.msToKmh).toInt() else (speed.observeAsState().value!!.toInt() * Constants.msToMph).toInt() } ",
+            text = "${speed.observeAsState().value!!}",
             color = Color.White,
             maxLines = 1,
             style = speedTextStyle,
