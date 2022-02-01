@@ -52,11 +52,11 @@ fun TripMapScreenPreview() {
     val tripViewModel = TripViewModel()
     val context = LocalContext.current
     tripViewModel.choosedTrip.value = TripData(tripInfo = TripInfo(0,"Ahoj",1000,10,160,100.0,Calendar.getInstance().time.time,Calendar.getInstance().time.time), locations = arrayListOf(Location(0,1,18.5,49.5,420.0,10)))
-    TripMapPage(context = context, tripViewModel = tripViewModel)
+    TripMapPage(context = context, tripViewModel = tripViewModel, paddingValues = PaddingValues(16.dp ))
 }
 
 @Composable
-fun TripMapPage(context: Context,tripViewModel: TripViewModel) {
+fun TripMapPage(paddingValues: PaddingValues,context: Context,tripViewModel: TripViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(

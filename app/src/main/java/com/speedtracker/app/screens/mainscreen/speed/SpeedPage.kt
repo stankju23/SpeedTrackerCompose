@@ -75,18 +75,18 @@ fun ActualSpeedPartTopBar(context: Context,scope: CoroutineScope, scaffoldState:
             .height(60.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = {
-            scope.launch {
-                scaffoldState.value = DrawerValue.Open
-            }
-        })
-        {
-            Icon(
-                imageVector = Icons.Filled.Menu,
-                contentDescription = "Menu Btn",
-                tint = Color.White
-            )
-        }
+//        IconButton(onClick = {
+//            scope.launch {
+//                scaffoldState.value = DrawerValue.Open
+//            }
+//        })
+//        {
+//            Icon(
+//                imageVector = Icons.Filled.Menu,
+//                contentDescription = "Menu Btn",
+//                tint = Color.White
+//            )
+//        }
         if (speedViewModel.searchingForGPSLocation.observeAsState().value == true) {
             LoadingComponent(modifier = Modifier
                 .weight(1f)

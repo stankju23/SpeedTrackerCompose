@@ -1,4 +1,5 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class,
+@file:OptIn(
+    ExperimentalComposeUiApi::class,
     ExperimentalAnimationApi::class
 )
 
@@ -10,6 +11,7 @@ import android.app.Activity
 import android.app.Application
 import android.content.ContentValues.TAG
 import android.content.Context
+import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.location.GnssStatus
@@ -18,6 +20,7 @@ import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Looper
+import android.os.PersistableBundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -30,12 +33,20 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.ripple.RippleAlpha
+import androidx.compose.material.ripple.RippleTheme
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.RoundRect
@@ -44,14 +55,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
+import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
@@ -79,6 +94,8 @@ import com.speedtracker.model.AppDatabase
 import com.speedtracker.model.CarInfo
 import com.speedtracker.model.Location
 import com.speedtracker.ui.theme.MainGradientBG
+import com.speedtracker.ui.theme.MainGradientEndColor
+import com.speedtracker.ui.theme.MainGradientStartColor
 import com.speedtracker.ui.theme.SpeedTrackerComposeTheme
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.HiltAndroidApp
@@ -95,7 +112,8 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
 @HiltAndroidApp
-class CoreApplication: Application()
+class CoreApplication : Application()
+
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity(), GpsStatus.Listener {
@@ -106,11 +124,12 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
     val tripViewModel by viewModels<TripViewModel>()
     val settingsViewModel by viewModels<SettingsViewModel>()
 
-//    lateinit var scaffoldState:ScaffoldState
-    lateinit var scope:CoroutineScope
-    lateinit var navController:NavHostController
+    //    lateinit var scaffoldState:ScaffoldState
+    lateinit var scope: CoroutineScope
+    lateinit var navController: NavHostController
 
     var checkAccuracy: Boolean = false
+
     //Snr > 40
     var highSnrValue: Double = 25.0
     private var fusedLocationClient: FusedLocationProviderClient? = null
@@ -121,119 +140,220 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
 
     lateinit var observer: Disposable
 
-    var showTripDialog:MutableLiveData<Boolean> = MutableLiveData(false)
-    var tripName:MutableLiveData<String> = MutableLiveData("")
-    var carInfo:MutableLiveData<CarInfo?> = MutableLiveData()
+    var showTripDialog: MutableLiveData<Boolean> = MutableLiveData(false)
+    var tripName: MutableLiveData<String> = MutableLiveData("")
+    var carInfo: MutableLiveData<CarInfo?> = MutableLiveData()
 
-    var startDestination:String = "splash-screen"
+    var startDestination: String = "splash-screen"
 
-    var canUpdateSpeed:Boolean = false
-    lateinit var drawerState:MutableState<DrawerValue>
+    var canUpdateSpeed: Boolean = false
+    lateinit var drawerState: MutableState<DrawerValue>
+
+    var showBottomView:MutableLiveData<Boolean?> = MutableLiveData(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        setContent {
-            SpeedTrackerComposeTheme {
-                drawerState = remember { mutableStateOf(DrawerValue.Closed) }
+
+
+            GlobalScope.launch((Dispatchers.IO)) {
+//            statisticsViewModel.getAllTrips(context = this@MainActivity)
+                var carInfos = AppDatabase.getDatabase(this@MainActivity).carInfoDao().getAllCarInfos()
+//            AppDatabase.getDatabase(this@MainActivity).carInfoDao().deleteCarInfos()
+                if (carInfos != null && carInfos.size > 0) {
+                    startDestination = "speed-meter"
+                    runOnUiThread {
+                        this@MainActivity.statisticsViewModel.initializeStatisticsData(
+                            this@MainActivity,
+                            settingsViewModel = settingsViewModel
+                        )
+                        canUpdateSpeed = true
+                        carInfo.value = carInfos.last()
+                        setContent {
+                            SpeedTrackerComposeTheme {
+                                drawerState = remember { mutableStateOf(DrawerValue.Closed) }
 
 
 //                scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
-                scope = rememberCoroutineScope()
-                navController = rememberAnimatedNavController()
+                                scope = rememberCoroutineScope()
+                                navController = rememberAnimatedNavController()
 
-                // A surface container using the 'background' color from the theme
-                Scaffold(
-                    drawerGesturesEnabled = false
-                    // scrimColor = Color.Red,  // Color for the fade background when you open/close the drawer
-//                    drawerContent = {
-//                        Drawer(scope = scope, scaffoldState = scaffoldState, navController = navController,carInfo = carInfo)
-//                    },
-//                    drawerShape = customShape()
-                ) {
-                    checkGPSPermission()
-
-
-                    val configuration = LocalConfiguration.current
-
-                    val screenWidth = configuration.screenWidthDp.dp
-
-                    val xOffset by animateDpAsState(
-                        targetValue = if (drawerState.value == DrawerValue.Open) screenWidth / 5 * 4  else 0.dp
-                    )
-
-
-                    BoxWithConstraints() {
-
-//                        val mainContentAnimation = animateOffsetAsState(
-//                            targetValue = Offset(
-//                                x = if (drawerState.value == DrawerValue.Open) {
-//                                    screenWidth.value / 5 * 4
-//                                } else {
-//                                    0f
-//                                },
-//                                y = 0f
-//                            ),
-//                            animationSpec = TweenSpec(
-//                                durationMillis = 250,
-//                                easing = FastOutSlowInEasing
-//                            )
-//                        )
-
-                        Box {
-                            if (xOffset.value != 0f) {
-                                Drawer(
-                                    modifier = Modifier,
-                                    scope = scope,
-                                    scaffoldState = drawerState,
-                                    navController = navController,
-                                    carInfo = carInfo
-                                )
+                                // A surface container using the 'background' color from the theme
+                                CustomScaffold {
+                                    checkGPSPermission()
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                    ) {
+                                        Navigation(
+                                            navController = navController,
+                                            scope,
+                                            drawerState,
+                                            paddingValues = it
+                                        )
+                                    }
+                                }
                             }
-                            Box(
-                                modifier = Modifier.offset(
-                                    x = xOffset
-                                )
-                            ) {
-                                Navigation(navController = navController, scope, drawerState)
-                            }
-
                         }
+                    }
+                } else {
 
+                    runOnUiThread {
+                        setContent {
+                            SpeedTrackerComposeTheme {
+                                drawerState = remember { mutableStateOf(DrawerValue.Closed) }
+                                scope = rememberCoroutineScope()
+                                navController = rememberAnimatedNavController()
 
+                                // A surface container using the 'background' color from the theme
+                                if (showBottomView.observeAsState().value != null) {
+                                    startDestination = "speed-meter"
+                                    canUpdateSpeed = false
+                                    CustomScaffold {
+                                        checkGPSPermission()
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                        ) {
+                                            Navigation(
+                                                navController = navController,
+                                                scope,
+                                                drawerState,
+                                                paddingValues = it
+                                            )
+                                        }
+                                    }
+                                } else {
+                                    WalkthroughScreen(
+                                        context = this@MainActivity,
+                                        walkthroughViewModel = walkthroughViewModel,
+                                        navigationController = navController,
+                                        statisticsViewModel = statisticsViewModel,
+                                        settingsViewModel = settingsViewModel,
+                                        carInfo = carInfo
+                                    )
+                                }
+
+                            }
+                        }
                     }
                 }
-
             }
-        }
+    }
 
-        GlobalScope.launch((Dispatchers.IO)) {
-//            statisticsViewModel.getAllTrips(context = this@MainActivity)
-            var carInfos = AppDatabase.getDatabase(this@MainActivity).carInfoDao().getAllCarInfos()
-//            AppDatabase.getDatabase(this@MainActivity).carInfoDao().deleteCarInfos()
-            if (carInfos != null && carInfos.size > 0) {
-                startDestination = "speed-meter"
-                runOnUiThread {
-                    this@MainActivity.statisticsViewModel.initializeStatisticsData(this@MainActivity, settingsViewModel = settingsViewModel)
-                    canUpdateSpeed = true
-                    carInfo.value = carInfos.last()
+    @Composable
+    fun CustomScaffold(content:@Composable ((PaddingValues) -> Unit)) {
+        Scaffold(
+            bottomBar = {
+                BottomAppBar(
+                    modifier = Modifier
+                        .background(Color.Transparent),
+                    cutoutShape = CircleShape,
+                    backgroundColor = MainGradientEndColor
 
+                ) {
+                    BottomNavigation(navController = navController)
                 }
-            } else {
-                startDestination = "walkthrough"
-                canUpdateSpeed = false
-//                navController.navigate("walkthrough")
-            }
+            },
+            floatingActionButton = {
+                FloatingActionButton(onClick = {
+                    navController.navigate(route = "speed-meter") {
+
+                        navController.graph.startDestinationRoute?.let { screen_route ->
+                            popUpTo(screen_route) {
+                                saveState = true
+                            }
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                    backgroundColor = MainGradientEndColor
+                ) {
+                    Icon(painter = painterResource(id = R.drawable.tachometer), "", tint = Color.White)
+                }
+            },
+
+            floatingActionButtonPosition = FabPosition.Center,
+            isFloatingActionButtonDocked = true
+        ) {
+            content(it)
         }
     }
 
-    fun customShape() =  object : Shape {
+    fun customShape() = object : Shape {
         override fun createOutline(
             size: Size,
             layoutDirection: LayoutDirection,
             density: Density
         ): Outline {
-            return Outline.Rounded(RoundRect(0f,0f,size.width/5*4,size.height, topRightCornerRadius = CornerRadius(x = 20f, y = 20f), bottomRightCornerRadius = CornerRadius(x = 20f, y = 20f)) )
+            return Outline.Rounded(
+                RoundRect(
+                    0f,
+                    0f,
+                    size.width / 5 * 4,
+                    size.height,
+                    topRightCornerRadius = CornerRadius(x = 20f, y = 20f),
+                    bottomRightCornerRadius = CornerRadius(x = 20f, y = 20f)
+                )
+            )
+        }
+    }
+
+    @Composable
+    fun BottomNavigation(navController: NavController) {
+        val items = listOf(
+            NavDrawerItem.TripList,
+            NavDrawerItem.HeadUpDisplay,
+            NavDrawerItem.SpeedMeter,
+            NavDrawerItem.Settings,
+            NavDrawerItem.About
+
+        )
+        BottomNavigation(
+            backgroundColor = MainGradientEndColor
+        ) {
+            val navBackStackEntry by navController.currentBackStackEntryAsState()
+            val currentRoute = navBackStackEntry?.destination?.route
+            items.forEach { item ->
+                BottomNavigationItem(
+                    icon = {
+                        if (item.icon != null) {
+                            Icon(
+                                painterResource(id = item.icon!!),
+                                contentDescription = item.title,
+                                tint = Color.White,
+                                modifier = Modifier.size(25.dp)
+                            )
+                        }
+
+                    },
+                    label = {
+                        Text(
+                            text = item.title,
+                            fontSize = 9.sp,
+                            color = Color.White
+                        )
+                    },
+                    selectedContentColor = Color.White,
+                    alwaysShowLabel = true,
+                    selected = currentRoute == item.route,
+                    onClick = {
+                        if (item.icon != null) {
+                            navController.navigate(item.route) {
+
+                                navController.graph.startDestinationRoute?.let { screen_route ->
+                                    popUpTo(screen_route) {
+                                        saveState = true
+                                    }
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    }
+                )
+            }
         }
     }
 
@@ -271,7 +391,10 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
 //                }
 //            )
 
-        val permissionGranted = ContextCompat.checkSelfPermission(this,  Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        val permissionGranted = ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
 
         if (permissionGranted) {
             Log.d(TAG, "Permission already granted, exiting..")
@@ -344,65 +467,67 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
     }
 
     @Composable
-    fun Navigation(navController: NavHostController, scope: CoroutineScope, scaffoldState: MutableState<DrawerValue>) {
+    fun Navigation(
+        navController: NavHostController,
+        scope: CoroutineScope,
+        scaffoldState: MutableState<DrawerValue>,
+        paddingValues: PaddingValues
+    ) {
 
         AnimatedNavHost(navController, startDestination = startDestination) {
-            composable("speed-meter" ,
+            composable("speed-meter",
                 enterTransition = { null },
-                popEnterTransition = { null},
-                exitTransition = {null},
-                popExitTransition = {null}) {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    canUpdateSpeed = true
-                    MainScreenView(scope = scope,
-                        scaffoldState = scaffoldState,
-                        speedViewModel = speedViewModel,
-                        statisticsViewModel = statisticsViewModel,
-                        context = this@MainActivity,
-                        showTripDialog = showTripDialog,
-                        tripName = tripName)
+                popEnterTransition = { null },
+                exitTransition = { null },
+                popExitTransition = { null }) {
+//                Surface(
+//                    modifier = Modifier
+//                        .fillMaxSize()
+//                        .padding(bottom = 64.dp),
+//                    color = MaterialTheme.colorScheme.background
+//                ) {
+                canUpdateSpeed = true
+                MainScreenView(
+                    paddingValues = paddingValues,
+                    scope = scope,
+                    scaffoldState = scaffoldState,
+                    speedViewModel = speedViewModel,
+                    statisticsViewModel = statisticsViewModel,
+                    context = this@MainActivity,
+                    showTripDialog = showTripDialog,
+                    tripName = tripName
+                )
 
-                }
+//                }
             }
 
             composable("walkthrough") {
-                WalkthroughScreen(context = this@MainActivity,
+
+                WalkthroughScreen(
+                    context = this@MainActivity,
                     walkthroughViewModel = walkthroughViewModel,
                     navigationController = navController,
                     statisticsViewModel = statisticsViewModel,
                     carInfo = carInfo,
-                    settingsViewModel = this@MainActivity.settingsViewModel)
+                    settingsViewModel = this@MainActivity.settingsViewModel
+                )
+
             }
 
-            composable(route = NavDrawerItem.Settings.route,
-                enterTransition = {
-                    slideInHorizontally (
-                        initialOffsetX = {300},
-                        animationSpec = tween(
-                            durationMillis = 300,
-                            easing = FastOutSlowInEasing
-                        )
-                    )
-                },
-                popExitTransition = {
-                    slideOutHorizontally(
-                        targetOffsetX = {300},
-                        animationSpec = tween(
-                            durationMillis = 300,
-                            easing = FastOutSlowInEasing
-                        )
-                    )
-                }) {
-                SettingsScreen(context = this@MainActivity, settingsViewModel = this@MainActivity.settingsViewModel, statisticsViewModel = this@MainActivity.statisticsViewModel)
+            composable(route = NavDrawerItem.Settings.route) {
+                SettingsScreen(
+                    paddingValues = paddingValues,
+                    context = this@MainActivity,
+                    settingsViewModel = this@MainActivity.settingsViewModel,
+                    statisticsViewModel = this@MainActivity.statisticsViewModel
+                )
+
             }
 
             composable("edit-car-info",
                 enterTransition = {
-                    slideInHorizontally (
-                        initialOffsetX = {300},
+                    slideInHorizontally(
+                        initialOffsetX = { 300 },
                         animationSpec = tween(
                             durationMillis = 300,
                             easing = FastOutSlowInEasing
@@ -411,63 +536,72 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                 },
                 popExitTransition = {
                     slideOutHorizontally(
-                        targetOffsetX = {300},
+                        targetOffsetX = { 300 },
                         animationSpec = tween(
                             durationMillis = 300,
                             easing = FastOutSlowInEasing
                         )
                     )
                 }) {
-                    var carList = AssetsHelper.parseCarsBrands(this@MainActivity)
-                    var brandStringList = carList.map { car -> car.brand }
-                    AssetsHelper.sortArrayAlphabetically(brandStringList as ArrayList<String>)
-                    brandStringList.add(0,"Choose your brand")
-                    walkthroughViewModel.brandList.value = brandStringList
-                    Log.d("Manufactured year", MutableLiveData(carInfo.value!!.carManufacturedYear.toInt()).toString())
-                    walkthroughViewModel.initializeBrandAndModelFromCarInfo(brand = carInfo.value!!.carBrand, model = carInfo.value!!.carModel, carList = carList, manufacturedYear = MutableLiveData(carInfo.value!!.carManufacturedYear.toInt()))
+                var carList = AssetsHelper.parseCarsBrands(this@MainActivity)
+                var brandStringList = carList.map { car -> car.brand }
+                AssetsHelper.sortArrayAlphabetically(brandStringList as ArrayList<String>)
+                brandStringList.add(0, "Choose your brand")
+                walkthroughViewModel.brandList.value = brandStringList
+                Log.d(
+                    "Manufactured year",
+                    MutableLiveData(carInfo.value!!.carManufacturedYear.toInt()).toString()
+                )
+                walkthroughViewModel.initializeBrandAndModelFromCarInfo(
+                    brand = carInfo.value!!.carBrand,
+                    model = carInfo.value!!.carModel,
+                    carList = carList,
+                    manufacturedYear = MutableLiveData(carInfo.value!!.carManufacturedYear.toInt())
+                )
 
-                    EditCarInfoScreen(carList = carList, walkthroughViewModel = this@MainActivity.walkthroughViewModel, context = this@MainActivity, carInfo = this@MainActivity.carInfo , scope = scope)
+                EditCarInfoScreen(
+                    carList = carList,
+                    walkthroughViewModel = this@MainActivity.walkthroughViewModel,
+                    context = this@MainActivity,
+                    carInfo = this@MainActivity.carInfo,
+                    scope = scope
+                )
 
-                }
+            }
 
 
-            composable("splash-screen"){
-                Box(modifier = Modifier
-                    .fillMaxSize()
-                    .background(brush = MainGradientBG),
-                    contentAlignment = Alignment.Center) {
-                    Image(modifier = Modifier.size(100.dp),painter = painterResource(id = R.drawable.ic_car_splash), contentDescription = "SplashIcon")
+            composable("splash-screen") {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(brush = MainGradientBG),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        modifier = Modifier.size(100.dp),
+                        painter = painterResource(id = R.drawable.ic_car_splash),
+                        contentDescription = "SplashIcon"
+                    )
                 }
             }
 
-            composable(NavDrawerItem.TripList.route,
-                enterTransition = {
-                    slideInHorizontally (
-                        initialOffsetX = {300},
-                        animationSpec = tween(
-                            durationMillis = 300,
-                            easing = FastOutSlowInEasing
-                        )
-                    )
-                },
-                popExitTransition = {
-                    slideOutHorizontally(
-                        targetOffsetX = {300},
-                        animationSpec = tween(
-                            durationMillis = 300,
-                            easing = FastOutSlowInEasing
-                        )
-                    )
-                },
-                popEnterTransition = {null}
+            composable(
+                NavDrawerItem.TripList.route
             ) {
-                TripListPage(context = this@MainActivity, tripViewModel = tripViewModel,navController = navController)
+
+                TripListPage(
+                    paddingValues = paddingValues,
+                    context = this@MainActivity,
+                    tripViewModel = tripViewModel,
+                    navController = navController
+                )
+
             }
 
             composable("trip-detail",
                 enterTransition = {
-                    slideInHorizontally (
-                        initialOffsetX = {300},
+                    slideInHorizontally(
+                        initialOffsetX = { 300 },
                         animationSpec = tween(
                             durationMillis = 300,
                             easing = FastOutSlowInEasing
@@ -476,7 +610,7 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                 },
                 popExitTransition = {
                     slideOutHorizontally(
-                        targetOffsetX = {300},
+                        targetOffsetX = { 300 },
                         animationSpec = tween(
                             durationMillis = 300,
                             easing = FastOutSlowInEasing
@@ -484,34 +618,22 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                     )
                 }
             ) {
-                TripMapPage(context = this@MainActivity, tripViewModel = tripViewModel)
+                TripMapPage(paddingValues = paddingValues,context = this@MainActivity, tripViewModel = tripViewModel)
             }
 
-            composable(NavDrawerItem.HeadUpDisplay.route,
-                enterTransition = {
-                    slideInHorizontally (
-                        initialOffsetX = {300},
-                        animationSpec = tween(
-                            durationMillis = 300,
-                            easing = FastOutSlowInEasing
-                        )
-                    )
-                },
-                popExitTransition = {
-                    slideOutHorizontally(
-                        targetOffsetX = {300},
-                        animationSpec = tween(
-                            durationMillis = 300,
-                            easing = FastOutSlowInEasing
-                        )
-                    )
-                }
-            ) {
-                Box(modifier = Modifier
-                    .fillMaxSize(),
-                ) {
+            composable(NavDrawerItem.HeadUpDisplay.route) {
+
+                Scaffold(modifier = Modifier.fillMaxSize()) {
                     HeadUpScreen(speedViewModel = this@MainActivity.speedViewModel)
-//                    TripListPage(this@MainActivity, scope = scope)
+                }
+            }
+
+            composable(NavDrawerItem.About.route) {
+                Box(modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White),
+                contentAlignment = Alignment.Center) {
+                    Text(text = "About Screen")
                 }
             }
         }
@@ -543,11 +665,14 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
             var status = locationManager.getGpsStatus(null)
             if (status != null) {
                 val satellites = status.satellites
-                var usedSatellites = satellites.filter { satellite -> satellite.usedInFix() == true }
+                var usedSatellites =
+                    satellites.filter { satellite -> satellite.usedInFix() == true }
                 Log.i("         Used satelites", "\t${usedSatellites.size}")
-                this.speedViewModel.satellitesText.value = "${usedSatellites.size}/${satellites.count()}"
+                this.speedViewModel.satellitesText.value =
+                    "${usedSatellites.size}/${satellites.count()}"
                 val maxSnr = usedSatellites.maxOf { satellite -> satellite.snr }
-                this@MainActivity.speedViewModel.searchingForGPSLocation.value = maxSnr < highSnrValue
+                this@MainActivity.speedViewModel.searchingForGPSLocation.value =
+                    maxSnr < highSnrValue
                 Log.i("          Max snr value", "\t${maxSnr}")
             }
         }
@@ -571,13 +696,18 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                                     var usedSatellites =
                                         satellites.filter { satellite -> satellite.usedInFix() == true }
                                     Log.i("         Used satelites", "\t${usedSatellites.size}")
-                                    this@MainActivity.speedViewModel.satellitesText.value = "${usedSatellites.size}/${satellites.count()}"
+                                    this@MainActivity.speedViewModel.satellitesText.value =
+                                        "${usedSatellites.size}/${satellites.count()}"
                                     if (usedSatellites != null && usedSatellites.size != 0) {
                                         var maxSnr =
                                             usedSatellites.maxOf { satellite -> satellite.snr }
 
-                                        speedViewModel.searchingForGPSLocation.value =  maxSnr < highSnrValue
-                                        Log.d("GPS searching for signal", speedViewModel.searchingForGPSLocation.value.toString())
+                                        speedViewModel.searchingForGPSLocation.value =
+                                            maxSnr < highSnrValue
+                                        Log.d(
+                                            "GPS searching for signal",
+                                            speedViewModel.searchingForGPSLocation.value.toString()
+                                        )
                                         Log.d("GPS max snr value", "\t${maxSnr}")
                                     }
                                 }
@@ -586,7 +716,8 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                             }
                         }
                     }
-            } }, null)
+                }
+            }, null)
         }
 
         if (fusedLocationClient == null) {
@@ -643,7 +774,8 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                         Log.i("Current speed", currentSpeed.toString())
 
                         if (currentSpeed > minValuableSpeed) {
-                            speedViewModel.speed.value = (locationResult.lastLocation.speed).roundToInt()
+                            speedViewModel.speed.value =
+                                (locationResult.lastLocation.speed).roundToInt()
 //                            speedViewModel.animateSpeed(speedViewModel.speed.value!!, )
                             speedViewModel.actualLatitude = locationResult.lastLocation.latitude
                             speedViewModel.actualLongitude = locationResult.lastLocation.longitude
@@ -654,7 +786,8 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                             currentSpeed = 0
                             if (speedViewModel.actualLatitude == 0.0 && speedViewModel.actualLongitude == 0.0 && speedViewModel.actualAltitude == 0.0) {
                                 speedViewModel.actualLatitude = locationResult.lastLocation.latitude
-                                speedViewModel.actualLongitude = locationResult.lastLocation.longitude
+                                speedViewModel.actualLongitude =
+                                    locationResult.lastLocation.longitude
                                 speedViewModel.altitude.value = locationResult.lastLocation.altitude
                                 speedViewModel.actualTime = locationResult.lastLocation.time
                             }
@@ -698,8 +831,13 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                         if (speedViewModel.actualLatitude != 0.0 && speedViewModel.actualLongitude != 0.0) {
                             Log.i("         Rx java update", "\t" + hh + ":" + mm + ":" + ss)
                             if (speedViewModel.lastOverallLatitude != 0.0 && speedViewModel.lastOverallLongitude != 0.0) {
-                                distanceToSave = (Math.round(speedViewModel.countCurrentDistance() * 10.0) / 10.0)
-                                statisticsViewModel.updateOverallData(speed = speedViewModel.speed.value!!,distanceToSave = distanceToSave, context = this)
+                                distanceToSave =
+                                    (Math.round(speedViewModel.countCurrentDistance() * 10.0) / 10.0)
+                                statisticsViewModel.updateOverallData(
+                                    speed = speedViewModel.speed.value!!,
+                                    distanceToSave = distanceToSave,
+                                    context = this
+                                )
                             } else {
                                 speedViewModel.lastOverallLatitude = speedViewModel.actualLatitude
                                 speedViewModel.lastOverallLongitude = speedViewModel.actualLongitude
@@ -712,9 +850,15 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                                     longitude = speedViewModel.actualLongitude,
                                     altitude = speedViewModel.actualAltitude,
                                     time = speedViewModel.actualTime,
-                                    locationId = Calendar.getInstance().time.time.toInt())
+                                    locationId = Calendar.getInstance().time.time.toInt()
+                                )
                                 Log.i("Current trip", "updated")
-                                statisticsViewModel.updateTrip(speed = speedViewModel.speed.value!!, distanceToSave = distanceToSave, location = location, context = this)
+                                statisticsViewModel.updateTrip(
+                                    speed = speedViewModel.speed.value!!,
+                                    distanceToSave = distanceToSave,
+                                    location = location,
+                                    context = this
+                                )
                             }
                         }
                     }

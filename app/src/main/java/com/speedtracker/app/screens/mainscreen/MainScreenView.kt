@@ -46,9 +46,10 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun MainScreenView(scope: CoroutineScope, scaffoldState: MutableState<DrawerValue>, speedViewModel: SpeedViewModel, statisticsViewModel: StatisticsViewModel, context: Context, showTripDialog:MutableLiveData<Boolean>, tripName:MutableLiveData<String>,) {
+fun MainScreenView(paddingValues: PaddingValues,scope: CoroutineScope, scaffoldState: MutableState<DrawerValue>, speedViewModel: SpeedViewModel, statisticsViewModel: StatisticsViewModel, context: Context, showTripDialog:MutableLiveData<Boolean>, tripName:MutableLiveData<String>,) {
     Column(modifier = Modifier
-        .fillMaxSize()) {
+        .fillMaxSize()
+        .padding(bottom = paddingValues.calculateBottomPadding())) {
         ActualSpeedPart(modifier = Modifier
             .weight(1.2f)
             .fillMaxWidth()

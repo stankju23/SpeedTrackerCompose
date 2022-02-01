@@ -40,7 +40,7 @@ import com.speedtracker.ui.theme.Pink40
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun SettingsScreen(context: Context, settingsViewModel: SettingsViewModel,statisticsViewModel:StatisticsViewModel) {
+fun SettingsScreen(paddingValues: PaddingValues,context: Context, settingsViewModel: SettingsViewModel,statisticsViewModel:StatisticsViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -55,7 +55,7 @@ fun SettingsScreen(context: Context, settingsViewModel: SettingsViewModel,statis
         }
     ) {
 
-        LazyColumn(Modifier.fillMaxSize()) {
+        LazyColumn(Modifier.fillMaxSize().padding(bottom = paddingValues.calculateBottomPadding())) {
 
             item {
                 SettingSection(title = "General") {
