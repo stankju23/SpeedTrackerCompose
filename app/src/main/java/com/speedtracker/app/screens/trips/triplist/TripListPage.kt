@@ -45,7 +45,7 @@ var showNoTripData:MutableLiveData<Boolean> = MutableLiveData(false)
 @Composable
 fun TripListPage(paddingValues: PaddingValues,context: Context,tripViewModel: TripViewModel,navController: NavHostController) {
     Scaffold(
-        modifier = Modifier.padding(bottom = paddingValues.calculateBottomPadding()),
+        modifier = Modifier.padding(bottom = paddingValues.calculateBottomPadding()) ,
         topBar = {
             TopAppBar(
                 title = { Text(text = "Trip List", color = Color.White, fontFamily = Nunito) },

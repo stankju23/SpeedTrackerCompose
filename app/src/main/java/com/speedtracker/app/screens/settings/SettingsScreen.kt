@@ -2,7 +2,6 @@
 
 package com.speedtracker.app.screens.settings
 
-import android.app.Activity
 import android.content.Context
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -87,17 +86,6 @@ fun SettingsScreen(paddingValues: PaddingValues,context: Context, settingsViewMo
                     SettingsItem(modifier = Modifier, title = "fjstudio", subtitle = "Flaticon")
                     Separator()
                     SettingsItem(modifier = Modifier, title = "Kiranshastry", subtitle = "Flaticon")
-                    Separator()
-                    SettingsItem(modifier = Modifier, title = "Freepik", subtitle = "Flaticon")
-                    Separator()
-                    SettingsItem(modifier = Modifier, title = "Those Icons", subtitle = "Flaticon")
-                    Separator()
-                    SettingsItem(modifier = Modifier, title = "Vitaly Gorbachev", subtitle = "Flaticon")
-                    Separator()
-                    SettingsItem(modifier = Modifier, title = "fjstudio", subtitle = "Flaticon")
-                    Separator()
-                    SettingsItem(modifier = Modifier, title = "Kiranshastry", subtitle = "Flaticon")
-
                 }
 
                 SettingSection(title = "About") {

@@ -29,7 +29,7 @@ fun HeadUpScreen(speedViewModel: SpeedViewModel) {
             .rotate(-90f)
             .scale(scaleY = 1f, scaleX = -1f)
             .align(Alignment.Center)) {
-            Text(text = "${if(GenerallData.isMetric.value!!) (speedViewModel.speed.observeAsState().value!! * Constants.msToKmh).toInt() else (speedViewModel.speed.observeAsState().value!!.toInt() * Constants.msToMph).toInt() } ", color = Color.White, fontSize = 160.sp, modifier = Modifier.alignByBaseline())
+            Text(text = "${speedViewModel.speed.observeAsState().value!!} ", color = Color.White, fontSize = 160.sp, modifier = Modifier.alignByBaseline())
             Text(text = if(GenerallData.isMetric.value!!) stringResource(id = R.string.speed_units_metric) else stringResource(id = R.string.speed_units_imperial), color = Color.White, fontSize = 40.sp, modifier = Modifier
                 .alignByBaseline()
                 .padding(start = 16.dp))

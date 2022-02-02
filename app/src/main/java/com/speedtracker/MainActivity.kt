@@ -73,6 +73,7 @@ import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.Task
+import com.speedtracker.app.screens.about.AboutScreen
 import com.speedtracker.app.screens.editcarinfo.EditCarInfoScreen
 import com.speedtracker.app.screens.headup.HeadUpScreen
 import com.speedtracker.app.screens.mainscreen.drawer.Drawer
@@ -629,12 +630,7 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
             }
 
             composable(NavDrawerItem.About.route) {
-                Box(modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.White),
-                contentAlignment = Alignment.Center) {
-                    Text(text = "About Screen")
-                }
+                AboutScreen(paddingValues = paddingValues, carInfo = this@MainActivity.carInfo)
             }
         }
     }
@@ -761,6 +757,7 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
 
                         var currentSpeed: Int
                         var minValuableSpeed = 0
+
                         if (GenerallData.isMetric.value!!) {
                             minValuableSpeed = 5
                             currentSpeed =
@@ -771,6 +768,8 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                                 (locationResult.lastLocation.speed * Constants.msToMph).toInt()
                         }
                         Log.i("Current speed", currentSpeed.toString())
+
+                        speedViewModel.speedToSave = locationResult.lastLocation.speed.toInt()
 
                         if (currentSpeed > minValuableSpeed) {
                             speedViewModel.speed.value = currentSpeed
@@ -832,7 +831,7 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                                 distanceToSave =
                                     (Math.round(speedViewModel.countCurrentDistance() * 10.0) / 10.0)
                                 statisticsViewModel.updateOverallData(
-                                    speed = speedViewModel.speed.value!!,
+                                    speed = speedViewModel.speedToSave,
                                     distanceToSave = distanceToSave,
                                     context = this
                                 )
@@ -852,7 +851,7 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                                 )
                                 Log.i("Current trip", "updated")
                                 statisticsViewModel.updateTrip(
-                                    speed = speedViewModel.speed.value!!,
+                                    speed = speedViewModel.speedToSave,
                                     distanceToSave = distanceToSave,
                                     location = location,
                                     context = this

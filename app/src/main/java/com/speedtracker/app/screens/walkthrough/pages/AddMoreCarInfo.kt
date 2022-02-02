@@ -147,7 +147,7 @@ fun CarPhotoImage(context: Context, imageLiveData: MutableLiveData<String>) {
 
     val launcher = rememberLauncherForActivityResult(contract =
     ActivityResultContracts.GetContent()) { uri: Uri? ->
-        imageLiveData.value = uri.toString()
+        imageLiveData.value = uri!!.encodedPath
         imageUri = uri
     }
 
