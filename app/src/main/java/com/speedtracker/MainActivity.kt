@@ -94,10 +94,7 @@ import com.speedtracker.helper.GenerallData
 import com.speedtracker.model.AppDatabase
 import com.speedtracker.model.CarInfo
 import com.speedtracker.model.Location
-import com.speedtracker.ui.theme.MainGradientBG
-import com.speedtracker.ui.theme.MainGradientEndColor
-import com.speedtracker.ui.theme.MainGradientStartColor
-import com.speedtracker.ui.theme.SpeedTrackerComposeTheme
+import com.speedtracker.ui.theme.*
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.HiltAndroidApp
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -250,7 +247,7 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                     modifier = Modifier
                         .background(Color.Transparent),
                     cutoutShape = CircleShape,
-                    backgroundColor = MainGradientEndColor
+                    backgroundColor = MainGradientMiddleColor
 
                 ) {
                     BottomNavigation(navController = navController)
@@ -269,7 +266,7 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                         restoreState = true
                     }
                 },
-                    backgroundColor = MainGradientEndColor
+                    backgroundColor = MainGradientMiddleColor
                 ) {
                     Icon(painter = painterResource(id = R.drawable.tachometer), "", tint = Color.White)
                 }
@@ -312,7 +309,7 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
 
         )
         BottomNavigation(
-            backgroundColor = MainGradientEndColor
+            backgroundColor = MainGradientMiddleColor
         ) {
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentRoute = navBackStackEntry?.destination?.route
