@@ -30,8 +30,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -51,9 +53,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Outline
-import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -250,14 +250,14 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                     modifier = Modifier
                         .background(Color.Transparent),
                     cutoutShape = CircleShape,
-                    backgroundColor = MainGradientStartColor
+                    backgroundColor = MainGradientEndColor
 
                 ) {
                     BottomNavigation(navController = navController)
                 }
             },
             floatingActionButton = {
-                FloatingActionButton(onClick = {
+                FloatingActionButton(modifier = Modifier,onClick = {
                     navController.navigate(route = "speed-meter") {
 
                         navController.graph.startDestinationRoute?.let { screen_route ->
@@ -269,7 +269,7 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                         restoreState = true
                     }
                 },
-                    backgroundColor = MainGradientStartColor
+                    backgroundColor = MainGradientEndColor
                 ) {
                     Icon(painter = painterResource(id = R.drawable.tachometer), "", tint = Color.White)
                 }
@@ -312,7 +312,7 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
 
         )
         BottomNavigation(
-            backgroundColor = MainGradientStartColor
+            backgroundColor = MainGradientEndColor
         ) {
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentRoute = navBackStackEntry?.destination?.route
