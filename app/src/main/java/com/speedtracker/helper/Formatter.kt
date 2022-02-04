@@ -79,6 +79,68 @@ object Formatter {
 
         return formatedString
     }
+    fun calculateTripTimeToSec(startDate:Date, endDate:Date) : String {
+        var different = (endDate.time - startDate.time)
+        var formatedString = ""
+
+        if (different != 0L) {
+            System.out.println("startDate : $startDate")
+            System.out.println("endDate : $endDate")
+            println("different : $different")
+
+            val secondsInMilli: Long = 1000
+            val minutesInMilli = secondsInMilli * 60
+            val hoursInMilli = minutesInMilli * 60
+            val daysInMilli = hoursInMilli * 24
+
+            val elapsedDays = different / daysInMilli
+            different = different % daysInMilli
+
+            val elapsedHours = different / hoursInMilli
+            different = different % hoursInMilli
+
+            val elapsedMinutes = different / minutesInMilli
+            different = different % minutesInMilli
+
+            val elapsedSeconds = different / secondsInMilli
+            different = different % secondsInMilli
+
+//        val elapsedSeconds = different / secondsInMilli
+
+            if (elapsedDays != 0L) {
+                formatedString += "${elapsedDays}d"
+            }
+            if (elapsedHours == 0L) {
+                formatedString += "0:"
+            } else {
+                formatedString += "${elapsedHours}:"
+            }
+
+            if (elapsedMinutes == 0L) {
+                formatedString += "00"
+            } else {
+                if (elapsedMinutes < 10) {
+                    formatedString += "0${elapsedMinutes}"
+                } else {
+                    formatedString += "${elapsedMinutes}"
+                }
+            }
+            if (elapsedSeconds == 0L) {
+                formatedString += ":00"
+            }  else {
+                if (elapsedSeconds < 10) {
+                    formatedString += ":0${elapsedSeconds}"
+                } else {
+                    formatedString += ":${elapsedSeconds}"
+                }
+            }
+        } else {
+            formatedString = "0:00:00"
+        }
+
+
+        return formatedString
+    }
 
     fun calculateTripDistance(locations:List<LatLng>):Double {
         var distance = 0.0f

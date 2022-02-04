@@ -493,7 +493,8 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                     statisticsViewModel = statisticsViewModel,
                     context = this@MainActivity,
                     showTripDialog = showTripDialog,
-                    tripName = tripName
+                    tripName = tripName,
+                    carInfoId = this@MainActivity.carInfo.value!!.carIdentifier
                 )
 
 //                }
@@ -671,7 +672,6 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
         }
     }
 
-
     @SuppressLint("MissingPermission")
     private fun startUpdatingLocation() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
@@ -799,7 +799,7 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
 
 
     private fun startStatsHandler() {
-        observer = interval(2000, TimeUnit.MILLISECONDS)
+        observer = interval(1000, TimeUnit.MILLISECONDS)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe {
                 if (canUpdateSpeed) {
@@ -854,6 +854,10 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                                     context = this
                                 )
                             }
+                        }
+                    } else {
+                        if (statisticsViewModel.trip.value != null) {
+                           statisticsViewModel.updateTripDuration(this)
                         }
                     }
                 }

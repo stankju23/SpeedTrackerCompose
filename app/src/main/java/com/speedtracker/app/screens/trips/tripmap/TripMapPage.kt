@@ -192,7 +192,7 @@ fun TripMapPage(paddingValues: PaddingValues,context: Context,tripViewModel: Tri
                             .weight(1f)
                             .fillMaxHeight()
                             .border(1.dp, color = MainGradientStartColor.copy(alpha = 0.5f)),
-                        image = R.drawable.trip_time,
+                        image = R.drawable.time_icon,
                         value = Formatter.calculateTripTime(
                             Date(tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.tripStartDate!!),
                             Date(tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.tripEndDate!!)

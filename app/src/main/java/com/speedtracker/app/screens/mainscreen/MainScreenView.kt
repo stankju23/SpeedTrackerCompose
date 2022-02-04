@@ -46,7 +46,7 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun MainScreenView(paddingValues: PaddingValues,scope: CoroutineScope, scaffoldState: MutableState<DrawerValue>, speedViewModel: SpeedViewModel, statisticsViewModel: StatisticsViewModel, context: Context, showTripDialog:MutableLiveData<Boolean>, tripName:MutableLiveData<String>,) {
+fun MainScreenView(paddingValues: PaddingValues,scope: CoroutineScope, scaffoldState: MutableState<DrawerValue>, speedViewModel: SpeedViewModel, statisticsViewModel: StatisticsViewModel, context: Context, showTripDialog:MutableLiveData<Boolean>, tripName:MutableLiveData<String>,carInfoId:String) {
     Column(modifier = Modifier
         .fillMaxSize()
         .padding(bottom = paddingValues.calculateBottomPadding())) {
@@ -67,11 +67,11 @@ fun MainScreenView(paddingValues: PaddingValues,scope: CoroutineScope, scaffoldS
             .background(Color.White),
             statisticsViewModel = statisticsViewModel)
     }
-    TripDialog(showDialog = showTripDialog, tripName = tripName, context = context, statisticsViewModel = statisticsViewModel, speedViewModel = speedViewModel)
+    TripDialog(showDialog = showTripDialog, tripName = tripName, context = context, statisticsViewModel = statisticsViewModel, carInfoId = carInfoId)
 }
 
 @Composable
-fun TripDialog(showDialog: MutableLiveData<Boolean>, tripName: MutableLiveData<String>, statisticsViewModel: StatisticsViewModel, context: Context,speedViewModel: SpeedViewModel) {
+fun TripDialog(showDialog: MutableLiveData<Boolean>, tripName: MutableLiveData<String>, statisticsViewModel: StatisticsViewModel, context: Context,carInfoId:String) {
     val confirmButtonColor = ButtonDefaults.buttonColors(
             containerColor = Color.Transparent,
             contentColor = androidx.compose.material3.MaterialTheme.colorScheme.surface
@@ -141,7 +141,7 @@ fun TripDialog(showDialog: MutableLiveData<Boolean>, tripName: MutableLiveData<S
                                 if (tripName.value!!.isEmpty()) {
                                     isError = true
                                 } else {
-                                    statisticsViewModel.startTrip(tripName = tripName.value!!, context = context)
+                                    statisticsViewModel.startTrip(tripName = tripName.value!!, context = context, carInfoId = carInfoId)
                                     showDialog.value = false
                                 }
                             },

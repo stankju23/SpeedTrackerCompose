@@ -23,7 +23,8 @@ data class TripInfo (
     @ColumnInfo(name = "maxSpeed") var maxSpeed: Int = 0,
     @ColumnInfo(name = "distance") var distance: Double = 0.0,
     @ColumnInfo(name = "tripStartDate") var tripStartDate: Long? = null,
-    @ColumnInfo(name = "tripEndDate") var tripEndDate: Long? = null
+    @ColumnInfo(name = "tripEndDate") var tripEndDate: Long? = null,
+    @ColumnInfo(name = "carInfoId") var carInfoId: String? = null
 )
 
 @Entity
@@ -91,7 +92,7 @@ interface TripDao {
 
 }
 
-@Database(entities = [CarInfo::class,TripInfo::class,Location::class], exportSchema = false, version = 1)
+@Database(entities = [CarInfo::class,TripInfo::class,Location::class], exportSchema = false, version = 2)
 abstract class AppDatabase: RoomDatabase() {
 
     abstract fun carInfoDao():CarInfoDao
