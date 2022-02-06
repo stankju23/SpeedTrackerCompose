@@ -51,7 +51,7 @@ import kotlin.collections.ArrayList
 fun TripMapScreenPreview() {
     val tripViewModel = TripViewModel()
     val context = LocalContext.current
-    tripViewModel.choosedTrip.value = TripData(tripInfo = TripInfo(0,"Ahoj",1000,10,160,100.0,Calendar.getInstance().time.time,Calendar.getInstance().time.time), locations = arrayListOf(Location(0,1,18.5,49.5,420.0,10)))
+    tripViewModel.choosedTrip.value = TripData(tripInfo = TripInfo(0,"Ahoj",1000f,10,160f,100.0,Calendar.getInstance().time.time,Calendar.getInstance().time.time), locations = arrayListOf(Location(0,1,18.5,49.5,420.0,10)))
     TripMapPage(context = context, tripViewModel = tripViewModel, paddingValues = PaddingValues(16.dp ))
 }
 

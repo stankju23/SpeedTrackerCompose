@@ -1,38 +1,52 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 
 package com.speedtracker.app.screens.about
 
+import android.Manifest
+import android.content.ContentResolver
+import android.content.Context
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.net.toUri
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
 import coil.compose.rememberImagePainter
-import com.skydoves.landscapist.glide.GlideImage
-import com.speedtracker.R
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberPermissionState
 import com.speedtracker.model.CarInfo
-import com.speedtracker.ui.theme.MainGradientEndColor
 import com.speedtracker.ui.theme.MainGradientStartColor
 import com.speedtracker.ui.theme.Nunito
+import java.io.FileNotFoundException
+import java.io.IOException
+
+
+@Throws(FileNotFoundException::class, IOException::class)
+fun getBitmap(cr: ContentResolver, url: Uri?): Bitmap {
+    val input = cr.openInputStream(url!!)
+    val bitmap = BitmapFactory.decodeStream(input)
+    input!!.close()
+    return bitmap
+}
 
 @Composable
 fun AboutScreen(paddingValues: PaddingValues,carInfo: MutableLiveData<CarInfo?>) {
@@ -56,28 +70,37 @@ fun AboutScreen(paddingValues: PaddingValues,carInfo: MutableLiveData<CarInfo?>)
                         modifier = Modifier
                             .fillMaxSize()
                     ) {
-                        if (carInfo.value != null) {
-                            Log.d("Car photo path", carInfo.value!!.carPhoto!!)
 
-                            GlideImage(
-                                modifier = Modifier.fillMaxSize(),
-                                imageModel = Uri.parse(carInfo.observeAsState().value!!.carPhoto)
-                            )
-                        }
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(
-                                    brush = Brush.verticalGradient(
-                                        listOf(
-                                            MainGradientStartColor.copy(alpha = 0.4f),
-                                            MainGradientStartColor
+                            if (carInfo.value != null) {
+                                Log.d("Car photo path", carInfo.value!!.carPhoto!!)
+
+                                val uri = carInfo.value!!.carPhoto!!
+
+                                Image(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop,
+                                    painter = rememberImagePainter(
+                                        data  = Uri.parse(uri)  // or ht
+                                    ),
+                                    contentDescription = ""
+                                )
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(
+                                        brush = Brush.verticalGradient(
+                                            listOf(
+                                                MainGradientStartColor.copy(alpha = 0.4f),
+                                                MainGradientStartColor
+                                            )
                                         )
                                     )
-                                )
-                        )
+                            )
                     }
                 }
+
+
                 Box(modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)) {
@@ -86,6 +109,30 @@ fun AboutScreen(paddingValues: PaddingValues,carInfo: MutableLiveData<CarInfo?>)
             }
         }
     }
+}
+
+
+@ExperimentalPermissionsApi
+@Composable
+fun RequireExternalStoragePermission(
+    context: Context
+) {
+
+    // Permission state
+    val permissionState = rememberPermissionState(
+        Manifest.permission.READ_EXTERNAL_STORAGE
+    )
+    val permissionGranted = ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.READ_EXTERNAL_STORAGE
+    ) == PackageManager.PERMISSION_GRANTED
+
+    if (!permissionGranted) {
+        SideEffect {
+            permissionState.launchPermissionRequest()
+        }
+    }
+
 }
 
 

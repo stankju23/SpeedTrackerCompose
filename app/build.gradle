@@ -16,12 +16,12 @@ android {
             storeFile file('SpeedTrackerComposeKey')
         }
     }
-    compileSdk 31
+    compileSdk 32
 
     defaultConfig {
         applicationId "com.speedtracker"
         minSdk 24
-        targetSdk 31
+        targetSdk 32
         versionCode 1
         versionName "1.0"
 
@@ -90,8 +90,6 @@ dependencies {
     annotationProcessor "androidx.room:room-compiler:2.4.0-rc01"
     kapt 'androidx.room:room-compiler:2.4.0-rc01'
 
-    implementation "com.github.skydoves:landscapist-glide:1.4.5"
-
     // optional - Kotlin Extensions and Coroutines support for Room
     implementation("androidx.room:room-ktx:2.3.0")
 
@@ -99,12 +97,13 @@ dependencies {
     implementation 'com.google.dagger:hilt-android:2.38.1'
     implementation("io.coil-kt:coil-compose:1.4.0")
     kapt("com.google.dagger:hilt-android-compiler:2.38.1")
-    implementation "com.github.skydoves:landscapist-glide:1.4.5"
 
     implementation "io.reactivex.rxjava3:rxjava:3.0.11-RC5"
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
 
     implementation 'com.github.alorma:compose-settings-ui:0.7.2'
+
+    implementation "com.google.accompanist:accompanist-permissions:0.20.0"
 //    implementation "com.github.JamalMulla:ComposePrefs:1.0.0"
 
 //    implementation("com.google.android.libraries.maps:maps:3.1.0-beta")

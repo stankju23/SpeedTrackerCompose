@@ -177,7 +177,7 @@ class StatisticsViewModel @Inject constructor(
         }
     }
 
-    fun updateTrip(speed:Int,distanceToSave: Double,location: Location,context: Context) {
+    fun updateTrip(speed:Float,distanceToSave: Double,location: Location,context: Context) {
         trip.value!!.sumOfTripSpeed += speed
         trip.value!!.countOfUpdates++
         trip.value!!.distance += distanceToSave
@@ -234,7 +234,7 @@ class StatisticsViewModel @Inject constructor(
 
     }
 
-    fun updateOverallData(speed:Int,distanceToSave:Double,context: Context) {
+    fun updateOverallData(speed:Float,distanceToSave:Double,context: Context) {
         overallData.countOfUpdates ++
         overallData.sumOfSpeeds += speed
         overallData.sumOfDistancesInM += distanceToSave

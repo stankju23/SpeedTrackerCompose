@@ -1,12 +1,13 @@
 package com.speedtracker.app.screens.walkthrough.pages
 
+import android.R.attr.data
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -39,7 +40,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
 import com.speedtracker.ui.theme.Typography
+import java.io.File
 import java.util.*
+
 
 @Composable
 fun AddMoreCarInfo(manufacturedYear:MutableLiveData<Int>, imageLiveData:MutableLiveData<String>, context:Context) {
@@ -146,8 +149,13 @@ fun CarPhotoImage(context: Context, imageLiveData: MutableLiveData<String>) {
 
 
     val launcher = rememberLauncherForActivityResult(contract =
-    ActivityResultContracts.GetContent()) { uri: Uri? ->
-        imageLiveData.value = uri!!.encodedPath
+    ActivityResultContracts.OpenDocument()) { uri: Uri? ->
+//        val file = File(uri!!.path) //create path from uri
+////        val split = file.path.split(":").toTypedArray() //split the path.
+//        // assign it to a string(your choice).
+//        var filePath = file.path
+
+        imageLiveData.value = uri!!.path
         imageUri = uri
     }
 
@@ -162,10 +170,17 @@ fun CarPhotoImage(context: Context, imageLiveData: MutableLiveData<String>) {
                 shape = CircleShape
             ),
         onClick = {
-            launcher.launch("image/*")
+            launcher.launch(arrayOf("image/*"))
         })
     {
         imageUri?.let {
+
+            val contentResolver = LocalContext.current.contentResolver
+
+            val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            // Check for the freshest data.
+            contentResolver.takePersistableUriPermission(imageUri!!, takeFlags)
+
             var image: Bitmap
             if (Build.VERSION.SDK_INT < 28) {
                 image = MediaStore.Images.Media.getBitmap(
@@ -204,5 +219,5 @@ fun CarPhotoImage(context: Context, imageLiveData: MutableLiveData<String>) {
 @Preview
 @Composable
 fun PreviewAddMoreCarInfo() {
-    AddMoreCarInfo(MutableLiveData(0),MutableLiveData(),LocalContext.current,)
+    AddMoreCarInfo(MutableLiveData(0), MutableLiveData(), LocalContext.current)
 }

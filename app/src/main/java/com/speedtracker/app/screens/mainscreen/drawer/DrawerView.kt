@@ -46,7 +46,6 @@ import androidx.navigation.compose.rememberNavController
 import coil.ImageLoader
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
-import com.skydoves.landscapist.glide.GlideImage
 import com.speedtracker.R
 import com.speedtracker.app.screens.walkthrough.WalkthroughViewModel
 import com.speedtracker.helper.AssetsHelper

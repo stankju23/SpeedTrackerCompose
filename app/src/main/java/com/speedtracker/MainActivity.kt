@@ -766,7 +766,7 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                         }
                         Log.i("Current speed", currentSpeed.toString())
 
-                        speedViewModel.speedToSave = locationResult.lastLocation.speed.toInt()
+                        speedViewModel.speedToSave = locationResult.lastLocation.speed
 
                         if (currentSpeed > minValuableSpeed) {
                             speedViewModel.speed.value = currentSpeed

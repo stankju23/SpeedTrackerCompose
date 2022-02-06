@@ -5,24 +5,24 @@ import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 
 class OverallData (
-    var sumOfSpeeds: Int = 0,
+    var sumOfSpeeds: Float = 0.0f,
     var countOfUpdates: Int = 0,
-    var maxSpeed:Int = 0,
+    var maxSpeed:Float = 0f,
     var sumOfDistancesInM:Double = 0.0
 ) :Parcelable
 {
     constructor(parcel: Parcel) : this(
+        parcel.readFloat(),
         parcel.readInt(),
-        parcel.readInt(),
-        parcel.readInt(),
+        parcel.readFloat(),
         parcel.readDouble()
     ) {
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeInt(sumOfSpeeds)
+        parcel.writeFloat(sumOfSpeeds)
         parcel.writeInt(countOfUpdates)
-        parcel.writeInt(maxSpeed)
+        parcel.writeFloat(maxSpeed)
         parcel.writeDouble(sumOfDistancesInM)
     }
 

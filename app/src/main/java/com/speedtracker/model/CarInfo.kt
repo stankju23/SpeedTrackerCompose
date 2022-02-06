@@ -18,9 +18,9 @@ data class CarInfo(
 data class TripInfo (
     @PrimaryKey()  var tripId: Long = System.currentTimeMillis(),
     @ColumnInfo(name = "tripName") var tripName: String? = null,
-    @ColumnInfo(name = "sumOfTripSpeed") var sumOfTripSpeed: Int = 0,
+    @ColumnInfo(name = "sumOfTripSpeed") var sumOfTripSpeed: Float = 0f,
     @ColumnInfo(name = "countOfUpdates") var countOfUpdates: Int = 0,
-    @ColumnInfo(name = "maxSpeed") var maxSpeed: Int = 0,
+    @ColumnInfo(name = "maxSpeed") var maxSpeed: Float = 0f,
     @ColumnInfo(name = "distance") var distance: Double = 0.0,
     @ColumnInfo(name = "tripStartDate") var tripStartDate: Long? = null,
     @ColumnInfo(name = "tripEndDate") var tripEndDate: Long? = null,

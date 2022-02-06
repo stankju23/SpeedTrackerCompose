@@ -24,8 +24,8 @@ class AppDataStoreImpl @Inject constructor(@ApplicationContext val context: Cont
             overallDataPref[PreferencesKeys.OVERALL_DATA_COUNT_OF_UPDATES] != null &&
             overallDataPref[PreferencesKeys.OVERALL_DATA_SUM_OF_DISTANCES] != null) {
             overallData = OverallData(
-                sumOfSpeeds = overallDataPref[PreferencesKeys.OVERALL_DATA_SUM_OF_SPEEDS] ?: 0,
-                maxSpeed = overallDataPref[PreferencesKeys.OVERALL_DATA_MAX_SPEED] ?: 0,
+                sumOfSpeeds = overallDataPref[PreferencesKeys.OVERALL_DATA_SUM_OF_SPEEDS] ?: 0f,
+                maxSpeed = overallDataPref[PreferencesKeys.OVERALL_DATA_MAX_SPEED] ?: 0f,
                 countOfUpdates = overallDataPref[PreferencesKeys.OVERALL_DATA_COUNT_OF_UPDATES] ?: 0,
                 sumOfDistancesInM = overallDataPref[PreferencesKeys.OVERALL_DATA_SUM_OF_DISTANCES]?:0.0
             )
@@ -39,8 +39,8 @@ class AppDataStoreImpl @Inject constructor(@ApplicationContext val context: Cont
     override suspend fun setOverallData(overallData: OverallData) {
         Log.d("Set Overall Data ","Called")
         context.overallDataStore.edit { dataStore ->
-            dataStore[PreferencesKeys.OVERALL_DATA_SUM_OF_SPEEDS] = overallData.sumOfSpeeds ?: 0
-            dataStore[PreferencesKeys.OVERALL_DATA_MAX_SPEED] = overallData.maxSpeed ?: 0
+            dataStore[PreferencesKeys.OVERALL_DATA_SUM_OF_SPEEDS] = overallData.sumOfSpeeds ?: 0f
+            dataStore[PreferencesKeys.OVERALL_DATA_MAX_SPEED] = overallData.maxSpeed ?: 0f
             dataStore[PreferencesKeys.OVERALL_DATA_COUNT_OF_UPDATES] = overallData.countOfUpdates ?: 0
             dataStore[PreferencesKeys.OVERALL_DATA_SUM_OF_DISTANCES] = overallData.sumOfDistancesInM ?: 0.0
         }
@@ -79,9 +79,9 @@ class AppDataStoreImpl @Inject constructor(@ApplicationContext val context: Cont
 }
 
 private object PreferencesKeys {
-    val OVERALL_DATA_SUM_OF_SPEEDS = intPreferencesKey("sum_of_speeds")
+    val OVERALL_DATA_SUM_OF_SPEEDS = floatPreferencesKey("sum_of_speeds")
     val OVERALL_DATA_COUNT_OF_UPDATES = intPreferencesKey("count_of_updates")
-    val OVERALL_DATA_MAX_SPEED = intPreferencesKey("max_speed")
+    val OVERALL_DATA_MAX_SPEED = floatPreferencesKey("max_speed")
     val OVERALL_DATA_SUM_OF_DISTANCES = doublePreferencesKey("sum_of_distances_in_m")
 
 

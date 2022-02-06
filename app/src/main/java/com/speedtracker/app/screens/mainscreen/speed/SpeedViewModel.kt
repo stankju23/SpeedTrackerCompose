@@ -25,7 +25,7 @@ class SpeedViewModel():ViewModel() {
     var actualAltitude = 0.0
     var actualTime: Long = 0
 
-    var speedToSave:Int = 0
+    var speedToSave:Float = 0f
 
     fun animate0To200And200To0() {
         val va = ValueAnimator.ofInt(0, 200,0)
