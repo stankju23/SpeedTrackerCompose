@@ -62,6 +62,7 @@ interface CarInfoDao {
     @Update
     suspend fun updateCarInfo(carInfo: CarInfo)
 
+
 }
 
 @Dao
@@ -83,6 +84,10 @@ interface TripDao {
     @Transaction
     @Query("SELECT * FROM TripInfo WHERE tripId = :id")
     suspend fun getTripDataById(id: Long): TripData
+
+    @Transaction
+    @Query("SELECT * FROM TripInfo WHERE carInfoId = :id")
+    suspend fun getTripDataByCarInfoId(id: String): List<TripData>
 
     @Query("DELETE FROM TripInfo WHERE tripId = :tripId")
     suspend fun removeTrip(tripId: Long)

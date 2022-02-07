@@ -32,7 +32,6 @@ import com.google.android.gms.maps.model.*
 import com.speedtracker.model.Location
 import com.speedtracker.R
 import com.speedtracker.app.screens.trips.TripViewModel
-import com.speedtracker.app.screens.trips.triplist.dataLoaded
 import com.speedtracker.helper.Constants
 import com.speedtracker.helper.Formatter
 import com.speedtracker.helper.GenerallData

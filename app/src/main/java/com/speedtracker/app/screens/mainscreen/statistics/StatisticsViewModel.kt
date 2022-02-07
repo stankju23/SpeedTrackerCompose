@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -19,10 +20,7 @@ import com.speedtracker.app.screens.settings.SettingsViewModel
 import com.speedtracker.helper.Constants
 import com.speedtracker.helper.Formatter
 import com.speedtracker.helper.GenerallData
-import com.speedtracker.model.AppDatabase
-import com.speedtracker.model.Location
-import com.speedtracker.model.OverallData
-import com.speedtracker.model.TripInfo
+import com.speedtracker.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collect
@@ -97,7 +95,7 @@ class StatisticsViewModel @Inject constructor(
                                 Statistic(iconDrawable = R.drawable.ic_avgspeed, "Avg speed:", "Average speed of your currently started trip.",if (GenerallData.isMetric.value!!) "${(trip.value!!.sumOfTripSpeed /trip.value!!.countOfUpdates * Constants.msToKmh).toInt()}" else "${(trip.value!!.sumOfTripSpeed / trip.value!!.countOfUpdates * Constants.msToMph).toInt()}",if(GenerallData.isMetric.value!!) context.getString(R.string.speed_units_metric) else context.getString(R.string.speed_units_imperial)),
                                 Statistic(iconDrawable = R.drawable.ic_topspeed, "Max speed:", "Max speed of your currently started trip.","${if(GenerallData.isMetric.value!!) (trip.value!!.maxSpeed * Constants.msToKmh).toInt() else (trip.value!!.maxSpeed * Constants.msToMph).toInt()}",if(GenerallData.isMetric.value!!) context.getString(R.string.speed_units_metric) else context.getString(R.string.speed_units_imperial)),
                                 Statistic(iconDrawable = R.drawable.ic_distance, "Trip distance:","Distance driven in currently started trip.", (Math.round((trip.value!!.distance/ (if (GenerallData.isMetric.value!!) Constants.mToKm else Constants.mToMil)) * 10.0) / 10.0).toString(), if(GenerallData.isMetric.value!!) context.getString(R.string.measute_units_metric) else context.getString(R.string.measute_units_imperial)),
-                                Statistic(iconDrawable = R.drawable.time_icon, "Duration:","Duration from the start of the trip.", Formatter.calculateTripTimeToSec(Date(trip.value!!.tripStartDate!!), Calendar.getInstance().time),"")
+                                Statistic(iconDrawable = R.drawable.time_icon, "Duration:","Duration from the start of the trip.", Formatter.calculateTripTime(Date(trip.value!!.tripStartDate!!), Calendar.getInstance().time),"")
 
                             )
 //                            tripStatisticsList = tripStatisticsList.toMutableList().also {
@@ -173,7 +171,7 @@ class StatisticsViewModel @Inject constructor(
             it[0] = Statistic(iconDrawable = R.drawable.ic_avgspeed, "Avg speed:", "Average speed of your currently started trip.", if (trip.value!!.countOfUpdates == 0) "0" else  if (GenerallData.isMetric.value!!) "${(trip.value!!.sumOfTripSpeed /trip.value!!.countOfUpdates * Constants.msToKmh).toInt()}" else "${(trip.value!!.sumOfTripSpeed / trip.value!!.countOfUpdates * Constants.msToMph).toInt()}",if(GenerallData.isMetric.value!!) context.getString(R.string.speed_units_metric) else context.getString(R.string.speed_units_imperial))
             it[1] = Statistic(iconDrawable = R.drawable.ic_topspeed, "Max speed:", "Max speed of your currently started trip.",if (trip.value!!.countOfUpdates == 0) "0" else "${if(GenerallData.isMetric.value!!) (trip.value!!.maxSpeed * Constants.msToKmh).toInt() else (trip.value!!.maxSpeed * Constants.msToMph).toInt()}",if(GenerallData.isMetric.value!!) context.getString(R.string.speed_units_metric) else context.getString(R.string.speed_units_imperial))
             it[2] = Statistic(iconDrawable = R.drawable.ic_distance, "Trip distance:", "Distance driven in currently started trip.",if (trip.value!!.countOfUpdates == 0) "0" else (Math.round((trip.value!!.distance/ (if (GenerallData.isMetric.value!!) Constants.mToKm else Constants.mToMil)) * 10.0) / 10.0).toString(), if(GenerallData.isMetric.value!!) context.getString(R.string.measute_units_metric) else context.getString(R.string.measute_units_imperial))
-            it[3] = Statistic(iconDrawable = R.drawable.time_icon, "Duration:","Duration from the start of the trip.", Formatter.calculateTripTimeToSec(Date(trip.value!!.tripStartDate!!), Calendar.getInstance().time),"")
+            it[3] = Statistic(iconDrawable = R.drawable.time_icon, "Duration:","Duration from the start of the trip.", Formatter.calculateTripTime(Date(trip.value!!.tripStartDate!!), Calendar.getInstance().time),"")
         }
     }
 
@@ -191,7 +189,7 @@ class StatisticsViewModel @Inject constructor(
             it[0] = Statistic(iconDrawable = R.drawable.ic_avgspeed, "Avg speed:", "Average speed of your currently started trip.", if (GenerallData.isMetric.value!!) "${(trip.value!!.sumOfTripSpeed /trip.value!!.countOfUpdates * Constants.msToKmh).toInt()}" else "${(trip.value!!.sumOfTripSpeed / trip.value!!.countOfUpdates * Constants.msToMph).toInt()}",if(GenerallData.isMetric.value!!) context.getString(R.string.speed_units_metric) else context.getString(R.string.speed_units_imperial))
             it[1] = Statistic(iconDrawable = R.drawable.ic_topspeed, "Max speed:", "Max speed of your currently started trip.","${if(GenerallData.isMetric.value!!) (trip.value!!.maxSpeed * Constants.msToKmh).toInt() else (trip.value!!.maxSpeed * Constants.msToMph).toInt()}",if(GenerallData.isMetric.value!!) context.getString(R.string.speed_units_metric) else context.getString(R.string.speed_units_imperial))
             it[2] = Statistic(iconDrawable = R.drawable.ic_distance, "Trip distance:", "Distance driven in currently started trip.",(Math.round((trip.value!!.distance/ (if (GenerallData.isMetric.value!!) Constants.mToKm else Constants.mToMil)) * 10.0) / 10.0).toString(), if(GenerallData.isMetric.value!!) context.getString(R.string.measute_units_metric) else context.getString(R.string.measute_units_imperial))
-            it[3] = Statistic(iconDrawable = R.drawable.time_icon, "Duration:","Duration from the start of the trip.", Formatter.calculateTripTimeToSec(Date(trip.value!!.tripStartDate!!), Calendar.getInstance().time),"")
+            it[3] = Statistic(iconDrawable = R.drawable.time_icon, "Duration:","Duration from the start of the trip.", Formatter.calculateTripTime(Date(trip.value!!.tripStartDate!!), Calendar.getInstance().time),"")
         }
 
         viewModelScope.launch {
@@ -209,7 +207,7 @@ class StatisticsViewModel @Inject constructor(
                 it[0] = Statistic(iconDrawable = R.drawable.ic_avgspeed, "Avg speed:", "Average speed of your currently started trip.", if (GenerallData.isMetric.value!!) "${(trip.value!!.sumOfTripSpeed /trip.value!!.countOfUpdates * Constants.msToKmh).toInt()}" else "${(trip.value!!.sumOfTripSpeed / trip.value!!.countOfUpdates * Constants.msToMph).toInt()}",if(GenerallData.isMetric.value!!) context.getString(R.string.speed_units_metric) else context.getString(R.string.speed_units_imperial))
                 it[1] =  Statistic(iconDrawable = R.drawable.ic_topspeed, "Max speed:", "Max speed of your currently started trip.","${if(GenerallData.isMetric.value!!) (trip.value!!.maxSpeed * Constants.msToKmh).toInt() else (trip.value!!.maxSpeed * Constants.msToMph).toInt()}",if(GenerallData.isMetric.value!!) context.getString(R.string.speed_units_metric) else context.getString(R.string.speed_units_imperial))
                 it[2] = Statistic(iconDrawable = R.drawable.ic_distance, "Trip distance:", "Distance driven in currently started trip.",(Math.round((trip.value!!.distance/ (if (GenerallData.isMetric.value!!) Constants.mToKm else Constants.mToMil)) * 10.0) / 10.0).toString(), if(GenerallData.isMetric.value!!) context.getString(R.string.measute_units_metric) else context.getString(R.string.measute_units_imperial))
-                it[3] = Statistic(iconDrawable = R.drawable.time_icon, "Duration:","Duration from the start of the trip.", Formatter.calculateTripTimeToSec(Date(trip.value!!.tripStartDate!!), Calendar.getInstance().time),"")
+                it[3] = Statistic(iconDrawable = R.drawable.time_icon, "Duration:","Duration from the start of the trip.", Formatter.calculateTripTime(Date(trip.value!!.tripStartDate!!), Calendar.getInstance().time),"")
             }
         }
 

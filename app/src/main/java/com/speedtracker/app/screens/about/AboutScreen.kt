@@ -13,17 +13,25 @@ import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Camera
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -33,23 +41,30 @@ import androidx.lifecycle.MutableLiveData
 import coil.compose.rememberImagePainter
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
+import com.speedtracker.R
+import com.speedtracker.app.screens.trips.TripViewModel
+import com.speedtracker.app.screens.trips.triplist.*
+import com.speedtracker.helper.Constants
+import com.speedtracker.helper.Formatter
+import com.speedtracker.helper.GenerallData
+import com.speedtracker.model.AppDatabase
 import com.speedtracker.model.CarInfo
+import com.speedtracker.ui.theme.MainGradientMiddleColor
 import com.speedtracker.ui.theme.MainGradientStartColor
 import com.speedtracker.ui.theme.Nunito
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.util.*
 
 
-@Throws(FileNotFoundException::class, IOException::class)
-fun getBitmap(cr: ContentResolver, url: Uri?): Bitmap {
-    val input = cr.openInputStream(url!!)
-    val bitmap = BitmapFactory.decodeStream(input)
-    input!!.close()
-    return bitmap
-}
+var dataLoaded:MutableLiveData<Boolean> = MutableLiveData(false)
+var showNoTripData:MutableLiveData<Boolean> = MutableLiveData(false)
 
 @Composable
-fun AboutScreen(paddingValues: PaddingValues,carInfo: MutableLiveData<CarInfo?>) {
+fun AboutScreen(context: Context,paddingValues: PaddingValues,carInfo: MutableLiveData<CarInfo?>,tripViewModel:TripViewModel) {
+
+
+
     Scaffold(
         containerColor = Color.White,
         topBar = {
@@ -65,7 +80,7 @@ fun AboutScreen(paddingValues: PaddingValues,carInfo: MutableLiveData<CarInfo?>)
             Column(modifier = Modifier.padding(bottom = paddingValues.calculateBottomPadding())) {
                 Box(modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)) {
+                    .weight(0.8f)) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -97,14 +112,88 @@ fun AboutScreen(paddingValues: PaddingValues,carInfo: MutableLiveData<CarInfo?>)
                                         )
                                     )
                             )
+
+                        IconButton(onClick = {}, modifier = Modifier.align(Alignment.TopStart)) {
+                            Icon(Icons.Default.PhotoCamera, contentDescription = "Change photo icon", tint = Color.White)
+                        }
+
+                        IconButton(onClick = {}, modifier = Modifier.align(Alignment.TopEnd)) {
+                            Icon(Icons.Default.Edit, contentDescription = "Change photo icon", tint = Color.White)
+                        }
                     }
                 }
 
 
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)) {
-                    CarInfoView(modifier = Modifier.padding(20.dp), carBrand = MutableLiveData(carInfo.observeAsState().value!!.carBrand), carModel = MutableLiveData(carInfo.observeAsState().value!!.carModel))
+                if (!dataLoaded.observeAsState().value!!) {
+
+                    LaunchedEffect("") {
+                        tripViewModel.loadTripsByCarInfo(context = context, carInfoId = carInfo.value!!.carIdentifier)
+                        dataLoaded.value = true
+                    }
+
+                    Loading()
+                } else {
+
+                    var topSpeed:MutableLiveData<String> = MutableLiveData("0")
+                    var distance:MutableLiveData<String> = MutableLiveData("0")
+                    var timeSpent:MutableLiveData<String> = MutableLiveData("0:00:00")
+                    var countOfTrips:MutableLiveData<String> = MutableLiveData("0")
+
+                    var distanceUnits: MutableLiveData<String> = MutableLiveData(if(GenerallData.isMetric.value!!) context.getString(
+                        R.string.measute_units_metric) else context.getString(R.string.measute_units_imperial))
+                    var speedUnits: MutableLiveData<String> = MutableLiveData(if(GenerallData.isMetric.value!!) context.getString(R.string.speed_units_metric) else context.getString(R.string.speed_units_imperial))
+
+                    if (tripViewModel.tripListByCarInfo.observeAsState().value!!.size == 0) {
+                        showNoTripData.value = true
+                    } else {
+                        showNoTripData.value = false
+                    }
+                    if (!showNoTripData.observeAsState().value!!) {
+                        var topSpeedValue = tripViewModel.tripListByCarInfo.value!!.maxOf { it.tripInfo.maxSpeed }
+                        topSpeed.value = "${if(GenerallData.isMetric.value!!) (topSpeedValue * Constants.msToKmh).toInt() else (topSpeedValue * Constants.msToMph).toInt()}"
+                        countOfTrips.value = tripViewModel.tripListByCarInfo.value!!.size.toString()
+                        var different = 0L
+                        tripViewModel.tripListByCarInfo.value!!.forEach {
+                            different += Formatter.calculateTimeBetweenDates(startDate = Date(it.tripInfo.tripStartDate!!), endDate = Date(it.tripInfo.tripEndDate!!))
+                        }
+                        timeSpent.value = Formatter.formatTimeFromLong(different = different)
+
+                        var distanceDouble = 0.0
+                        tripViewModel.tripListByCarInfo.value!!.forEach {
+                            distanceDouble += Formatter.calculateTripDistanceFromLocationList(locations = it.locations)
+                        }
+
+                        distance.value = if (GenerallData.isMetric.observeAsState().value!!) "${(Math.round(distanceDouble / Constants.mToKm) * 10.0) / 10.0 }" else "${(Math.round(distanceDouble / Constants.mToMil) * 10.0) / 10.0}"
+                    }
+
+                    Column(modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1.2f)) {
+                        CarInfoView(modifier = Modifier.padding(20.dp), carBrand = MutableLiveData(carInfo.observeAsState().value!!.carBrand), carModel = MutableLiveData(carInfo.observeAsState().value!!.carModel), carYear = MutableLiveData(carInfo.observeAsState().value!!.carManufacturedYear))
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                            .height(0.5.dp)
+                            .padding(start = 20.dp, end = 20.dp)
+                            .background(Color.Gray.copy(alpha = 0.3f)))
+                        Column() {
+                            Row(modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth()) {
+                                StatsItem(modifier = Modifier.weight(1f), title = MutableLiveData("Top Speed"), value = topSpeed, units = speedUnits)
+                                StatsItem(modifier = Modifier.weight(1f), title = MutableLiveData("Distance"), value = distance, units = distanceUnits)
+//                            StatsItem(modifier = Modifier, title = MutableLiveData("Time spent"), value = MutableLiveData("23:15:54"), units = MutableLiveData("hour"))
+
+                            }
+                            Row(modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth()) {
+                                StatsItem(modifier = Modifier.weight(1f), title = MutableLiveData("Time spent"), value = timeSpent, units = MutableLiveData("hour"))
+                                StatsItem(modifier = Modifier.weight(1f), title = MutableLiveData("Count of Trips"), value = countOfTrips, units = MutableLiveData(""))
+
+                            }
+
+                        }
+                    }
                 }
             }
         }
@@ -139,12 +228,35 @@ fun RequireExternalStoragePermission(
 @Preview
 @Composable
 fun PreviewCarInfo() {
-    CarInfoView(modifier = Modifier.padding(20.dp), carBrand = MutableLiveData("Skoda"), carModel = MutableLiveData("Octavia Combi"))
+    CarInfoView(modifier = Modifier.padding(20.dp), carBrand = MutableLiveData("Skoda"), carModel = MutableLiveData("Octavia Combi"), carYear = MutableLiveData("2015"))
 }
 @Composable
-fun CarInfoView(modifier: Modifier,carBrand:MutableLiveData<String>,carModel:MutableLiveData<String>) {
-    Column(modifier = modifier) {
-        Text(text = carBrand.observeAsState().value!!, fontSize = 12.sp, fontWeight = FontWeight.Normal, fontFamily = Nunito, color = Color.Gray)
-        Text(text = carModel.observeAsState().value!!, fontSize = 24.sp, fontWeight = FontWeight.Bold, fontFamily = Nunito, color = Color.White)
+fun CarInfoView(modifier: Modifier,carBrand:MutableLiveData<String>,carModel:MutableLiveData<String>,carYear:MutableLiveData<String>) {
+    Row(modifier = modifier) {
+        Column() {
+            Text(text = carBrand.observeAsState().value!!, fontSize = 12.sp, fontWeight = FontWeight.Normal, fontFamily = Nunito, color = Color.Gray)
+            Text(text = carModel.observeAsState().value!!, fontSize = 24.sp, fontWeight = FontWeight.Bold, fontFamily = Nunito, color = Color.White)
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        Text(modifier = Modifier.align(Alignment.Bottom),text = carYear.observeAsState().value!!, fontSize = 24.sp, fontWeight = FontWeight.Bold, fontFamily = Nunito, color = Color.White)
+    }
+
+}
+
+@Preview
+@Composable
+fun PreviewStatsItem() {
+    StatsItem(modifier = Modifier.width(150.dp), title = MutableLiveData("Top Speed"), value = MutableLiveData("150"), units = MutableLiveData("km/h"))
+}
+
+@Composable
+fun StatsItem(modifier: Modifier,title:MutableLiveData<String>, value:MutableLiveData<String>, units:MutableLiveData<String>) {
+    Surface(modifier = modifier, color = Color.Transparent) {
+        Column(modifier = Modifier.padding(16.dp),horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(text = title.observeAsState().value!!, fontSize = 12.sp, fontWeight = FontWeight.Normal, fontFamily = Nunito, color = Color.Gray)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = value.observeAsState().value!!, fontSize = 30.sp, fontWeight = FontWeight.Bold, fontFamily = Nunito, color = Color.White)
+            Text(text = units.observeAsState().value!!, fontSize = 8.sp, fontWeight = FontWeight.Normal, fontFamily = Nunito, color = Color.Gray)
+        }
     }
 }

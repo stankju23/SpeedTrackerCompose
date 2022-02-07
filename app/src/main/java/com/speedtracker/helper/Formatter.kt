@@ -30,80 +30,34 @@ object Formatter {
         }
     }
 
-    fun calculateTripTime(startDate:Date, endDate:Date) : String {
-        var different = (endDate.time - startDate.time)
-
-        System.out.println("startDate : $startDate")
-        System.out.println("endDate : $endDate")
-        println("different : $different")
-
-        val secondsInMilli: Long = 1000
-        val minutesInMilli = secondsInMilli * 60
-        val hoursInMilli = minutesInMilli * 60
-        val daysInMilli = hoursInMilli * 24
-
-        val elapsedDays = different / daysInMilli
-        different = different % daysInMilli
-
-        val elapsedHours = different / hoursInMilli
-        different = different % hoursInMilli
-
-        val elapsedMinutes = different / minutesInMilli
-        different = different % minutesInMilli
-
-//        val elapsedSeconds = different / secondsInMilli
-
-        var formatedString = ""
-        if (elapsedDays != 0L) {
-            formatedString += "${elapsedDays}d"
-        }
-        if (elapsedHours == 0L) {
-            formatedString += "00:"
-        } else {
-            if (elapsedHours < 10) {
-                formatedString += "0${elapsedHours}:"
-            } else {
-                formatedString += "${elapsedHours}:"
-            }
-        }
-
-        if (elapsedMinutes == 0L) {
-            formatedString += "00"
-        } else {
-            if (elapsedMinutes < 10) {
-                formatedString += "0${elapsedMinutes}"
-            } else {
-                formatedString += "${elapsedMinutes}"
-            }
-        }
-
-        return formatedString
+    fun calculateTimeBetweenDates(startDate:Date, endDate:Date):Long {
+        return (endDate.time - startDate.time)
     }
-    fun calculateTripTimeToSec(startDate:Date, endDate:Date) : String {
-        var different = (endDate.time - startDate.time)
+
+    fun formatTimeFromLong(different:Long):String {
+
         var formatedString = ""
 
         if (different != 0L) {
-            System.out.println("startDate : $startDate")
-            System.out.println("endDate : $endDate")
             println("different : $different")
 
+            var newDifferent = different
             val secondsInMilli: Long = 1000
             val minutesInMilli = secondsInMilli * 60
             val hoursInMilli = minutesInMilli * 60
             val daysInMilli = hoursInMilli * 24
 
-            val elapsedDays = different / daysInMilli
-            different = different % daysInMilli
+            val elapsedDays = newDifferent / daysInMilli
+            newDifferent = newDifferent % daysInMilli
 
-            val elapsedHours = different / hoursInMilli
-            different = different % hoursInMilli
+            val elapsedHours = newDifferent / hoursInMilli
+            newDifferent = newDifferent % hoursInMilli
 
-            val elapsedMinutes = different / minutesInMilli
-            different = different % minutesInMilli
+            val elapsedMinutes = newDifferent / minutesInMilli
+            newDifferent = newDifferent % minutesInMilli
 
-            val elapsedSeconds = different / secondsInMilli
-            different = different % secondsInMilli
+            val elapsedSeconds = newDifferent / secondsInMilli
+            newDifferent = newDifferent % secondsInMilli
 
 //        val elapsedSeconds = different / secondsInMilli
 
@@ -142,7 +96,27 @@ object Formatter {
         return formatedString
     }
 
+    fun calculateTripTime(startDate:Date, endDate:Date) : String {
+        var different = (endDate.time - startDate.time)
+        return formatTimeFromLong(different)
+    }
+
+
     fun calculateTripDistance(locations:List<LatLng>):Double {
+        var distance = 0.0f
+        if (locations.size > 1) {
+            for (i in 0..locations.size - 1) {
+                if (i < locations.size - 1) {
+                    distance += getDistanceBetweenTwoLocations(locations[i].latitude, locations[i].longitude,locations[i + 1].latitude, locations[i + 1].longitude)
+                }
+            }
+        } else {
+            distance = 0.0f
+        }
+        return Math.round(distance * 10.0) / 10.0
+    }
+
+    fun calculateTripDistanceFromLocationList(locations:List<Location>):Double {
         var distance = 0.0f
         if (locations.size > 1) {
             for (i in 0..locations.size - 1) {

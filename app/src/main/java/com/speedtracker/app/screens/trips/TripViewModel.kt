@@ -21,6 +21,7 @@ class TripViewModel : ViewModel() {
 
     var choosedTrip:MutableLiveData<TripData> = MutableLiveData()
     var tripList:MutableLiveData<ArrayList<TripData>> = MutableLiveData()
+    var tripListByCarInfo:MutableLiveData<ArrayList<TripData>> = MutableLiveData()
 
     fun getAddressFromLocation(location: Location, context: Context) :List<String>{
         var geocoder = Geocoder(context, Locale.getDefault())
@@ -59,6 +60,10 @@ class TripViewModel : ViewModel() {
 
     suspend fun loadTrips(context:Context) {
         tripList.value = ArrayList(AppDatabase.getDatabase(context = context).tripDao().getAllTripData().reversed())
+    }
+
+    suspend fun loadTripsByCarInfo(context: Context, carInfoId:String) {
+        tripListByCarInfo.value = ArrayList(AppDatabase.getDatabase(context = context).tripDao().getTripDataByCarInfoId(carInfoId))
     }
 
     fun deleteTrip(index: Int, context: Context) {
