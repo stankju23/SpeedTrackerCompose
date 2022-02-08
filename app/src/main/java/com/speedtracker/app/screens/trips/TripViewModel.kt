@@ -70,7 +70,6 @@ class TripViewModel : ViewModel() {
         viewModelScope.launch {
             var tripID = tripList.value!!.get(index).tripInfo.tripId
             AppDatabase.getDatabase(context = context).tripDao().removeTrip(tripID)
-            AppDatabase.getDatabase(context = context).tripDao().removeLocations(tripID)
         }
     }
 }

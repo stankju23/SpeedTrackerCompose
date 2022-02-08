@@ -61,16 +61,17 @@ fun TripListPage(paddingValues: PaddingValues,context: Context,tripViewModel: Tr
         }
     ) {
 
+
+        LaunchedEffect("") {
+            dataLoaded.value = false
+            tripViewModel.loadTrips(context = context)
+            dataLoaded.value = true
+        }
+
         if (!dataLoaded.observeAsState().value!!) {
 //            SideEffect {
 //
 //            }
-
-            LaunchedEffect("") {
-                tripViewModel.loadTrips(context = context)
-                dataLoaded.value = true
-            }
-
             Loading()
         } else {
             if (tripViewModel.tripList.observeAsState().value!!.size == 0) {

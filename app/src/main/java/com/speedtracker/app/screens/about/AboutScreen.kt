@@ -5,11 +5,14 @@ package com.speedtracker.app.screens.about
 import android.Manifest
 import android.content.ContentResolver
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -21,9 +24,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,12 +39,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
+import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import com.speedtracker.R
 import com.speedtracker.app.screens.trips.TripViewModel
 import com.speedtracker.app.screens.trips.triplist.*
+import com.speedtracker.app.screens.walkthrough.WalkthroughViewModel
 import com.speedtracker.helper.Constants
 import com.speedtracker.helper.Formatter
 import com.speedtracker.helper.GenerallData
@@ -52,18 +55,25 @@ import com.speedtracker.model.CarInfo
 import com.speedtracker.ui.theme.MainGradientMiddleColor
 import com.speedtracker.ui.theme.MainGradientStartColor
 import com.speedtracker.ui.theme.Nunito
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.util.*
+import kotlin.coroutines.coroutineContext
 
 
 var dataLoaded:MutableLiveData<Boolean> = MutableLiveData(false)
 var showNoTripData:MutableLiveData<Boolean> = MutableLiveData(false)
 
 @Composable
-fun AboutScreen(context: Context,paddingValues: PaddingValues,carInfo: MutableLiveData<CarInfo?>,tripViewModel:TripViewModel) {
+fun AboutScreen(scope: CoroutineScope, context: Context, paddingValues: PaddingValues, carInfo: MutableLiveData<CarInfo?>, tripViewModel:TripViewModel, navController: NavController, walkthroughViewModel: WalkthroughViewModel) {
 
-
+    var imageUri by remember {
+        mutableStateOf<Uri?>(null)
+    }
 
     Scaffold(
         containerColor = Color.White,
@@ -86,16 +96,16 @@ fun AboutScreen(context: Context,paddingValues: PaddingValues,carInfo: MutableLi
                             .fillMaxSize()
                     ) {
 
-                            if (carInfo.value != null) {
-                                Log.d("Car photo path", carInfo.value!!.carPhoto!!)
+                            if (carInfo.observeAsState().value != null) {
+                                Log.d("Car photo path", carInfo.observeAsState().value!!.carPhoto!!)
 
-                                val uri = carInfo.value!!.carPhoto!!
+                                imageUri = Uri.parse(carInfo.observeAsState().value!!.carPhoto!!)
 
                                 Image(
                                     modifier = Modifier.fillMaxSize(),
                                     contentScale = ContentScale.Crop,
                                     painter = rememberImagePainter(
-                                        data  = Uri.parse(uri)  // or ht
+                                        data  = imageUri  // or ht
                                     ),
                                     contentDescription = ""
                                 )
@@ -113,27 +123,45 @@ fun AboutScreen(context: Context,paddingValues: PaddingValues,carInfo: MutableLi
                                     )
                             )
 
-                        IconButton(onClick = {}, modifier = Modifier.align(Alignment.TopStart)) {
+                        val launcher = rememberLauncherForActivityResult(contract =
+                        ActivityResultContracts.OpenDocument()) { uri: Uri? ->
+                            carInfo.value!!.carPhoto = uri!!.toString()
+//                            imageUri = uri
+                            val contentResolver = context.contentResolver
+
+                            val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            // Check for the freshest data.
+                            contentResolver.takePersistableUriPermission(uri, takeFlags)
+                            scope.launch {
+                                Log.d("New Car photo path", carInfo.value!!.carPhoto!!)
+                                walkthroughViewModel.updateCarPhoto(context = context, photoPath = uri.toString(), carInfo = carInfo)
+                            }
+
+                        }
+
+                        IconButton(onClick = {
+                            launcher.launch(arrayOf("image/*"))
+                        }, modifier = Modifier.align(Alignment.TopStart)) {
                             Icon(Icons.Default.PhotoCamera, contentDescription = "Change photo icon", tint = Color.White)
                         }
 
-                        IconButton(onClick = {}, modifier = Modifier.align(Alignment.TopEnd)) {
-                            Icon(Icons.Default.Edit, contentDescription = "Change photo icon", tint = Color.White)
+                        IconButton(onClick = {
+                            navController.navigate("edit-car-info")
+                        }, modifier = Modifier.align(Alignment.TopEnd)) {
+                            Icon(Icons.Default.Edit, contentDescription = "Change car info", tint = Color.White)
                         }
                     }
                 }
 
+                LaunchedEffect("") {
+                    dataLoaded.value = false
+                    tripViewModel.loadTripsByCarInfo(context = context, carInfoId = carInfo.value!!.carIdentifier)
+                    dataLoaded.value = true
+                }
 
                 if (!dataLoaded.observeAsState().value!!) {
-
-                    LaunchedEffect("") {
-                        tripViewModel.loadTripsByCarInfo(context = context, carInfoId = carInfo.value!!.carIdentifier)
-                        dataLoaded.value = true
-                    }
-
                     Loading()
                 } else {
-
                     var topSpeed:MutableLiveData<String> = MutableLiveData("0")
                     var distance:MutableLiveData<String> = MutableLiveData("0")
                     var timeSpent:MutableLiveData<String> = MutableLiveData("0:00:00")

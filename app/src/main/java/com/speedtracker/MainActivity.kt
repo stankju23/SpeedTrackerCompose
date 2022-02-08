@@ -628,7 +628,7 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
             }
 
             composable(NavDrawerItem.About.route) {
-                AboutScreen(paddingValues = paddingValues, carInfo = this@MainActivity.carInfo, context = this@MainActivity, tripViewModel = this@MainActivity.tripViewModel)
+                AboutScreen(paddingValues = paddingValues, carInfo = this@MainActivity.carInfo, context = this@MainActivity, tripViewModel = this@MainActivity.tripViewModel, navController = navController, walkthroughViewModel = this@MainActivity.walkthroughViewModel, scope = scope)
             }
         }
     }

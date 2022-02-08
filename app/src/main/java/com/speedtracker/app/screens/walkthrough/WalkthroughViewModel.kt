@@ -58,6 +58,14 @@ class WalkthroughViewModel:ViewModel() {
         return false
     }
 
+    suspend fun updateCarPhoto(context: Context,photoPath:String,carInfo: MutableLiveData<CarInfo?>) {
+        Log.d("Car pref stored", carInfo.value!!.carPhoto!!)
+        var carInfoValue = carInfo.value!!
+        carInfoValue.carPhoto = photoPath
+        AppDatabase.getDatabase(context = context).carInfoDao().updateCarInfo(carInfo = carInfoValue)
+        carInfo.value = carInfoValue
+    }
+
     suspend fun updateCarPreferences(context: Context,carInfo: MutableLiveData<CarInfo?>) {
         validateData()
         if (errors.size > 0) {
@@ -65,6 +73,7 @@ class WalkthroughViewModel:ViewModel() {
         } else {
             if (errors.size == 0) {
 //                Log.i("tag222", carInfo.carPhotoPath.toString())
+                Log.d("Car pref stored", carInfo.value!!.carPhoto!!)
                 var carInfoValue = carInfo.value!!
                 carInfoValue.carBrand = carBrand.value!!
                 carInfoValue.carModel = carModel.value!!

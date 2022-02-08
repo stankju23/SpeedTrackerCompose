@@ -27,7 +27,12 @@ data class TripInfo (
     @ColumnInfo(name = "carInfoId") var carInfoId: String? = null
 )
 
-@Entity
+@Entity(foreignKeys = [ForeignKey(
+    entity = TripInfo::class,
+    parentColumns = arrayOf("tripId"),
+    childColumns = arrayOf("tripIdentifier"),
+    onDelete = ForeignKey.CASCADE
+)])
 data class Location (
     @PrimaryKey(autoGenerate = true) var locationId:Int?,
     @ColumnInfo(name = "tripIdentifier") val tripIdentifier: Long,
@@ -92,12 +97,9 @@ interface TripDao {
     @Query("DELETE FROM TripInfo WHERE tripId = :tripId")
     suspend fun removeTrip(tripId: Long)
 
-    @Query("DELETE FROM Location WHERE tripIdentifier = :tripId")
-    suspend fun removeLocations(tripId: Long)
-
 }
 
-@Database(entities = [CarInfo::class,TripInfo::class,Location::class], exportSchema = false, version = 2)
+@Database(entities = [CarInfo::class,TripInfo::class,Location::class], exportSchema = false, version = 1)
 abstract class AppDatabase: RoomDatabase() {
 
     abstract fun carInfoDao():CarInfoDao
