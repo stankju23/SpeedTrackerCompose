@@ -11,6 +11,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -133,18 +134,30 @@ fun TripList(context: Context,tripViewModel: TripViewModel,navController: NavHos
         .padding(top = 4.dp),
         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        items(tripViewModel.tripList.value!!.size) { index ->
 
-            val dismissState = rememberDismissState()
+        itemsIndexed(items = tripViewModel.tripList.value!!,
+            key={
+                index,item->
+            item.hashCode()
+        }) { index,item ->
 
-            if (dismissState.isDismissed(DismissDirection.EndToStart)) {
-                tripViewModel.deleteTrip(index = index, context = context)
-                tripViewModel.tripList.value!!.removeAt(index)
+            val state= rememberDismissState(
+                confirmStateChange = {
+                    if (it==DismissValue.DismissedToStart){
+                        tripViewModel.deleteTrip(index = index, context = context)
+                        tripViewModel.tripList.value!!.remove(item)
+                    }
+                    true
+                }
+            )
 
-            }
+//            if (dismissState.isDismissed(DismissDirection.EndToStart)) {
+//                tripViewModel.deleteTrip(index = index, context = context)
+//                tripViewModel.tripList.value!!.removeAt(index)
+//            }
 
             SwipeToDismiss(
-                state = dismissState,
+                state = state,
                 modifier = Modifier
                     .padding(vertical = Dp(1f)),
                 directions = setOf(
