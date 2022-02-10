@@ -167,12 +167,12 @@ fun TripList(context: Context,tripViewModel: TripViewModel,navController: NavHos
                     FractionalThreshold(if (direction == DismissDirection.EndToStart) 0.1f else 0.05f)
                 },
                 background = {
-                    val color by animateColorAsState(
-                        when (dismissState.targetValue) {
-                            DismissValue.Default -> Color.White
-                            else -> Color.Red
-                        }
-                    )
+//                    val color by animateColorAsState(
+//                        when (dismissState.targetValue) {
+//                            DismissValue.Default -> Color.White
+//                            else -> Color.Red
+//                        }
+//                    )
                     val alignment = Alignment.CenterEnd
 
                     Box(
