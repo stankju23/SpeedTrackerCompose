@@ -35,6 +35,7 @@ import androidx.lifecycle.MutableLiveData
 import com.justwatter.app.helper.AppDataStoreImpl
 import com.speedtracker.DrawerValue
 import com.speedtracker.R
+import com.speedtracker.app.screens.components.AutoSizeText
 import com.speedtracker.app.screens.components.LoadingComponent
 import com.speedtracker.app.screens.mainscreen.statistics.StatisticsViewModel
 import com.speedtracker.helper.Constants
@@ -49,8 +50,8 @@ import kotlinx.coroutines.launch
 fun previewActualSpeedFun() {
     ActualSpeedPart(
         context = LocalContext.current,
-        modifier = Modifier.height(500.dp),
-        speed = MutableLiveData(123),
+        modifier = Modifier.height(280.dp),
+        speed = MutableLiveData(10),
         speedViewModel = SpeedViewModel(),
         statisticsViewModel = StatisticsViewModel(AppDataStoreImpl(LocalContext.current)),
         showTripDialog = MutableLiveData(false)
@@ -141,21 +142,22 @@ fun SpeedText(modifier: Modifier, speed: MutableLiveData<Int>) {
     var unitTextReadyToDraw by remember { mutableStateOf(false) }
     Row(
         modifier = modifier
-            .background(Color.Red),
+            .background(Color.Transparent),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center) {
 
         Row() {
-            Text(
+            AutoSizeText(
                 text = "${speed.observeAsState().value!!}",
                 color = Color.White,
-                maxLines = 1,
                 style = speedTextStyle,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Right,
+                minTextSizeSp = 50f,
+                maxTextSizeSp = 200f,
                 modifier = Modifier
+                    .padding(start = 10.dp)
+                    .background(Color.Transparent)
                     .alignByBaseline()
-                    .padding(start = 10.dp, top = 0.dp, end = 0.dp, bottom = 0.dp)
+
     //                .drawWithContent {
     //                    if (speedTextReadyToDraw) drawContent()
     //                },

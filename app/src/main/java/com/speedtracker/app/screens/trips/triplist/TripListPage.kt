@@ -158,14 +158,6 @@ fun TripList(context: Context,tripViewModel: TripViewModel,navController: NavHos
 
             SwipeToDismiss(
                 state = state,
-                modifier = Modifier
-                    .padding(vertical = Dp(1f)),
-                directions = setOf(
-                    DismissDirection.EndToStart
-                ),
-                dismissThresholds = { direction ->
-                    FractionalThreshold(if (direction == DismissDirection.EndToStart) 0.1f else 0.05f)
-                },
                 background = {
 //                    val color by animateColorAsState(
 //                        when (dismissState.targetValue) {
@@ -173,15 +165,15 @@ fun TripList(context: Context,tripViewModel: TripViewModel,navController: NavHos
 //                            else -> Color.Red
 //                        }
 //                    )
-                    val alignment = Alignment.CenterEnd
-
-                    Box(
-                        Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = Dp(20f)),
-                        contentAlignment = alignment
-                    ) {
-                    }
+//                    val alignment = Alignment.CenterEnd
+//
+//                    Box(
+//                        Modifier
+//                            .fillMaxSize()
+//                            .padding(horizontal = Dp(20f)),
+//                        contentAlignment = alignment
+//                    ) {
+//                    }
                 },
                 dismissContent = {
                     if (tripViewModel.tripList.value!!.size != 0) {
@@ -189,7 +181,10 @@ fun TripList(context: Context,tripViewModel: TripViewModel,navController: NavHos
                     } else {
                         showNoTripData.value = true
                     }
-                }
+                },
+                directions = setOf(
+                    DismissDirection.EndToStart
+                ),
             )
         }
 
