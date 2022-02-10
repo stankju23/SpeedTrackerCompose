@@ -2,17 +2,10 @@
 
 package com.speedtracker.app.screens.mainscreen.drawer
 
-import android.content.ContentUris
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.ImageDecoder
 import android.net.Uri
-import android.os.Build
-import android.provider.MediaStore
 import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -22,16 +15,19 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.rounded.PhotoCamera
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
@@ -42,22 +38,17 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import coil.ImageLoader
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.speedtracker.R
 import com.speedtracker.app.screens.walkthrough.WalkthroughViewModel
-import com.speedtracker.helper.AssetsHelper
-import com.speedtracker.helper.ImageBitmapString
 import com.speedtracker.model.CarInfo
 import com.speedtracker.ui.theme.MainGradientBG
 import com.speedtracker.ui.theme.Nunito
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import java.io.File
 
-    @Composable
+@Composable
     fun Drawer(context:Context,modifier: Modifier,scope: CoroutineScope, scaffoldState: MutableState<com.speedtracker.DrawerValue>, navController: NavController,carInfo:MutableLiveData<CarInfo?>,walkthroughViewModel:WalkthroughViewModel) {
         val items = listOf(
             NavDrawerItem.TripList,

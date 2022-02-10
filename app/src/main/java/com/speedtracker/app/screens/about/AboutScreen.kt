@@ -181,8 +181,14 @@ fun AboutScreen(scope: CoroutineScope, context: Context, paddingValues: PaddingV
                         topSpeed.value = "${if(GenerallData.isMetric.value!!) (topSpeedValue * Constants.msToKmh).toInt() else (topSpeedValue * Constants.msToMph).toInt()}"
                         countOfTrips.value = tripViewModel.tripListByCarInfo.value!!.size.toString()
                         var different = 0L
+                        var endDate: Date
                         tripViewModel.tripListByCarInfo.value!!.forEach {
-                            different += Formatter.calculateTimeBetweenDates(startDate = Date(it.tripInfo.tripStartDate!!), endDate = Date(it.tripInfo.tripEndDate!!))
+                            if (it.tripInfo.tripEndDate == null) {
+                                endDate = Calendar.getInstance().time
+                            } else {
+                                endDate = Date(it.tripInfo.tripEndDate!!)
+                            }
+                            different += Formatter.calculateTimeBetweenDates(startDate = Date(it.tripInfo.tripStartDate!!), endDate)
                         }
                         timeSpent.value = Formatter.formatTimeFromLong(different = different)
 

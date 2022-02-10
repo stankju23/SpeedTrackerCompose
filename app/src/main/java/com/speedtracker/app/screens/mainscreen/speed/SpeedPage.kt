@@ -22,15 +22,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.*
 import androidx.lifecycle.MutableLiveData
+import com.justwatter.app.helper.AppDataStoreImpl
 import com.speedtracker.DrawerValue
 import com.speedtracker.R
 import com.speedtracker.app.screens.components.LoadingComponent
@@ -42,24 +44,40 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 
+@Preview
+@Composable
+fun previewActualSpeedFun() {
+    ActualSpeedPart(
+        context = LocalContext.current,
+        modifier = Modifier.height(500.dp),
+        speed = MutableLiveData(123),
+        speedViewModel = SpeedViewModel(),
+        statisticsViewModel = StatisticsViewModel(AppDataStoreImpl(LocalContext.current)),
+        showTripDialog = MutableLiveData(false)
+    )
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ActualSpeedPart(context: Context, modifier: Modifier, speed: MutableLiveData<Int>, scaffoldState:  MutableState<DrawerValue>, speedViewModel: SpeedViewModel, statisticsViewModel: StatisticsViewModel, showTripDialog:MutableLiveData<Boolean>) {
+fun ActualSpeedPart(context: Context, modifier: Modifier, speed: MutableLiveData<Int>, speedViewModel: SpeedViewModel, statisticsViewModel: StatisticsViewModel, showTripDialog:MutableLiveData<Boolean>) {
     Column(modifier = modifier) {
-        ActualSpeedPartTopBar(context = context, scaffoldState, speedViewModel = speedViewModel, showTripDialog = showTripDialog, statisticsViewModel = statisticsViewModel)
+        ActualSpeedPartTopBar(context = context, speedViewModel = speedViewModel, showTripDialog = showTripDialog, statisticsViewModel = statisticsViewModel)
         Column(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f),
             verticalArrangement = Arrangement.Center
         ) {
             SpeedText(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .weight(7f)
                     .align(Alignment.CenterHorizontally), speed = speed
             )
+//            Spacer(modifier = Modifier.weight(1f))
             AdditionalInfo(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f),
+                    .weight(3f),
                 speedViewModel = speedViewModel
             )
         }
@@ -68,7 +86,7 @@ fun ActualSpeedPart(context: Context, modifier: Modifier, speed: MutableLiveData
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ActualSpeedPartTopBar(context: Context, scaffoldState:  MutableState<DrawerValue>, speedViewModel: SpeedViewModel,statisticsViewModel: StatisticsViewModel,showTripDialog: MutableLiveData<Boolean>) {
+fun ActualSpeedPartTopBar(context: Context, speedViewModel: SpeedViewModel,statisticsViewModel: StatisticsViewModel,showTripDialog: MutableLiveData<Boolean>) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -96,13 +114,13 @@ fun ActualSpeedPartTopBar(context: Context, scaffoldState:  MutableState<DrawerV
         }
         IconButton(onClick = {
 //            speedViewModel.speed.value = speedViewModel.speed.value!! + 30
-            if (scaffoldState.value == DrawerValue.Closed) {
+//            if (scaffoldState.value == DrawerValue.Closed) {
                 if (statisticsViewModel.trip.value == null) {
                     showTripDialog.value = true
                 } else {
                     statisticsViewModel.closeTrip(context = context)
                 }
-            }
+//            }
         }) {
             Icon(
                 painter = if (statisticsViewModel.trip.observeAsState().value != null) painterResource(
@@ -121,52 +139,59 @@ fun SpeedText(modifier: Modifier, speed: MutableLiveData<Int>) {
     var unitTextStyle by remember { mutableStateOf(Typography.titleLarge) }
     var speedTextReadyToDraw by remember { mutableStateOf(false) }
     var unitTextReadyToDraw by remember { mutableStateOf(false) }
-    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+    Row(
+        modifier = modifier
+            .background(Color.Red),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center) {
 
-        Text(
-            text = "${speed.observeAsState().value!!}",
-            color = Color.White,
-            maxLines = 1,
-            style = speedTextStyle,
-            textAlign = TextAlign.Right,
-            modifier = Modifier
-                .alignByBaseline()
-                .padding(start = 10.dp)
-//                .drawWithContent {
-//                    if (speedTextReadyToDraw) drawContent()
-//                },
-//            onTextLayout = { textLayoutResult ->
-//                if (textLayoutResult.didOverflowWidth || textLayoutResult.didOverflowHeight) {
-//                    speedTextStyle = speedTextStyle.copy(fontSize = speedTextStyle.fontSize * 0.9)
-//                    needsToResize = true
-//                } else {
-////                    if (textLayoutResult.size.width > textLayoutResult.multiParagraph.width || textLayoutResult.size.height > textLayoutResult.multiParagraph.height) {
-////                        speedTextStyle = speedTextStyle.copy(fontSize = Typography.bodyLarge.fontSize)
-////                    }
-////                    }
-//                    speedTextReadyToDraw = true
-//                }
-//            }
-        )
+        Row() {
+            Text(
+                text = "${speed.observeAsState().value!!}",
+                color = Color.White,
+                maxLines = 1,
+                style = speedTextStyle,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Right,
+                modifier = Modifier
+                    .alignByBaseline()
+                    .padding(start = 10.dp, top = 0.dp, end = 0.dp, bottom = 0.dp)
+    //                .drawWithContent {
+    //                    if (speedTextReadyToDraw) drawContent()
+    //                },
+//                onTextLayout = { textLayoutResult ->
+//                    if (textLayoutResult.didOverflowWidth || textLayoutResult.didOverflowHeight) {
+//                        speedTextStyle = speedTextStyle.copy(fontSize = speedTextStyle.fontSize * 0.9)
+//                        needsToResize = true
+//                    } else {
+    ////                    if (textLayoutResult.size.width > textLayoutResult.multiParagraph.width || textLayoutResult.size.height > textLayoutResult.multiParagraph.height) {
+    ////                        speedTextStyle = speedTextStyle.copy(fontSize = Typography.bodyLarge.fontSize)
+    ////                    }
+    ////                    }
+    //                    speedTextReadyToDraw = true
+    //                }
+    //            }
+            )
 
-        
-        Text(
-            text = if(GenerallData.isMetric.value!!) stringResource(id = R.string.speed_units_metric) else stringResource(id = R.string.speed_units_imperial),
-            color = Color.White,
-            style = unitTextStyle,
-            maxLines = 1,
-            softWrap = false,
-            modifier = Modifier
-                .alignByBaseline()
-                .padding(end = 20.dp),
-//            onTextLayout = { textLayoutResult ->
-//                if (textLayoutResult.didOverflowWidth) {
-//                    unitTextStyle = unitTextStyle.copy(fontSize = unitTextStyle.fontSize * 0.9)
-//                } else {
-//                    unitTextReadyToDraw = true
-//                }
-//            }
-          )
+
+            Text(
+                text = if(GenerallData.isMetric.value!!) stringResource(id = R.string.speed_units_metric) else stringResource(id = R.string.speed_units_imperial),
+                color = Color.White,
+                style = unitTextStyle,
+                maxLines = 1,
+                softWrap = false,
+                modifier = Modifier
+                    .alignByBaseline()
+                    .padding(end = 20.dp),
+    //            onTextLayout = { textLayoutResult ->
+    //                if (textLayoutResult.didOverflowWidth) {
+    //                    unitTextStyle = unitTextStyle.copy(fontSize = unitTextStyle.fontSize * 0.9)
+    //                } else {
+    //                    unitTextReadyToDraw = true
+    //                }
+    //            }
+              )
+        }
     }
 }
 

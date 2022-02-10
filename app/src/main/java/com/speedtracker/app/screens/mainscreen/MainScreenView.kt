@@ -55,7 +55,6 @@ fun MainScreenView(paddingValues: PaddingValues,scope: CoroutineScope, scaffoldS
             .fillMaxWidth()
             .background(brush = MainGradientBG),
             speed = speedViewModel.speed,
-            scaffoldState = scaffoldState,
             speedViewModel = speedViewModel,
             context = context,
             statisticsViewModel = statisticsViewModel,
