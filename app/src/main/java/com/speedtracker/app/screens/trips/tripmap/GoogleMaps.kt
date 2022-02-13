@@ -1,6 +1,7 @@
 package com.speedtracker.app.screens.trips.tripmap
 
 import android.os.Bundle
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -41,17 +42,21 @@ fun GoogleMaps(
 }
 
 @Composable
-fun rememberMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =
+fun rememberMapLifecycleObserver(mapView: MapView?): LifecycleEventObserver =
     remember(mapView) {
         LifecycleEventObserver { _, event ->
-            when(event) {
-                Lifecycle.Event.ON_CREATE -> mapView.onCreate(Bundle())
-                Lifecycle.Event.ON_START -> mapView.onStart()
-                Lifecycle.Event.ON_RESUME -> mapView.onResume()
-                Lifecycle.Event.ON_PAUSE -> mapView.onPause()
-                Lifecycle.Event.ON_STOP -> mapView.onStop()
-                Lifecycle.Event.ON_DESTROY -> mapView.onDestroy()
-                else -> throw IllegalStateException()
+            try {
+                when(event) {
+                    Lifecycle.Event.ON_CREATE -> mapView?.onCreate(Bundle())
+                    Lifecycle.Event.ON_START -> mapView?.onStart()
+                    Lifecycle.Event.ON_RESUME -> mapView?.onResume()
+                    Lifecycle.Event.ON_PAUSE -> mapView?.onPause()
+                    Lifecycle.Event.ON_STOP -> mapView?.onStop()
+                    Lifecycle.Event.ON_DESTROY -> mapView?.onDestroy()
+                    else -> throw IllegalStateException()
+                }
+            } catch (e:Exception) {
+                Log.e("Map error", e.localizedMessage)
             }
         }
     }

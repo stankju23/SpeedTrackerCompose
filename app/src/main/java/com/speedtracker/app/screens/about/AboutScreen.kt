@@ -11,6 +11,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
+import android.widget.Space
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -204,6 +205,8 @@ fun AboutScreen(scope: CoroutineScope, context: Context, paddingValues: PaddingV
                         .fillMaxWidth()
                         .weight(1.2f)) {
                         CarInfoView(modifier = Modifier.padding(20.dp), carBrand = MutableLiveData(carInfo.observeAsState().value!!.carBrand), carModel = MutableLiveData(carInfo.observeAsState().value!!.carModel), carYear = MutableLiveData(carInfo.observeAsState().value!!.carManufacturedYear))
+                        Text(text = "Trips statistics: ", color = Color.Gray, fontSize = 12.sp, fontFamily = Nunito, modifier = Modifier.padding(start = 20.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
                         Box(modifier = Modifier
                             .fillMaxWidth()
                             .height(0.5.dp)
@@ -232,30 +235,6 @@ fun AboutScreen(scope: CoroutineScope, context: Context, paddingValues: PaddingV
             }
         }
     }
-}
-
-
-@ExperimentalPermissionsApi
-@Composable
-fun RequireExternalStoragePermission(
-    context: Context
-) {
-
-    // Permission state
-    val permissionState = rememberPermissionState(
-        Manifest.permission.READ_EXTERNAL_STORAGE
-    )
-    val permissionGranted = ContextCompat.checkSelfPermission(
-        context,
-        Manifest.permission.READ_EXTERNAL_STORAGE
-    ) == PackageManager.PERMISSION_GRANTED
-
-    if (!permissionGranted) {
-        SideEffect {
-            permissionState.launchPermissionRequest()
-        }
-    }
-
 }
 
 

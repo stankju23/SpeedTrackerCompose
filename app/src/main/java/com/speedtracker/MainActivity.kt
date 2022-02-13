@@ -346,7 +346,7 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                                     }
                                 }
                                 launchSingleTop = true
-                                restoreState = true
+                                restoreState = false
                             }
                         }
                     }
@@ -587,14 +587,12 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
             composable(
                 NavDrawerItem.TripList.route
             ) {
-
                 TripListPage(
                     paddingValues = paddingValues,
                     context = this@MainActivity,
                     tripViewModel = tripViewModel,
                     navController = navController
                 )
-
             }
 
             composable("trip-detail",
@@ -617,7 +615,11 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                     )
                 }
             ) {
-                TripMapPage(paddingValues = paddingValues,context = this@MainActivity, tripViewModel = tripViewModel)
+                TripMapPage(
+                    paddingValues = paddingValues,
+                    context = this@MainActivity,
+                    tripViewModel = tripViewModel
+                )
             }
 
             composable(NavDrawerItem.HeadUpDisplay.route) {
