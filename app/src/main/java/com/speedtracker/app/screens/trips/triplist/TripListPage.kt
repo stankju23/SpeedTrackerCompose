@@ -55,7 +55,7 @@ fun TripListPage(paddingValues: PaddingValues,context: Context,tripViewModel: Tr
         modifier = Modifier.padding(bottom = paddingValues.calculateBottomPadding()) ,
         topBar = {
             TopAppBar(
-                title = { Text(text = "Trip List", color = Color.White, fontFamily = Nunito) },
+                title = { Text(text = stringResource(R.string.trip_list_screen_title), color = Color.White, fontFamily = Nunito) },
                 backgroundColor = MainGradientStartColor
 //                navigationIcon = {
 //                    IconButton(onClick = {(context as Activity).onBackPressed()}) {

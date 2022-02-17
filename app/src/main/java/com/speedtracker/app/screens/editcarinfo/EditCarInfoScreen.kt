@@ -20,11 +20,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
 import com.speedtracker.MainActivity
+import com.speedtracker.R
 import com.speedtracker.app.screens.walkthrough.WalkthroughViewModel
 import com.speedtracker.app.screens.walkthrough.pages.Dropdown
 import com.speedtracker.app.screens.walkthrough.pages.TypeYearTextField
@@ -43,7 +45,7 @@ fun EditCarInfoScreen(carList:List<Car>, scope: CoroutineScope, walkthroughViewM
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Edit Car Info", color = Color.White, fontFamily = Nunito) },
+                title = { Text(text = stringResource(R.string.edit_car_info_screen_title), color = Color.White, fontFamily = Nunito) },
                 backgroundColor = MainGradientStartColor,
                 actions = {
                     IconButton(onClick = {
@@ -70,7 +72,7 @@ fun EditCarInfoScreen(carList:List<Car>, scope: CoroutineScope, walkthroughViewM
         Column(modifier = Modifier.fillMaxSize().background(brush = MainGradientBG), horizontalAlignment = Alignment.CenterHorizontally) {
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = "Here you can change your car info",
+                text = stringResource(R.string.edit_car_info_page_title),
                 textAlign = TextAlign.Center,
                 fontSize = 18.sp,
                 color = Color.White)
@@ -78,11 +80,11 @@ fun EditCarInfoScreen(carList:List<Car>, scope: CoroutineScope, walkthroughViewM
             Dropdown(listOfItems = walkthroughViewModel.brandList.observeAsState().value!!,
                 itemClick = {
                     if (it == -1) {
-                        walkthroughViewModel.modelList.value = listOf("Choose your model")
+                        walkthroughViewModel.modelList.value = listOf(context.getString(R.string.choose_model_title))
                         walkthroughViewModel.carModelIndex.value = 0
                     } else {
                         var models = carList.get(it).models
-                        models.add(0,"Choose your model")
+                        models.add(0,context.getString(R.string.choose_model_title))
                         walkthroughViewModel.modelList.value = models
                         walkthroughViewModel.carModelIndex.value = 0
                     }
@@ -103,11 +105,4 @@ fun EditCarInfoScreen(carList:List<Car>, scope: CoroutineScope, walkthroughViewM
             Spacer(modifier = Modifier.weight(1f))
         }
     }
-}
-
-@Preview
-@Composable
-fun PreviewEditCarInfo() {
-    var walkthroughViewModel = WalkthroughViewModel()
-//    EditCarInfoScreen(AssetsHelper.parseCarsBrands(LocalContext.current),walkthroughViewModel = walkthroughViewModel, context = LocalContext.current, carInfo = CarInfo(0,"aaa","Volvo","S90","2015",null))
 }

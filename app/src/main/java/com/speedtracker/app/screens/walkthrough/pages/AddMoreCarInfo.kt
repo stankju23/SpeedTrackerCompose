@@ -33,12 +33,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
+import com.speedtracker.R
 import com.speedtracker.ui.theme.Typography
 import java.io.File
 import java.util.*
@@ -59,7 +61,7 @@ fun AddMoreCarInfo(manufacturedYear:MutableLiveData<Int>, imageLiveData:MutableL
         Spacer(modifier = Modifier.weight(1f))
 
         Text(
-            text = "You can add photo by tapping \n on the image below",
+            text = stringResource(R.string.walkthroug_add_photo_title),
             textAlign = TextAlign.Center,
             fontSize = 18.sp,
             color = Color.White
@@ -72,7 +74,7 @@ fun AddMoreCarInfo(manufacturedYear:MutableLiveData<Int>, imageLiveData:MutableL
         Spacer(modifier = Modifier.weight(1f))
 
         Text(
-            text = "You can type manufacture \n year into field below",
+            text = stringResource(R.string.walkthrough_manufacture_year_title),
             textAlign = TextAlign.Center,
             fontSize = 18.sp,
             color = Color.White,
@@ -113,7 +115,7 @@ fun TypeYearTextField(manufacturedYear: MutableLiveData<Int>,initialText:String)
         TextField(
             value = text,
             textStyle = Typography.labelSmall,
-            label = { Text(text = "Here you can type year", color = Color.White)},
+            label = { Text(text = stringResource(R.string.walkthrough_type_year_hint), color = Color.White)},
             onValueChange = {
                 text = it
                 manufacturedYear.value = if(it.isEmpty()) 0 else it.toInt()
@@ -130,7 +132,7 @@ fun TypeYearTextField(manufacturedYear: MutableLiveData<Int>,initialText:String)
         )
         if (isError) {
             Text(
-                text = "Type correct year",
+                text = stringResource(R.string.walkthrough_type_year_error_message),
                 color = MaterialTheme.colorScheme.error,
                 style = androidx.compose.material.MaterialTheme.typography.caption,
                 modifier = Modifier.padding(start = 16.dp)

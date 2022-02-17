@@ -4,9 +4,7 @@ package com.speedtracker.app.screens.trips.tripmap
 
 import android.app.Activity
 import android.content.Context
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -15,7 +13,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,7 +40,6 @@ import com.speedtracker.ui.theme.MainGradientStartColor
 import com.speedtracker.ui.theme.Nunito
 import com.speedtracker.ui.theme.mapsLineColor
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 @Preview
@@ -87,7 +84,7 @@ fun TripMapPage(paddingValues: PaddingValues,context: Context,tripViewModel: Tri
                         .weight(1f)
                         .border(1.dp, color = MainGradientStartColor.copy(alpha = 0.5f))
                         .padding(start = 20.dp),
-                    title = "START",
+                    title = stringResource(R.string.trip_map_start_location_title),
                     street = "${startAddressList.get(0)} ${startAddressList.get(1)}",
                     city = startAddressList.get(2)
                 )
@@ -96,7 +93,7 @@ fun TripMapPage(paddingValues: PaddingValues,context: Context,tripViewModel: Tri
                         .weight(1f)
                         .border(1.dp, color = MainGradientStartColor.copy(alpha = 0.5f))
                         .padding(start = 20.dp),
-                    title = "END",
+                    title = stringResource(R.string.trip_map_end_location_title),
                     street = "${endAddressList.get(0)} ${endAddressList.get(1)}",
                     city = endAddressList.get(2)
                 )
@@ -155,8 +152,8 @@ fun TripMapPage(paddingValues: PaddingValues,context: Context,tripViewModel: Tri
                                 ) / Constants.mToKm) * 10.0
                             ) / 10.0)
                         }" else "${(Math.round((Formatter.calculateTripDistance(trackOptions.points) / Constants.mToMil) * 10.0) / 10.0)}",
-                        description = "Distance",
-                        unit = if (GenerallData.isMetric.value!!) "km" else "mil"
+                        description = stringResource(R.string.trip_map_distance_title),
+                        unit = if (GenerallData.isMetric.value!!) stringResource(id = R.string.measute_units_metric) else stringResource(id = R.string.measute_units_imperial)
                     )
 
 
@@ -167,8 +164,8 @@ fun TripMapPage(paddingValues: PaddingValues,context: Context,tripViewModel: Tri
                             .border(1.dp, color = MainGradientStartColor.copy(alpha = 0.5f)),
                         image = R.drawable.ic_avgspeed,
                         value = if (GenerallData.isMetric.observeAsState().value!!) if (tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.countOfUpdates == 0) "0.0" else "${(tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.sumOfTripSpeed / tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.countOfUpdates * Constants.msToKmh).toInt()}" else if (tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.countOfUpdates == 0) "0.0" else "${(tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.sumOfTripSpeed / tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.countOfUpdates * Constants.msToMph).toInt()}",
-                        description = "Average speed",
-                        unit = if (GenerallData.isMetric.value!!) "km/h" else "mph"
+                        description = stringResource(R.string.trip_map_avg_speed_title),
+                        unit = if (GenerallData.isMetric.value!!) stringResource(id = R.string.speed_units_metric) else stringResource(id = R.string.speed_units_imperial)
                     )
                 }
                 Row(
@@ -183,8 +180,8 @@ fun TripMapPage(paddingValues: PaddingValues,context: Context,tripViewModel: Tri
                             .border(1.dp, color = MainGradientStartColor.copy(alpha = 0.5f)),
                         image = R.drawable.ic_topspeed,
                         value = if (GenerallData.isMetric.observeAsState().value!!) "${(tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.maxSpeed * Constants.msToKmh).toInt()}" else "${(tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.maxSpeed * Constants.msToMph).toInt()}",
-                        description = "Top Speed",
-                        unit = if (GenerallData.isMetric.value!!) "km/h" else "mph"
+                        description = stringResource(R.string.trip_map_top_speed_title),
+                        unit = if (GenerallData.isMetric.value!!) stringResource(id = R.string.speed_units_metric) else stringResource(id = R.string.speed_units_imperial)
                     )
                     MapStatisticsItem(
                         modifier = Modifier
@@ -196,8 +193,8 @@ fun TripMapPage(paddingValues: PaddingValues,context: Context,tripViewModel: Tri
                             Date(tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.tripStartDate!!),
                             Date(tripViewModel.choosedTrip.observeAsState().value!!.tripInfo.tripEndDate!!)
                         ),
-                        description = "Time",
-                        unit = "h"
+                        description = stringResource(R.string.trip_map_time_title),
+                        unit = stringResource(R.string.trip_map_time_unit)
                     )
                 }
             }

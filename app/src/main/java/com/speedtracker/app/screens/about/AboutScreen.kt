@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -80,7 +81,7 @@ fun AboutScreen(scope: CoroutineScope, context: Context, paddingValues: PaddingV
         containerColor = Color.White,
         topBar = {
             TopAppBar(
-                title = { Text(text = "About", color = Color.White, fontFamily = Nunito) },
+                title = { Text(text = stringResource(R.string.about_screen_title), color = Color.White, fontFamily = Nunito) },
                 backgroundColor = MainGradientStartColor
             )
         },
@@ -216,16 +217,16 @@ fun AboutScreen(scope: CoroutineScope, context: Context, paddingValues: PaddingV
                             Row(modifier = Modifier
                                 .weight(1f)
                                 .fillMaxWidth()) {
-                                StatsItem(modifier = Modifier.weight(1f), title = MutableLiveData("Top Speed"), value = topSpeed, units = speedUnits)
-                                StatsItem(modifier = Modifier.weight(1f), title = MutableLiveData("Distance"), value = distance, units = distanceUnits)
+                                StatsItem(modifier = Modifier.weight(1f), title = MutableLiveData(stringResource(R.string.about_top_speed_title)), value = topSpeed, units = speedUnits)
+                                StatsItem(modifier = Modifier.weight(1f), title = MutableLiveData(stringResource(R.string.about_distance_title)), value = distance, units = distanceUnits)
 //                            StatsItem(modifier = Modifier, title = MutableLiveData("Time spent"), value = MutableLiveData("23:15:54"), units = MutableLiveData("hour"))
 
                             }
                             Row(modifier = Modifier
                                 .weight(1f)
                                 .fillMaxWidth()) {
-                                StatsItem(modifier = Modifier.weight(1f), title = MutableLiveData("Time spent"), value = timeSpent, units = MutableLiveData("hour"))
-                                StatsItem(modifier = Modifier.weight(1f), title = MutableLiveData("Count of Trips"), value = countOfTrips, units = MutableLiveData(""))
+                                StatsItem(modifier = Modifier.weight(1f), title = MutableLiveData(stringResource(R.string.about_time_spent_title)), value = timeSpent, units = MutableLiveData("hour"))
+                                StatsItem(modifier = Modifier.weight(1f), title = MutableLiveData(stringResource(R.string.about_count_of_trips_title)), value = countOfTrips, units = MutableLiveData(""))
 
                             }
 

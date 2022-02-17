@@ -1,5 +1,6 @@
 package com.speedtracker.app.screens.walkthrough
 
+import android.app.Application
 import android.content.Context
 import android.net.Uri
 import android.util.Log
@@ -9,15 +10,22 @@ import com.speedtracker.R
 import com.speedtracker.model.AppDatabase
 import com.speedtracker.model.Car
 import com.speedtracker.model.CarInfo
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.util.*
+import javax.inject.Inject
 import kotlin.collections.ArrayList
 
-class WalkthroughViewModel:ViewModel() {
+@HiltViewModel
+
+class WalkthroughViewModel @Inject constructor(
+    application: Application,
+):ViewModel() {
 
     var brandList:MutableLiveData<List<String>> = MutableLiveData(listOf())
-    var modelList:MutableLiveData<List<String>> = MutableLiveData(listOf("Choose Your Model"))
+    var modelList:MutableLiveData<List<String>> = MutableLiveData(listOf(application.getString(R.string.choose_model_title)))
 
     var carBrand:MutableLiveData<String> = MutableLiveData("")
     var carModel:MutableLiveData<String> = MutableLiveData("")

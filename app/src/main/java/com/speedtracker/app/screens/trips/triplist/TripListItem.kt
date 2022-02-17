@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -52,7 +53,7 @@ fun TripListItem(index:Int, context: Context, tripViewModel: TripViewModel,navCo
                 )
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Text(
-                        text = "Corrupted locations swipe to remove",
+                        text = stringResource(R.string.no_valid_locations_in_trip_title),
                         color = Color.DarkGray,
                         fontSize = 16.sp,
                         fontFamily = Nunito

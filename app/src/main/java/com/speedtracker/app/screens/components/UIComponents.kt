@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFontLoader
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.Paragraph
 import androidx.compose.ui.text.TextStyle
@@ -22,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.speedtracker.R
 
 @Composable
 fun LoadingComponent(modifier: Modifier) {
@@ -45,7 +47,7 @@ fun LoadingComponent(modifier: Modifier) {
         ) {
             Text(
                 textAlign = TextAlign.Center,
-                text = "Searching for GPS location...",
+                text = stringResource(R.string.searching_for_gps_location_text),
                 color = Color.White,
                 fontSize = 12.sp
             )

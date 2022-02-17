@@ -63,7 +63,7 @@ fun WalkthroughScreen(context: Context,walkthroughViewModel: WalkthroughViewMode
             // Our page content
             when(page) {
                 0 -> {
-                    CarBrandModelPage(AssetsHelper.parseCarsBrands(context),walkthroughViewModel = walkthroughViewModel)
+                    CarBrandModelPage(context = context,AssetsHelper.parseCarsBrands(context),walkthroughViewModel = walkthroughViewModel)
                 }
                 1 -> {
                     AddMoreCarInfo(manufacturedYear = walkthroughViewModel.manufacturedYear, context = context, imageLiveData = walkthroughViewModel.carImage)
@@ -148,7 +148,7 @@ fun ErrorsDialog(showDialog: MutableLiveData<Boolean>,erros:List<WalkthroughView
             onDismissRequest = {
             },
             title = {
-                Text("Something went wrong.", color = MainGradientStartColor)
+                Text(stringResource(R.string.walkthrough_error_dialog_title), color = MainGradientStartColor)
             },
             confirmButton = {
                 Button(
@@ -158,7 +158,7 @@ fun ErrorsDialog(showDialog: MutableLiveData<Boolean>,erros:List<WalkthroughView
                         showDialog.value = false
                     },
                 ) {
-                    Text("Ok")
+                    Text(stringResource(R.string.dialog_ok_btn))
                 }
             },
             text = {

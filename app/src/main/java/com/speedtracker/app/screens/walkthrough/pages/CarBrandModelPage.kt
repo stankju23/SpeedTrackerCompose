@@ -1,5 +1,6 @@
 package com.speedtracker.app.screens.walkthrough.pages
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -19,7 +20,9 @@ import androidx.compose.ui.focus.FocusRequester.Companion.createRefs
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -33,7 +36,7 @@ import com.speedtracker.ui.theme.MainGradientStartColor
 
 
 @Composable
-fun CarBrandModelPage(carList:List<Car>,walkthroughViewModel: WalkthroughViewModel) {
+fun CarBrandModelPage(context: Context,carList:List<Car>,walkthroughViewModel: WalkthroughViewModel) {
     Column(modifier = Modifier
         .fillMaxHeight()
         .fillMaxWidth(),
@@ -45,7 +48,7 @@ fun CarBrandModelPage(carList:List<Car>,walkthroughViewModel: WalkthroughViewMod
             contentDescription = "Car icon")
         Spacer(modifier = Modifier.weight(1f))
         Text(
-            text = "Choose your car brand \n and model",
+            text = stringResource(R.string.walkthrough_choose_car_brand_model_title),
             textAlign = TextAlign.Center,
             fontSize = 18.sp,
             color = Color.White)
@@ -53,18 +56,19 @@ fun CarBrandModelPage(carList:List<Car>,walkthroughViewModel: WalkthroughViewMod
 
         var brandStringList = carList.map { car -> car.brand }
         AssetsHelper.sortArrayAlphabetically(brandStringList as ArrayList<String>)
-        brandStringList.add(0,"Choose your brand")
+        brandStringList.add(0,context.getString(R.string.choose_brand_title))
 
         walkthroughViewModel.brandList.value = brandStringList
+
 
         Dropdown(listOfItems = walkthroughViewModel.brandList.observeAsState().value!!,
             itemClick = {
             if (it == -1) {
-                walkthroughViewModel.modelList.value = listOf("Choose your model")
+                walkthroughViewModel.modelList.value = listOf(context.getString(R.string.choose_model_title))
                 walkthroughViewModel.carModelIndex.value = 0
             } else {
                 var models = carList.get(it).models
-                models.add(0,"Choose your model")
+                models.add(0,context.getString(R.string.choose_model_title))
                 walkthroughViewModel.modelList.value = models
                 walkthroughViewModel.carModelIndex.value = 0
             }
@@ -100,7 +104,11 @@ fun Dropdown(listOfItems:List<String>, itemClick:(Int) -> (Unit),selectedItem:Mu
             .wrapContentSize(Alignment.TopStart)
             .height(50.dp)
             .padding(start = 65.dp, end = 65.dp)
-            .border(2.dp, color = if(listOfItems.size == 1) Color.Gray else Color.White, shape = RoundedCornerShape(10.dp)),
+            .border(
+                2.dp,
+                color = if (listOfItems.size == 1) Color.Gray else Color.White,
+                shape = RoundedCornerShape(10.dp)
+            ),
 
         ) {
         Row(modifier = Modifier
@@ -143,13 +151,4 @@ fun Dropdown(listOfItems:List<String>, itemClick:(Int) -> (Unit),selectedItem:Mu
             }
         }
     }
-}
-
-
-
-
-@Preview
-@Composable
-fun PreviewCarBrandModelPage() {
-    CarBrandModelPage(listOf(), WalkthroughViewModel())
 }

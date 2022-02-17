@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.Index
+import com.speedtracker.R
 import com.speedtracker.model.AppDatabase
 import com.speedtracker.model.Location
 import com.speedtracker.model.TripData
@@ -52,7 +53,7 @@ class TripViewModel : ViewModel() {
                     addressList.add(0,locality.locality)
                 }
             } else {
-                addressList.add("Unknown")
+                addressList.add(context.getString(R.string.unknown_address_title))
             }
         }
         return addressList

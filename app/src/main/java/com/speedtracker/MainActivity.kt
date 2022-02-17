@@ -57,6 +57,7 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -121,6 +122,8 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
     val walkthroughViewModel by viewModels<WalkthroughViewModel>()
     val tripViewModel by viewModels<TripViewModel>()
     val settingsViewModel by viewModels<SettingsViewModel>()
+
+    var showSettingsDialog = MutableLiveData(false)
 
     //    lateinit var scaffoldState:ScaffoldState
     lateinit var scope: CoroutineScope
@@ -370,15 +373,15 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
 //
 //        val context: Context = LocalContext.current
 //
-//        val settingResultRequest = rememberLauncherForActivityResult(
-//            contract = ActivityResultContracts.StartIntentSenderForResult()
-//        ) { activityResult ->
-//            if (activityResult.resultCode == RESULT_OK)
-//                Log.d("appDebug", "Accepted")
-//            else {
-//                Log.d("appDebug", "Denied")
-//            }
-//        }
+        val settingResultRequest = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartIntentSenderForResult()
+        ) { activityResult ->
+            if (activityResult.resultCode == RESULT_OK)
+                Log.d("appDebug", "Accepted")
+            else {
+                Log.d("appDebug", "Denied")
+            }
+        }
 //            checkLocationSetting(
 //                context = context,
 //                onDisabled = { intentSenderRequest ->
@@ -395,12 +398,15 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
         ) == PackageManager.PERMISSION_GRANTED
 
         if (permissionGranted) {
-            Log.d(TAG, "Permission already granted, exiting..")
-            startUpdatingLocation()
-            SideEffect {
-                startStatsHandler()
-            }
-
+            checkLocationSetting(context = this,
+                onEnabled = {
+                    startUpdatingLocation()
+                    startStatsHandler()
+                },
+                onDisabled = {
+                    settingResultRequest.launch(it)
+                }
+            )
             return
         }
 
@@ -411,8 +417,15 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
             if (isGranted) {
                 Log.d(TAG, "Permission provided by user")
                 // Permission Accepted
-                startUpdatingLocation()
-                startStatsHandler()
+                checkLocationSetting(context = this,
+                    onEnabled = {
+                        startUpdatingLocation()
+                        startStatsHandler()
+                    },
+                    onDisabled = {
+                        settingResultRequest.launch(it)
+                    }
+                )
             } else {
                 Log.d(TAG, "Permission denied by user")
                 // Permission Denied
@@ -545,7 +558,7 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                 var carList = AssetsHelper.parseCarsBrands(this@MainActivity)
                 var brandStringList = carList.map { car -> car.brand }
                 AssetsHelper.sortArrayAlphabetically(brandStringList as ArrayList<String>)
-                brandStringList.add(0, "Choose your brand")
+                brandStringList.add(0, stringResource(id = R.string.choose_brand_title))
                 walkthroughViewModel.brandList.value = brandStringList
                 Log.d(
                     "Manufactured year",

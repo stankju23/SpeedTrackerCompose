@@ -1,6 +1,10 @@
 package com.speedtracker.app.screens.settings
 
+import android.app.Activity
+import android.app.ActivityManager
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.justwatter.app.helper.AppDataStoreImpl
@@ -33,4 +37,18 @@ class SettingsViewModel @Inject constructor(var appDataStoreImpl: AppDataStoreIm
         }
 
     }
+
+    fun showWebPage(url:String,context:Context) {
+        val uri: Uri = Uri.parse(url)
+        val intent = Intent(Intent.ACTION_VIEW, uri)
+        context.startActivity(intent)
+    }
+
+
+    fun resetApp(context: Context) {
+        (context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager)
+            .clearApplicationUserData()
+        (context as Activity).recreate()
+    }
+
 }

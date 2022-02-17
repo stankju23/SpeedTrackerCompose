@@ -209,13 +209,13 @@ fun AdditionalInfo(modifier: Modifier, speedViewModel: SpeedViewModel) {
             modifier = Modifier.width(150.dp),
             imageRes = R.drawable.satellite_icon,
             value = MutableLiveData("${speedViewModel.satellitesText.observeAsState().value}"),
-            units = MutableLiveData("satellites")
+            units = MutableLiveData(stringResource(R.string.sattelites_title))
         )
         AdditionalInfoItem(
             modifier = Modifier.width(120.dp),
             imageRes = R.drawable.altitude_icon,
-            value = MutableLiveData("${speedViewModel.altitude.observeAsState().value}"),
-            units = MutableLiveData("m.n.m")
+            value = MutableLiveData(if(GenerallData.isMetric.observeAsState().value!!) "${speedViewModel.altitude.observeAsState().value}" else "${Math.round(speedViewModel.altitude.observeAsState().value!! * Constants.feetToM * 10.0) / 10.0}"),
+            units = MutableLiveData(if(GenerallData.isMetric.observeAsState().value!!) stringResource(R.string.altitude_units_metric) else stringResource(R.string.altitude_units_imperial))
         )
 //        ProgressBar(
 //            progress = 0.8f,

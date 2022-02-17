@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.*
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -89,7 +90,7 @@ fun TripDialog(showDialog: MutableLiveData<Boolean>, tripName: MutableLiveData<S
                     isError = false
                 },
                 title = {
-                    Text("Start new trip", color = MainGradientStartColor, fontSize = 26.sp)
+                    Text(stringResource(R.string.start_trip_dialog_title), color = MainGradientStartColor, fontSize = 26.sp)
                 },
                 text = {
                     Column(modifier = Modifier.height(75.dp)) {
@@ -107,7 +108,7 @@ fun TripDialog(showDialog: MutableLiveData<Boolean>, tripName: MutableLiveData<S
                                 colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.Transparent),
                                 label = {
                                     androidx.compose.material.Text(
-                                            text = "Trip name",
+                                            text = stringResource(R.string.start_trip_dialog_hint),
                                             color = Color.Black
                                     )
                                 },
@@ -124,7 +125,7 @@ fun TripDialog(showDialog: MutableLiveData<Boolean>, tripName: MutableLiveData<S
                         )
                         if (isError) {
                             androidx.compose.material.Text(
-                                    text = "Trip name cannot be empty",
+                                    text = stringResource(R.string.start_trip_dialog_error_message),
                                     color = androidx.compose.material3.MaterialTheme.colorScheme.error,
                                     style = androidx.compose.material.MaterialTheme.typography.caption,
                                     modifier = Modifier.padding(start = 16.dp)
@@ -145,7 +146,7 @@ fun TripDialog(showDialog: MutableLiveData<Boolean>, tripName: MutableLiveData<S
                                 }
                             },
                     ) {
-                        Text("Start", color = Color.Black, fontSize = 16.sp)
+                        Text(stringResource(R.string.start_trip_btn), color = Color.Black, fontSize = 16.sp)
                     }
                 },
                 dismissButton = {
@@ -157,7 +158,7 @@ fun TripDialog(showDialog: MutableLiveData<Boolean>, tripName: MutableLiveData<S
                                 isError = false
                             },
                     ) {
-                        Text("Cancel", color = Color.Black, fontSize = 16.sp)
+                        Text(stringResource(R.string.dialog_cancel_btn), color = Color.Black, fontSize = 16.sp)
                     }
                 }
         )
@@ -172,7 +173,7 @@ fun StatisticsPart(modifier: Modifier,statisticsViewModel: StatisticsViewModel) 
         val pagerState = rememberPagerState()
         val coroutineScope = rememberCoroutineScope()
 
-        var pages = listOf("General", "Trip")
+        var pages = listOf(stringResource(R.string.overall_stats_title), stringResource(R.string.trip_stats_title))
 
 
         Row(Modifier.fillMaxWidth()) {
@@ -234,7 +235,6 @@ fun StatisticsPart(modifier: Modifier,statisticsViewModel: StatisticsViewModel) 
             if (page == 0) {
                 StatisticsPage(statisticList = statisticsViewModel.overallStatisticsList)
             } else {
-                var itemsList = listOf("Trip distance", "Trip max speed", "Trip average speed","Trip average altitude")
                 StatisticsPage(statisticList = statisticsViewModel.tripStatisticsList)
             }
         }
