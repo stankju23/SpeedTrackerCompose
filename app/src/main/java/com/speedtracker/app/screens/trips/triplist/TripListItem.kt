@@ -1,6 +1,7 @@
 package com.speedtracker.app.screens.trips.triplist
 
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -23,6 +24,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.speedtracker.R
 import com.speedtracker.app.screens.trips.TripViewModel
+import com.speedtracker.helper.ConnectionHelper
 import com.speedtracker.helper.Formatter
 import com.speedtracker.ui.theme.Nunito
 
@@ -65,14 +67,23 @@ fun TripListItem(index:Int, context: Context, tripViewModel: TripViewModel,navCo
                 .fillMaxWidth()
                 .fillMaxHeight()
                 .clickable {
-                    navController.navigate("trip-detail") {
-                        // Avoid multiple copies of the same destination when
-                        // reselecting the same item
-                        launchSingleTop = true
+                    if (ConnectionHelper.getInternetConnection(context = context)) {
+                        navController.navigate("trip-detail") {
+                            // Avoid multiple copies of the same destination when
+                            // reselecting the same item
+                            launchSingleTop = true
 //                        // Restore state when reselecting a previously selected item
 //                        restoreState = true
+                        }
+                        tripViewModel.choosedTrip.value = tripData
+                    } else {
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.no_internet_connection_toast),
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
-                    tripViewModel.choosedTrip.value = tripData
+
                 },
                 verticalAlignment = Alignment.CenterVertically) {
                 Icon(

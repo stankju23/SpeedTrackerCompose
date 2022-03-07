@@ -118,6 +118,9 @@ class CoreApplication : Application()
 class MainActivity : ComponentActivity(), GpsStatus.Listener {
 
     val speedViewModel by viewModels<SpeedViewModel>()
+
+    val speedeViewModel by viewModels<SpeedViewModel>()
+
     val statisticsViewModel by viewModels<StatisticsViewModel>()
     val walkthroughViewModel by viewModels<WalkthroughViewModel>()
     val tripViewModel by viewModels<TripViewModel>()
@@ -132,7 +135,7 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
     var checkAccuracy: Boolean = false
 
     //Snr > 40
-    var highSnrValue: Double = 25.0
+    var highSnrValue: Double = 30.0
     private var fusedLocationClient: FusedLocationProviderClient? = null
     private lateinit var locationManager: LocationManager
 
@@ -376,9 +379,11 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
         val settingResultRequest = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.StartIntentSenderForResult()
         ) { activityResult ->
-            if (activityResult.resultCode == RESULT_OK)
+            if (activityResult.resultCode == RESULT_OK) {
                 Log.d("appDebug", "Accepted")
-            else {
+                startUpdatingLocation()
+                startStatsHandler()
+            } else {
                 Log.d("appDebug", "Denied")
             }
         }
@@ -697,32 +702,60 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                     if (status != null) {
                         val satellitesCount = status.satelliteCount
                         if (satellitesCount > 0) {
-                            var status = locationManager.getGpsStatus(null)
-                            if (status != null) {
-                                val satellites = status.satellites
-                                if (satellites != null) {
-                                    var usedSatellites =
-                                        satellites.filter { satellite -> satellite.usedInFix() == true }
-                                    Log.i("         Used satelites", "\t${usedSatellites.size}")
-                                    this@MainActivity.speedViewModel.satellitesText.value =
-                                        "${usedSatellites.size}/${satellites.count()}"
-                                    if (usedSatellites != null && usedSatellites.size != 0) {
-                                        var maxSnr =
-                                            usedSatellites.maxOf { satellite -> satellite.snr }
+                            var usedSatellites = 0
+                            var maxSnr = 0f
+                            for (i in 0..satellitesCount - 1) {
+                                if (status.usedInFix(i))
+                                    usedSatellites++
+                                if (maxSnr < status.getCn0DbHz(i))
+                                    maxSnr = status.getCn0DbHz(i)
+                            }
 
-                                        speedViewModel.searchingForGPSLocation.value =
-                                            maxSnr < highSnrValue
-                                        Log.d(
-                                            "GPS searching for signal",
-                                            speedViewModel.searchingForGPSLocation.value.toString()
-                                        )
-                                        Log.d("GPS max snr value", "\t${maxSnr}")
-                                    }
-                                }
-                            } else {
+                            if (usedSatellites == 0) {
                                 speedViewModel.searchingForGPSLocation.value = true
                             }
+                            this@MainActivity.speedViewModel.satellitesText.value =
+                                "${usedSatellites}/${status.satelliteCount}"
+                            speedViewModel.searchingForGPSLocation.value =
+                                maxSnr < highSnrValue
+                            Log.d(
+                                "GPS searching for signal",
+                                speedViewModel.searchingForGPSLocation.value.toString()
+                            )
+                        } else {
+                            speedViewModel.searchingForGPSLocation.value = true
                         }
+
+                        // old way before android 7, our min SDK is 24 which is 7.0 so it's not needed
+//                        if (satellitesCount > 0) {
+//                            var status = locationManager.getGpsStatus(null)
+//                            if (status != null) {
+//                                val satellites = status.satellites
+//                                if (satellites != null) {
+//                                    var usedSatellites =
+//                                        satellites.filter { satellite -> satellite.usedInFix() == true }
+//                                    Log.i("         Used satelites", "\t${usedSatellites.size}")
+//                                    this@MainActivity.speedViewModel.satellitesText.value =
+//                                        "${usedSatellites.size}/${satellites.count()}"
+//                                    if (usedSatellites != null && usedSatellites.size != 0) {
+//                                        var maxSnr =
+//                                            usedSatellites.maxOf { satellite -> satellite.snr }
+//
+//                                        speedViewModel.searchingForGPSLocation.value =
+//                                            maxSnr < highSnrValue
+//                                        Log.d(
+//                                            "GPS searching for signal",
+//                                            speedViewModel.searchingForGPSLocation.value.toString()
+//                                        )
+//                                        Log.d("GPS max snr value", "\t${maxSnr}")
+//                                    }
+//                                }
+//                            } else {
+//                                speedViewModel.searchingForGPSLocation.value = true
+//                            }
+//                        }
+                    } else {
+                        speedViewModel.searchingForGPSLocation.value = true
                     }
                 }
             }, null)
@@ -765,7 +798,7 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
 //                    Toast.makeText(applicationContext,"Accuracy is ${locationResult.lastLocation.accuracy}",Toast.LENGTH_SHORT).show()
                     Log.i("Accuracy", "${locationResult.lastLocation.accuracy}")
 
-                    if (!speedViewModel.searchingForGPSLocation.value!! && locationResult.lastLocation.accuracy < 20) {
+                    if (!speedViewModel.searchingForGPSLocation.value!! && locationResult.lastLocation.accuracy < 15) {
 
                         var currentSpeed: Int
                         var minValuableSpeed = 0

@@ -100,6 +100,7 @@
     <string name="measute_units_imperial">mil</string>
     <string name="speed_units_imperial">mph</string>
     <string name="altitude_units_imperial">feets</string>
+    <string name="no_internet_connection_toast">No internet connection, please enable your internet connection to proceed next ...</string>
 
 
 </resources>

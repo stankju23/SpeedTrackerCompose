@@ -27,12 +27,12 @@ import androidx.compose.ui.unit.sp
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.*
-import com.speedtracker.model.Location
 import com.speedtracker.R
 import com.speedtracker.app.screens.trips.TripViewModel
 import com.speedtracker.helper.Constants
 import com.speedtracker.helper.Formatter
 import com.speedtracker.helper.GenerallData
+import com.speedtracker.model.Location
 import com.speedtracker.model.TripData
 import com.speedtracker.model.TripInfo
 import com.speedtracker.ui.theme.MainGradientEndColor
@@ -111,12 +111,25 @@ fun TripMapPage(paddingValues: PaddingValues,context: Context,tripViewModel: Tri
                 }
             }
 
+
             GoogleMaps(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(0.5f)
             ) { googleMap ->
                 googleMap.setMapStyle(MapStyleOptions(context.resources.getString(R.string.style_json)))
+                googleMap.addMarker(
+                    MarkerOptions()
+                        .position(trackOptions.points.first())
+                        .title(context.resources.getString(R.string.trip_map_start_location_title))
+
+                )
+                googleMap.addMarker(
+                    MarkerOptions()
+                        .position(trackOptions.points.last())
+                        .title(context.resources.getString(R.string.trip_map_end_location_title))
+                )
+                googleMap.uiSettings.isMapToolbarEnabled = false
                 trackOptions.width(10f)
                 trackOptions.visible(true)
                 trackOptions.jointType(JointType.ROUND)
