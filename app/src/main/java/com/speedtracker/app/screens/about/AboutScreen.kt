@@ -2,13 +2,8 @@
 
 package com.speedtracker.app.screens.about
 
-import android.Manifest
-import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
 import android.widget.Space
@@ -23,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
@@ -58,13 +54,8 @@ import com.speedtracker.ui.theme.MainGradientMiddleColor
 import com.speedtracker.ui.theme.MainGradientStartColor
 import com.speedtracker.ui.theme.Nunito
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.FileNotFoundException
-import java.io.IOException
 import java.util.*
-import kotlin.coroutines.coroutineContext
 
 
 var dataLoaded:MutableLiveData<Boolean> = MutableLiveData(false)
@@ -99,18 +90,39 @@ fun AboutScreen(scope: CoroutineScope, context: Context, paddingValues: PaddingV
                     ) {
 
                             if (carInfo.observeAsState().value != null) {
-                                Log.d("Car photo path", carInfo.observeAsState().value!!.carPhoto!!)
 
-                                imageUri = Uri.parse(carInfo.observeAsState().value!!.carPhoto!!)
 
-                                Image(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Crop,
-                                    painter = rememberImagePainter(
-                                        data  = imageUri  // or ht
-                                    ),
-                                    contentDescription = ""
-                                )
+
+                                carInfo.observeAsState().value?.let {
+                                    if ( !it.carPhoto.isNullOrEmpty()) {
+                                        Log.d("Car photo path", carInfo.observeAsState().value!!.carPhoto!!)
+                                        imageUri = Uri.parse(carInfo.observeAsState().value!!.carPhoto!!)
+                                        Image(
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentScale = ContentScale.Crop,
+                                            painter = rememberImagePainter(
+                                                data  = imageUri  // or ht
+                                            ),
+                                            contentDescription = ""
+                                        )
+                                    } else {
+                                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                Icons.Rounded.PhotoCamera,
+                                                modifier = Modifier
+                                                    .width(50.dp)
+                                                    .height(50.dp),
+                                                contentDescription = "Photo image",
+                                                tint = Color.White
+                                            )
+                                        }
+
+                                    }
+
+                                }
+
+
+
                             }
                             Box(
                                 modifier = Modifier
