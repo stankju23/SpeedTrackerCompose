@@ -18,7 +18,7 @@ object Formatter {
         try {
             var geocoder = Geocoder(context, Locale.getDefault())
             var startAddresses = geocoder.getFromLocation(location.latitude, location.longitude, 10)
-            var locality = startAddresses.firstOrNull { address -> address.locality != null }
+            var locality = startAddresses?.firstOrNull { address -> address.locality != null }
             if (locality != null) {
                 return locality.locality
             } else {

@@ -2,7 +2,6 @@ package com.speedtracker.model
 
 import android.content.Context
 import androidx.room.*
-import androidx.room.OnConflictStrategy.IGNORE
 
 @Entity
 data class CarInfo(
@@ -55,17 +54,17 @@ data class TripData (
 @Dao
 interface CarInfoDao {
 
-    @Query("DELETE  FROM Carinfo")
+    @Query("DELETE FROM Carinfo")
     fun deleteCarInfos()
 
     @Query("SELECT * from Carinfo")
-    suspend fun getAllCarInfos(): List<CarInfo>
+    fun getAllCarInfos(): List<CarInfo>
 
-    @Insert(onConflict = IGNORE)
-    suspend fun insertCarInfo(carInfo: CarInfo)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insertCarInfo(carInfo: CarInfo)
 
     @Update
-    suspend fun updateCarInfo(carInfo: CarInfo)
+    fun updateCarInfo(carInfo: CarInfo)
 
 
 }
@@ -75,27 +74,27 @@ interface TripDao {
 
     @Transaction
     @Query("SELECT * FROM TripInfo")
-    suspend fun getAllTripData(): List<TripData>
+    fun getAllTripData(): List<TripData>
 
-    @Insert(onConflict = IGNORE)
-    suspend fun insertTripInfo(tripInfo: TripInfo)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insertTripInfo(tripInfo: TripInfo)
 
-    @Insert(onConflict = IGNORE)
-    suspend fun addLocation(location: Location)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun addLocation(location: Location)
 
     @Update
-    suspend fun updateTrip(tripInfo: TripInfo)
+    fun updateTrip(tripInfo: TripInfo)
 
     @Transaction
     @Query("SELECT * FROM TripInfo WHERE tripId = :id")
-    suspend fun getTripDataById(id: Long): TripData
+    fun getTripDataById(id: Long): TripData
 
     @Transaction
     @Query("SELECT * FROM TripInfo WHERE carInfoId = :id")
-    suspend fun getTripDataByCarInfoId(id: String): List<TripData>
+    fun getTripDataByCarInfoId(id: String): List<TripData>
 
     @Query("DELETE FROM TripInfo WHERE tripId = :tripId")
-    suspend fun removeTrip(tripId: Long)
+    fun removeTrip(tripId: Long)
 
 }
 

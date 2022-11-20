@@ -1,6 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
-package com.speedtracker.app.screens.walkthrough.pages
+package com.speedtracker.app.screens.mainscreen
 
 import android.content.Context
 import androidx.compose.foundation.background
@@ -8,13 +6,10 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material3.Icon
+import androidx.compose.material.TabRowDefaults
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.*
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ScaffoldState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -39,7 +34,6 @@ import com.speedtracker.R
 import com.speedtracker.app.screens.mainscreen.speed.ActualSpeedPart
 import com.speedtracker.app.screens.mainscreen.speed.AdditionalInfoItem
 import com.speedtracker.app.screens.mainscreen.speed.SpeedViewModel
-import com.speedtracker.app.screens.mainscreen.StatisticsPage
 import com.speedtracker.app.screens.mainscreen.statistics.StatisticsViewModel
 import com.speedtracker.ui.theme.*
 import kotlinx.coroutines.CoroutineScope
@@ -73,11 +67,9 @@ fun MainScreenView(paddingValues: PaddingValues,scope: CoroutineScope, scaffoldS
 @Composable
 fun TripDialog(showDialog: MutableLiveData<Boolean>, tripName: MutableLiveData<String>, statisticsViewModel: StatisticsViewModel, context: Context,carInfoId:String) {
     val confirmButtonColor = ButtonDefaults.buttonColors(
-            containerColor = Color.Transparent,
             contentColor = androidx.compose.material3.MaterialTheme.colorScheme.surface
     )
     val dismissButtonColor = ButtonDefaults.buttonColors(
-            containerColor = Color.Transparent,
             contentColor = androidx.compose.material3.MaterialTheme.colorScheme.surface
     )
     var isError by rememberSaveable { mutableStateOf(false) }

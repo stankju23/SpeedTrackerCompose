@@ -7,11 +7,9 @@ package com.speedtracker
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.Application
 import android.content.ContentValues.TAG
 import android.content.Context
-import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.location.GnssStatus
@@ -20,7 +18,6 @@ import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Looper
-import android.os.PersistableBundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -30,32 +27,21 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.ripple.RippleAlpha
-import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Density
@@ -65,7 +51,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
-import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.navigation.animation.AnimatedNavHost
@@ -77,7 +62,6 @@ import com.google.android.gms.tasks.Task
 import com.speedtracker.app.screens.about.AboutScreen
 import com.speedtracker.app.screens.editcarinfo.EditCarInfoScreen
 import com.speedtracker.app.screens.headup.HeadUpScreen
-import com.speedtracker.app.screens.mainscreen.drawer.Drawer
 import com.speedtracker.app.screens.mainscreen.drawer.NavDrawerItem
 import com.speedtracker.app.screens.mainscreen.speed.SpeedViewModel
 import com.speedtracker.app.screens.mainscreen.statistics.StatisticsViewModel
@@ -87,7 +71,7 @@ import com.speedtracker.app.screens.trips.TripViewModel
 import com.speedtracker.app.screens.trips.triplist.TripListPage
 import com.speedtracker.app.screens.trips.tripmap.TripMapPage
 import com.speedtracker.app.screens.walkthrough.WalkthroughViewModel
-import com.speedtracker.app.screens.walkthrough.pages.MainScreenView
+import com.speedtracker.app.screens.mainscreen.MainScreenView
 import com.speedtracker.app.screens.walkthrough.pages.WalkthroughScreen
 import com.speedtracker.helper.AssetsHelper
 import com.speedtracker.helper.Constants
@@ -108,7 +92,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
 import java.util.concurrent.TimeUnit
-import kotlin.math.roundToInt
 
 @HiltAndroidApp
 class CoreApplication : Application()
@@ -134,6 +117,8 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
 
     var checkAccuracy: Boolean = false
 
+    val maxAccuracy = 15
+
     //Snr > 40
     var highSnrValue: Double = 30.0
     private var fusedLocationClient: FusedLocationProviderClient? = null
@@ -155,6 +140,7 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
 
     var showBottomView:MutableLiveData<Boolean?> = MutableLiveData(null)
 
+    @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -777,61 +763,62 @@ class MainActivity : ComponentActivity(), GpsStatus.Listener {
                     Log.i("   Time between updates", "\t${updateTime} seconds")
                     Log.i(
                         "     Latitude-Longitude",
-                        "\t${locationResult.lastLocation.latitude}," +
-                                " ${locationResult.lastLocation.longitude}"
+                        "\t${locationResult.lastLocation?.latitude}," +
+                                " ${locationResult.lastLocation?.longitude}"
                     )
                     Log.i(
                         "                  Speed",
-                        "\t${(locationResult.lastLocation.speed).toInt()} m/s"
+                        "\t${(locationResult.lastLocation?.speed)?.toInt()} m/s"
                     )
                     if (GenerallData.isMetric.value!!) {
                         Log.i(
                             "                  Speed",
-                            "\t${(locationResult.lastLocation.speed * Constants.msToKmh).toInt()} km/h"
+                            "\t${((locationResult.lastLocation?.speed ?: (0 * Constants.msToKmh))).toInt()} km/h"
                         )
                     } else {
                         Log.i(
                             "                  Speed",
-                            "\t${(locationResult.lastLocation.speed * Constants.msToMph).toInt()} mil"
+                            "\t${((locationResult.lastLocation?.speed ?: (0 * Constants.msToMph))).toInt()} mil"
                         )
                     }
 //                    Toast.makeText(applicationContext,"Accuracy is ${locationResult.lastLocation.accuracy}",Toast.LENGTH_SHORT).show()
-                    Log.i("Accuracy", "${locationResult.lastLocation.accuracy}")
+                    Log.i("Accuracy", "${locationResult.lastLocation?.accuracy}")
 
-                    if (!speedViewModel.searchingForGPSLocation.value!! && locationResult.lastLocation.accuracy < 15) {
+                    if (!speedViewModel.searchingForGPSLocation.value!! && ((locationResult.lastLocation?.accuracy
+                            ?: 0) < (maxAccuracy as Nothing))
+                    ) {
 
                         var currentSpeed: Int
                         var minValuableSpeed = 0
-
                         if (GenerallData.isMetric.value!!) {
                             minValuableSpeed = 5
                             currentSpeed =
-                                (locationResult.lastLocation.speed * Constants.msToKmh).toInt()
+                                ((locationResult.lastLocation?.speed ?: (0 * Constants.msToKmh))).toInt()
                         } else {
                             minValuableSpeed = 3
                             currentSpeed =
-                                (locationResult.lastLocation.speed * Constants.msToMph).toInt()
+                                ((locationResult.lastLocation?.speed ?: (0 * Constants.msToMph))).toInt()
                         }
                         Log.i("Current speed", currentSpeed.toString())
 
-                        speedViewModel.speedToSave = locationResult.lastLocation.speed
+                        speedViewModel.speedToSave = locationResult.lastLocation?.speed ?: 0f
 
                         if (currentSpeed > minValuableSpeed) {
                             speedViewModel.speed.value = currentSpeed
 //                            speedViewModel.animateSpeed(speedViewModel.speed.value!!, )
-                            speedViewModel.actualLatitude = locationResult.lastLocation.latitude
-                            speedViewModel.actualLongitude = locationResult.lastLocation.longitude
-                            speedViewModel.altitude.value = locationResult.lastLocation.altitude
-                            speedViewModel.actualTime = locationResult.lastLocation.time
+                            speedViewModel.actualLatitude = locationResult.lastLocation?.latitude ?: 0.0
+                            speedViewModel.actualLongitude = locationResult.lastLocation?.longitude ?: 0.0
+                            speedViewModel.altitude.value = locationResult.lastLocation?.altitude ?: 0.0
+                            speedViewModel.actualTime = locationResult.lastLocation?.time ?: 0
                         } else {
                             speedViewModel.speed.value = 0
                             currentSpeed = 0
                             if (speedViewModel.actualLatitude == 0.0 && speedViewModel.actualLongitude == 0.0 && speedViewModel.actualAltitude == 0.0) {
-                                speedViewModel.actualLatitude = locationResult.lastLocation.latitude
+                                speedViewModel.actualLatitude = locationResult.lastLocation?.latitude ?: 0.0
                                 speedViewModel.actualLongitude =
-                                    locationResult.lastLocation.longitude
-                                speedViewModel.altitude.value = locationResult.lastLocation.altitude
-                                speedViewModel.actualTime = locationResult.lastLocation.time
+                                    locationResult.lastLocation?.longitude ?: 0.0
+                                speedViewModel.altitude.value = locationResult.lastLocation?.altitude ?: 0.0
+                                speedViewModel.actualTime = locationResult.lastLocation?.time ?: 0
                             }
                         }
                     }
